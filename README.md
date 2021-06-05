@@ -25,19 +25,6 @@
 |Module PIN|ESP32 PIN|
 |:-:|:-:|
 |VCC|VIN(5 V)|
-|GND|GND|
-|CS|D5|
-|RESET|D2|
-|DC|D15|
-|SDI(MOSI)|D23|
-|SCK|D18|
-|LED|3V3|
-|SDO(MISO)|D19|
-|T_CLK|D18|
-|T_CS|D14|
-|T_DIN|D23|
-|T_DO|D19|
-|T_IRQ|-|
 |SD_CS|D27|
 |SD_MOSI|D23|
 |SD_MISO|D19|

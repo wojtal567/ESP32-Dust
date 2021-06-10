@@ -5,15 +5,26 @@
 #include <WEMOS_SHT3X.h>
 #include <WiFiUdp.h>
 #include <NTPClient.h>
-#include <WebServer.h>
+// #include <WebServer.h>
+#include <FS.h>
+#include <ESPAsyncWebServer.h>
 
 #define FAN_PIN 4        // * number of PIN which controls the PMS fan
 #define MY_SD_CARD_PIN 27 // * pin of SD_CS
+
+
+
+AsyncWebServer server(80);
+AsyncWebSocket socket("/ws");
+
 
 // ! CONFIG ============================================|
 std::string configFilePath = "/settings.json";
 
 RtcDateTime measureSaveDateTime;
+RtcDateTime currentDateTime;
+
+
 Config config =
     {
         "",
@@ -54,11 +65,6 @@ std::map<std::string, float> data;
 static const char ntpServerName[] = "europe.pool.ntp.org";
 WiFiUDP ntpUDP;
 NTPClient dateTimeClient(ntpUDP, ntpServerName, ntpTimeOffset);
-
-//Webserver
-WebServer server(80);
-String appIpAddress = "";
-int fetchPeriod = 30000;
 
 //SD Card and sqlite database objects declaration
 MySD mySDCard(MY_SD_CARD_PIN);

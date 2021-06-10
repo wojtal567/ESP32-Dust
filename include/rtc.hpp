@@ -58,9 +58,8 @@ String getCharArrrayFromRTC(RtcDS1307<TwoWire> &Rtc, int address)
     return result;
 }
 
-String getMainTimestamp(RtcDS1307<TwoWire> &Rtc)
+String getMainTimestamp(RtcDateTime timestamp)
 {
-    RtcDateTime timestamp = Rtc.GetDateTime();
     String time = (String)timestamp.Year() + "-";
 
     if (timestamp.Month() < 10)

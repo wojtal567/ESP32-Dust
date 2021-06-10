@@ -1,5 +1,10 @@
 #include <GlobalVariables.hpp>
 
+void notify(String text)
+{
+    socket.textAll(text);
+}
+
 //Get single sample and set text
 void getSampleFunc()
 {
@@ -10,7 +15,7 @@ void getSampleFunc()
         std::map<std::string, float> tmpData = pmsSensor->returnData();
         pmsSensor->dumpSamples();
         data = tmpData;
-        config.currentSampleNumber++;
+        // config.currentSampleNumber++;
         temp = sht30.cTemp;
         humi = sht30.humidity;
         Serial.print("Temperature: "); Serial.print(temp);
@@ -18,9 +23,18 @@ void getSampleFunc()
         Serial.println();
         if(Rtc.GetIsRunning())
         {
-            lastSampleTimestamp = getMainTimestamp(Rtc);
+            lastSampleTimestamp = getMainTimestamp(currentDateTime);
             Serial.print("lastSampleTimestamp przed wrzuceniem do bazy: " + lastSampleTimestamp);
             mySDCard.save(data, temp, humi, lastSampleTimestamp, &sampleDB, &Serial);
+           
+            StaticJsonDocument<600> measuredata;
+            JsonArray lastRecordToCheck = measuredata.to<JsonArray>();
+            mySDCard.getLastRecord(&sampleDB, &Serial, &lastRecordToCheck);
+            String output;
+            serializeJson(measuredata, output);
+            output = output.substring(1, output.length()-1);
+            Serial.println(output);
+            notify(output);//send data to website
         }
         else
             Serial.println("RTC is not running, not saving");

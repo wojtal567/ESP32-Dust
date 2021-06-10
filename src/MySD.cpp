@@ -12,7 +12,7 @@ bool MySD::begin()
 
 void MySD::end()
 {
-    SD.end();
+    // SD.end();
 }
 
 bool MySD::start(SQLiteDb *object, Stream *debugger)
@@ -30,7 +30,6 @@ bool MySD::start(SQLiteDb *object, Stream *debugger)
     }
     else
         Serial.println("MySD::start -> Can't initilize - no access to SD card.");
-    end();
     return result;
 }
 
@@ -64,7 +63,6 @@ void MySD::save(std::map<std::string, float> data, float temperature, float humi
     }
     else
         Serial.println("MySD::save -> Cannot access SD card.");
-    end();
 }
 
 void MySD::select(SQLiteDb *object, Stream *debugger, String datetime, JsonArray *array)
@@ -88,7 +86,6 @@ void MySD::select(SQLiteDb *object, Stream *debugger, String datetime, JsonArray
     }
     else
         Serial.println("MySD::select -> Cannot access SD card.");
-    end();
 }
 
 void MySD::getLastRecord(SQLiteDb *object, Stream *debugger, JsonArray *array)
@@ -112,7 +109,6 @@ void MySD::getLastRecord(SQLiteDb *object, Stream *debugger, JsonArray *array)
     }
     else
         Serial.println("MySD::getLastRecord -> Cannot access SD card.");
-    end();
 }
 
 void MySD::saveConfig(Config config, std::string filePath)

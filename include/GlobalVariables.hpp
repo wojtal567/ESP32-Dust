@@ -12,7 +12,7 @@
 #define FAN_PIN 4        // * number of PIN which controls the PMS fan
 #define MY_SD_CARD_PIN 27 // * pin of SD_CS
 
-
+bool isSampleTaking = false;
 
 AsyncWebServer server(80);
 AsyncWebSocket socket("/ws");

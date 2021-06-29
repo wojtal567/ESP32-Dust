@@ -7,11 +7,13 @@ MySD::MySD(int port)
 
 bool MySD::begin()
 {
-    return SD.begin(_port);
+    return SD.begin(_port, SPI, 8000000);
 }
 
 void MySD::end()
 {
+    //for developing web server from sdcard not SPIFFS file system must be mounted all the time 
+    // final version should be on the spiffs not on SD
     // SD.end();
 }
 
@@ -63,6 +65,7 @@ void MySD::save(std::map<std::string, float> data, float temperature, float humi
     }
     else
         Serial.println("MySD::save -> Cannot access SD card.");
+    end();
 }
 
 void MySD::select(SQLiteDb *object, Stream *debugger, String datetime, JsonArray *array)
@@ -86,6 +89,7 @@ void MySD::select(SQLiteDb *object, Stream *debugger, String datetime, JsonArray
     }
     else
         Serial.println("MySD::select -> Cannot access SD card.");
+    end();
 }
 
 void MySD::getLastRecord(SQLiteDb *object, Stream *debugger, JsonArray *array)
@@ -109,6 +113,7 @@ void MySD::getLastRecord(SQLiteDb *object, Stream *debugger, JsonArray *array)
     }
     else
         Serial.println("MySD::getLastRecord -> Cannot access SD card.");
+    end();
 }
 
 void MySD::saveConfig(Config config, std::string filePath)
@@ -120,6 +125,7 @@ void MySD::saveConfig(Config config, std::string filePath)
         if (!configurationFile)
         {
             Serial.println("Failed to create configuration file.");
+            end();
             return;
         }
         else
@@ -164,6 +170,7 @@ void MySD::loadConfig(Config &config, std::string filePath)
         if (error)
         {
             Serial.println("Failed to read file, using default Configuration");
+            end();
             return;
         }
 
@@ -192,6 +199,7 @@ void MySD::printConfig(std::string filePath)
         if (!configurationFile)
         {
             Serial.print("Failed to read configuration file.");
+            end();
             return;
         }
         else
@@ -227,6 +235,7 @@ void MySD::loadWiFi(Config &config, std::string filePath)
         if (error)
         {
             Serial.println("Failed to read file, using default Configuration");
+            end();
             return;
         }
 

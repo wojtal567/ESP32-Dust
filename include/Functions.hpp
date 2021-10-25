@@ -34,6 +34,11 @@ void getSampleFunc()
             Serial.print("datetime from rtc: ");
             // Serial.println(Rtc.GetDateTime());
             currentDateTime = Rtc.GetDateTime();
+            while(!checkValidDateTime(currentDateTime))
+            {
+                currentDateTime = Rtc.GetDateTime();
+                delay(500);
+            }
             lastSampleTimestamp = getMainTimestamp(currentDateTime);
             Serial.print("lastSampleTimestamp przed wrzuceniem do bazy: " + lastSampleTimestamp);
             mySDCard.save(data, temp, humi, lastSampleTimestamp, &sampleDB, &Serial);

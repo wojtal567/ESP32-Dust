@@ -115,3 +115,17 @@ String getTime(RtcDS1307<TwoWire> &Rtc)
                dt.Second());
     return String(timestring);
 }
+bool checkValidDateTime(RtcDateTime timestamp)
+{
+    if(timestamp.Month() > 12)
+        return false;
+    if(timestamp.Day() > 31)
+        return false;
+    if(timestamp.Hour() > 24)
+        return false;
+    if(timestamp.Minute() > 60)
+        return false;
+    if(timestamp.Second() > 60)
+        return false;
+    return true;
+}

@@ -1,17 +1,36 @@
 #include <Arduino.h>
-
+#include <SPI.h>
+#include <RTClib.h>
 
 #define FAN_PIN 4
 
+RTC_DS1307 rtc;
+
+DateTime lastSampleTime, turnFanOnTime;
+
 void setup()
 {
+    // PMS things
     pinMode(FAN_PIN, OUTPUT);
     
-    digitalWrite(FAN_PIN, LOW);
+    Serial2.begin(9600, SERIAL_8N1, 16, 17);
 
+    // com
     Serial.begin(115200);
 
-    Serial2.begin(9600, SERIAL_8N1, 16, 17);
+    // rtc 
+    if(!rtc.begin()) {
+        Serial.println("RTC NOT FOUND");
+    }
+    
+    if(!rtc.isrunning()){
+        Serial.println("RTC is not running, need to set the time(for now compilation time)");
+
+        rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+    }
+    lastSampleTime = rtc.now();
+    turnFanOnTime = rtc.now();
+    digitalWrite(FAN_PIN, HIGH);
 }
 
 struct pms5003data
@@ -120,25 +139,28 @@ void printPMSData()
 
 void loop()
 {
-    uint counter = 0;
-    if(digitalRead(FAN_PIN) == LOW)
-    {
-        counter = 0;
-        Serial.println("Fan is turned off, turning on...");
+    if((rtc.now() - turnFanOnTime).minutes() >= 1 && digitalRead(FAN_PIN) == HIGH) {
+        Serial.println("Trying to take sample...");
+
+        if (readPMSdata(&Serial2)) {
+            DateTime now = rtc.now();
+            String dateForPrint = now.hour() + (String)":" + now.minute() + (String)":" + now.second() + ", " + now.day() + "." + now.month() + "." + now.year();
+            Serial.print("\n");
+            Serial.println(dateForPrint);
+            
+            printPMSData();
+
+            Serial.println("Turning fan off");
+            digitalWrite(FAN_PIN, LOW);
+            lastSampleTime = rtc.now();
+        }
+    }
+
+    if((rtc.now() - lastSampleTime).minutes() >= 5 && digitalRead(FAN_PIN) == LOW) {
+        Serial.println("Turning on the fan...");
         digitalWrite(FAN_PIN, HIGH);
+        turnFanOnTime = rtc.now();
     }
-
-    if (readPMSdata(&Serial2))
-    {
-        printPMSData();
-        counter++;
-    }
-
-    if(counter == 10)
-    {
-        Serial.println("Turning fan off");
-        digitalWrite(FAN_PIN, LOW);
-    }
-
+    
     delay(500);
 }

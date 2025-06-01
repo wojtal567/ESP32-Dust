@@ -118,8 +118,8 @@ void statusFunc(lv_task_t *task)
         lv_obj_set_hidden(sdStatusAtMainWarning, true);
         if (config.ssid == "" && config.password == "")
         {
-            mySDCard.loadWiFi(config, configFilePath);
-            mySDCard.saveConfig(config, configFilePath);
+            mySDCard.loadWiFi(config, StringConstants::CONFIG_FILE_PATH);
+            mySDCard.saveConfig(config, StringConstants::CONFIG_FILE_PATH);
         }
         if (config.ssid != "" && config.password != "")
         {

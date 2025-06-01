@@ -1,19 +1,19 @@
-#include <MySD.hpp>
-#include <lvgl.h>
-#include <RtcDS1307.h>
-#include <Wire.h>
-#include <PMS5003.hpp>
-#include <WEMOS_SHT3X.h>
-#include <WiFiUdp.h>
 #include <NTPClient.h>
-#include <WebServer.h>
+#include <RtcDS1307.h>
 #include <TFT_eSPI.h>
+#include <WEMOS_SHT3X.h>
+#include <WebServer.h>
+#include <WiFiUdp.h>
+#include <Wire.h>
+#include <lvgl.h>
 
-#define FAN_PIN 4        // * number of PIN which controls the PMS fan
-#define MY_SD_CARD_PIN 27 // * pin of SD_CS
+#include <MySD.hpp>
+#include <PMS5003.hpp>
+
+#include "utils/constants.h"
+#include "utils/stringConstants.h"
 
 // ! CONFIG ============================================|
-std::string configFilePath = "/settings.json";
 
 Config config =
     {
@@ -26,30 +26,15 @@ Config config =
         0,
         30000};
 
-int ntpTimeOffset = 3600; //poland, winter - 3600, summer (DST) - 7200 
-
-#define LVGL_TICK_PERIOD 60
-#define SCREEN_WIDTH 320
-#define SCREEN_HEIGHT 240
-#define GMT_OFFSET_SEC 7200
-#define MIN_RANGE 1
-#define MAX_RANGE 999
-
 //Include additional font with lock and unlock symbol
 extern lv_font_t monte16lock;
-#define MY_LOCK_SYMBOL "\xEF\x80\xA3"
-#define MY_UNLOCK_SYMBOL "\xEF\x82\x9C"
 
 extern lv_font_t hugeSymbolsFont48;
-#define MY_INFO_SYMBOL "\xEF\x81\x9A"
-#define MY_CLOCK_SYMBOL "\xEF\x80\x97"
-#define MY_WIFI_SYMBOL "\xEF\x87\xAB"
-#define MY_COGS_SYMBOL "\xEF\x82\x85"
 
 //RTC, PMS5003 and SHT30 objects declaration
 RtcDS1307<TwoWire> Rtc(Wire);
 PMS5003 *pmsSensor;
-SHT3X sht30(0x45);
+SHT3X sht30(0x44); // TODO extract address to config
 
 std::map<std::string, float> data;
 const char *labels[15] = {
@@ -69,10 +54,9 @@ const char *labels[15] = {
     "unused",
     "checksum"};
 
-//NTPClient declarations
-static const char ntpServerName[] = "europe.pool.ntp.org";
+// NTPClient declarations
 WiFiUDP ntpUDP;
-NTPClient dateTimeClient(ntpUDP, ntpServerName, ntpTimeOffset);
+NTPClient dateTimeClient(ntpUDP, StringConstants::NTP_SERVER, Constants::GMT_OFFSET_SEC);
 
 //Webserver
 WebServer server(80);
@@ -85,7 +69,7 @@ static lv_disp_buf_t disp_buf;
 static lv_color_t buf[LV_HOR_RES_MAX * 10];
 
 //SD Card and sqlite database objects declaration
-MySD mySDCard(MY_SD_CARD_PIN);
+MySD mySDCard(Constants::SD_CARD_PIN);
 SQLiteDb sampleDB("/sd/database.db", "/database.db", "samples");
 
 String lastSampleTimestamp;
@@ -154,9 +138,9 @@ lv_obj_t *labelParticlesNumber[6];
 lv_obj_t *contParticlesNumber[6];
 lv_obj_t *ledAtMain;
 
-String airQualityStates[6] = {"Excellent", "Good", "Moderate", "Unhealthy", "Bad", "Hazardous"};
+// Commented out as these are now defined in Utils/stringConstants.h
 String particlesSize[7] = {"0.0", "0.3", "0.5", "1.0", "2.5", "5.0", "10.0"};
-float aqiStandards[5] = {21, 61, 101, 141, 201};
+// Commented out as these are now defined in Utils/constants.h
 int labelParticleSizePosX[7] = {9, 56, 103, 153, 198, 245, 288};
 int contParticleNumberPosX[6] = {18, 65, 112, 159, 206, 253};
 static lv_point_t mainLinePoints[] = {{18, 210}, {300, 210}};

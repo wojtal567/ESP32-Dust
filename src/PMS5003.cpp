@@ -67,3 +67,21 @@ void PMS5003::dumpSamples()
     for (uint16_t i = 0; i < VALUES; i++)
         _debugger->println((String)labels[i] + " " + (String)data[labels[i]]);
 }
+
+Types::ParticleData PMS5003::getParticleData()
+{
+    Types::ParticleData particleData;
+    
+    // Fill the structured data from the map
+    particleData.pm1_0 = data["pm10_standard"];
+    particleData.pm2_5 = data["pm25_standard"];
+    particleData.pm10_0 = data["pm100_standard"];
+    particleData.particles_0_3 = data["particles_03um"];
+    particleData.particles_0_5 = data["particles_05um"];
+    particleData.particles_1_0 = data["particles_10um"];
+    particleData.particles_2_5 = data["particles_25um"];
+    particleData.particles_5_0 = data["particles_50um"];
+    particleData.particles_10_0 = data["particles_100um"];
+    
+    return particleData;
+}

@@ -1,6 +1,9 @@
 #include <SD.h>
 #include <SQLiteDb.hpp>
 #include <string>
+#include "Utils/types.h"
+
+// TODO replace by Types::ConfigData
 struct Config
 {
     std::string ssid;            // * WiFi ssid

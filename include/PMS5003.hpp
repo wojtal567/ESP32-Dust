@@ -5,6 +5,7 @@
 #include <iterator>
 #include <vector>
 #include <Arduino.h>
+#include "Utils/types.h"
 
 #define BUFFERSIZE 32
 #define VALUES 15
@@ -35,5 +36,6 @@ class PMS5003
         PMS5003(HardwareSerial *reader, HardwareSerial *debugger);
         bool readData();
         std::map<std::string, float> returnData();
+        Types::ParticleData getParticleData(); // New method to return structured data
         void dumpSamples();
 };

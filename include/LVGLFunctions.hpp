@@ -1,5 +1,8 @@
 #include <GlobalVariables.hpp>
 
+#include "Utils/stringConstants.h"
+#include "utils/timeUtils.h"
+
 void set_spinbox_digit_format(lv_obj_t *spinbox, int32_t range_min, int32_t range_max, int offset)
 {
     int _spinbox_value = lv_spinbox_get_value(spinbox) + offset;
@@ -129,7 +132,7 @@ void display_current_config()
 // Function that turns fan on
 void turnFanOnFunc(lv_task_t *task)
 {
-    digitalWrite(FAN_PIN, HIGH);
+    digitalWrite(Constants::FAN_PIN, HIGH);
     lv_task_set_prio(turnFanOn, LV_TASK_PRIO_OFF);
 }
 
@@ -167,15 +170,20 @@ bool isLastSampleSaved()
 
 void setAqiStateNColor()
 {
-    for (int i = 0; i < 6; i++)
-    {
-        if (i == 5 or pm25Aqi < aqiStandards[i])
-        {
-            lv_label_set_text(labelAQIColorBar, airQualityStates[i].c_str());
-            lv_obj_set_style_local_bg_color(contAQIColorBar, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, airQualityColors[i]);
-            return;
-        }
-    }
+    float aqi = Utils::calculatePM25AQI(pm25Aqi);
+
+    // determine the air quality category based on AQI value
+    int categoryIndex = (aqi <= 50) ? 0 : (aqi <= 100) ? 1 : (aqi <= 150) ? 2 : (aqi <= 200) ? 3 : (aqi <= 300) ? 4 : 5;
+
+    // map category index to the appropriate quality text
+    static const char *qualityTexts[] = {
+        StringConstants::AIR_QUALITY_EXCELLENT, StringConstants::AIR_QUALITY_GOOD,
+        StringConstants::AIR_QUALITY_MODERATE,  StringConstants::AIR_QUALITY_UNHEALTHY,
+        StringConstants::AIR_QUALITY_BAD,       StringConstants::AIR_QUALITY_HAZARDOUS};
+
+    lv_label_set_text(labelAQIColorBar, qualityTexts[categoryIndex]);
+    lv_obj_set_style_local_bg_color(contAQIColorBar, LV_CONT_PART_MAIN, LV_STATE_DEFAULT,
+                                    airQualityColors[categoryIndex]);
 }
 
 // Get single sample and set text
@@ -266,7 +274,7 @@ void getSampleFunc(lv_task_t *task)
             Serial.println("RTC is not running, not saving");
         lv_task_reset(turnFanOn);
         lv_task_set_prio(turnFanOn, LV_TASK_PRIO_HIGHEST);
-        digitalWrite(FAN_PIN, LOW);
+        digitalWrite(Constants::FAN_PIN, LOW);
         if (isLastSampleSaved())
         {
             lv_obj_set_style_local_bg_color(ledAtLock, LV_LED_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_GREEN);
@@ -373,8 +381,8 @@ static void btn_connect(lv_obj_t *obj, lv_event_t event)
         Serial.println(config.ssid.c_str());
         config.password = lv_textarea_get_text(pwdTA);
 
-        mySDCard.saveConfig(config, configFilePath);
-        mySDCard.printConfig(configFilePath);
+        mySDCard.saveConfig(config, StringConstants::CONFIG_FILE_PATH);
+        mySDCard.printConfig(StringConstants::CONFIG_FILE_PATH);
         WiFi.begin(config.ssid.c_str(), config.password.c_str());
         while (WiFi.status() != WL_CONNECTED and wifiAttempts > 0)
         {
@@ -511,8 +519,8 @@ void timesettings_save_btn(lv_obj_t *obj, lv_event_t event)
             config.lcdLockTime = 60000;
             break;
         }
-        mySDCard.saveConfig(config, configFilePath);
-        mySDCard.printConfig(configFilePath);
+        mySDCard.saveConfig(config, StringConstants::CONFIG_FILE_PATH);
+        mySDCard.printConfig(StringConstants::CONFIG_FILE_PATH);
         if (timeChanged == true)
         {
             String datet = lv_label_get_text(dateBtnLabel) + (String)lv_textarea_get_text(timeHour) + ":" + (String)lv_textarea_get_text(timeMinute);
@@ -830,7 +838,7 @@ static void measureNumberIncrement_func(lv_obj_t *btn, lv_event_t event)
     {
         if ((lv_spinbox_get_value(measurePeriodHour) * 3600 + lv_spinbox_get_value(measurePeriodMinute) * 60 + lv_spinbox_get_value(measurePeriodsecond)) >= (lv_spinbox_get_value(turnFanOnTime) + ((lv_spinbox_get_value(measureNumber) - 1) * lv_spinbox_get_value(measureAvPeriod))))
         {
-            set_spinbox_digit_format(measureNumber, MIN_RANGE, MAX_RANGE, 1);
+            set_spinbox_digit_format(measureNumber, Constants::MIN_RANGE, Constants::MAX_RANGE, 1);
             lv_spinbox_increment(measureNumber);
         }
     }
@@ -840,7 +848,7 @@ static void measureNumberDecrement_func(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_SHORT_CLICKED || event == LV_EVENT_LONG_PRESSED_REPEAT)
     {
-        set_spinbox_digit_format(measureNumber, MIN_RANGE, MAX_RANGE, -1);
+        set_spinbox_digit_format(measureNumber, Constants::MIN_RANGE, Constants::MAX_RANGE, -1);
         lv_spinbox_decrement(measureNumber);
     }
 }
@@ -851,7 +859,7 @@ static void turnFanOnTimeIncrement_func(lv_obj_t *btn, lv_event_t event)
     {
         if ((lv_spinbox_get_value(measurePeriodHour) * 3600 + lv_spinbox_get_value(measurePeriodMinute) * 60 + lv_spinbox_get_value(measurePeriodsecond)) >= (lv_spinbox_get_value(turnFanOnTime) + 1 + (lv_spinbox_get_value(measureNumber) - 1) * lv_spinbox_get_value(measureAvPeriod)))
         {
-            set_spinbox_digit_format(turnFanOnTime, MIN_RANGE, MAX_RANGE, 1);
+            set_spinbox_digit_format(turnFanOnTime, Constants::MIN_RANGE, Constants::MAX_RANGE, 1);
             lv_spinbox_increment(turnFanOnTime);
         }
     }
@@ -861,7 +869,7 @@ static void turnFanOnTimeDecrement_func(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_SHORT_CLICKED || event == LV_EVENT_LONG_PRESSED_REPEAT)
     {
-        set_spinbox_digit_format(turnFanOnTime, MIN_RANGE, MAX_RANGE, -1);
+        set_spinbox_digit_format(turnFanOnTime, Constants::MIN_RANGE, Constants::MAX_RANGE, -1);
         lv_spinbox_decrement(turnFanOnTime);
     }
 }
@@ -872,7 +880,7 @@ static void av_periodIncrement(lv_obj_t *btn, lv_event_t event)
     {
         if ((lv_spinbox_get_value(measurePeriodHour) * 3600 + lv_spinbox_get_value(measurePeriodMinute) * 60 + lv_spinbox_get_value(measurePeriodsecond)) >= (lv_spinbox_get_value(turnFanOnTime) + (lv_spinbox_get_value(measureNumber) - 1) * (lv_spinbox_get_value(measureAvPeriod) + 1)))
         {
-            set_spinbox_digit_format(measureAvPeriod, MIN_RANGE, MAX_RANGE, 1);
+            set_spinbox_digit_format(measureAvPeriod, Constants::MIN_RANGE, Constants::MAX_RANGE, 1);
             lv_spinbox_increment(measureAvPeriod);
         }
     }
@@ -882,7 +890,7 @@ static void av_periodDecrement(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_SHORT_CLICKED || event == LV_EVENT_LONG_PRESSED_REPEAT)
     {
-        set_spinbox_digit_format(measureAvPeriod, MIN_RANGE, MAX_RANGE, -1);
+        set_spinbox_digit_format(measureAvPeriod, Constants::MIN_RANGE, Constants::MAX_RANGE, -1);
         lv_spinbox_decrement(measureAvPeriod);
     }
 }
@@ -898,8 +906,8 @@ static void sampling_settings_save_btn(lv_obj_t *btn, lv_event_t event)
         config.turnFanTime = lv_spinbox_get_value(turnFanOnTime) * 1000;
         getSample = lv_task_create(getSampleFunc, (config.timeBetweenSavingSamples - (config.numberOfSamples - 1) * config.measurePeriod), LV_TASK_PRIO_HIGH, NULL);
         turnFanOn = lv_task_create(turnFanOnFunc, config.timeBetweenSavingSamples - config.turnFanTime, LV_TASK_PRIO_HIGHEST, NULL);
-        mySDCard.saveConfig(config, configFilePath);
-        mySDCard.printConfig(configFilePath);
+        mySDCard.saveConfig(config, StringConstants::CONFIG_FILE_PATH);
+        mySDCard.printConfig(StringConstants::CONFIG_FILE_PATH);
         lv_scr_load(mainScr);
         display_current_config();
     }

@@ -136,7 +136,7 @@ void settingsScreen()
 
     wifiBtn = my_lv_btn_create(settingsScr, NULL, 60, 60, 60, 38, WiFi_btn);
     wifiBtnLabel = lv_label_create(wifiBtn, NULL);
-    lv_label_set_text(wifiBtnLabel, MY_WIFI_SYMBOL);
+    lv_label_set_text(wifiBtnLabel, StringConstants::WIFI_SYMBOL);
     lv_obj_add_style(wifiBtn, LV_OBJ_PART_MAIN, &transparentBackgroundStyle);
     lv_obj_add_style(wifiBtn, LV_OBJ_PART_MAIN, &borderlessStyle);
     lv_obj_add_style(wifiBtn, LV_OBJ_PART_MAIN, &whiteFontStyle);
@@ -147,19 +147,19 @@ void settingsScreen()
 
     infoBtn = my_lv_btn_create(settingsScr, wifiBtn, 60, 60, 200, 38, info_btn);
     infoBtnLabel = lv_label_create(infoBtn, NULL);
-    lv_label_set_text(infoBtnLabel, MY_INFO_SYMBOL);
+    lv_label_set_text(infoBtnLabel, StringConstants::INFO_SYMBOL);
 
     infoBtnName = my_lv_label_create(settingsScr, wifiBtnName, 207, 103, "Info");
 
     timeBtn = my_lv_btn_create(settingsScr, wifiBtn, 60, 60, 60, 140, time_settings_btn);
     timeBtnLabel = lv_label_create(timeBtn, NULL);
-    lv_label_set_text(timeBtnLabel, MY_CLOCK_SYMBOL);
+    lv_label_set_text(timeBtnLabel, StringConstants::CLOCK_SYMBOL);
 
     timeBtnName = my_lv_label_create(settingsScr, wifiBtnName, 65, 200, "Time");
 
     tempBtn = my_lv_btn_create(settingsScr, wifiBtn, 60, 60, 200, 140, temp_settings_btn);
     tempBtnLabel = lv_label_create(tempBtn, wifiBtnName);
-    lv_label_set_text(tempBtnLabel, MY_COGS_SYMBOL);
+    lv_label_set_text(tempBtnLabel, StringConstants::COGS_SYMBOL);
     lv_obj_add_style(tempBtnLabel, LV_OBJ_PART_MAIN, &hugeFontStyle);
     tempBtnName = my_lv_label_create(settingsScr, wifiBtnName, 180, 200, "Sampling");
 }
@@ -192,7 +192,7 @@ void mainScreen()
 	lockButton = my_lv_btn_create(mainScr, setButton, 14, 18, 95, 7, lockButton_task);
 	labelLockButton = lv_label_create(lockButton, NULL);
     lv_obj_set_style_local_text_font(lockButton, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, &monte16lock);
-	lv_label_set_text(labelLockButton, MY_LOCK_SYMBOL);
+    lv_label_set_text(labelLockButton, StringConstants::LOCK_SYMBOL);
 
     wifiStatusAtMain = my_lv_label_create(mainScr, NULL, 52, 7, LV_SYMBOL_WIFI, LV_COLOR_WHITE);
     wifiStatusAtMainWarning = my_lv_label_create(wifiStatusAtMain, NULL, 6, 6, LV_SYMBOL_CLOSE, LV_COLOR_RED);
@@ -473,7 +473,7 @@ void lockScreen()
     labelUnlockButton = lv_label_create(unlockButton, NULL);
     lv_obj_set_style_local_text_font(unlockButton, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, &monte16lock);
     lv_obj_align(unlockButton, NULL, LV_ALIGN_IN_BOTTOM_MID, 0, -25);
-    lv_label_set_text(labelUnlockButton, MY_UNLOCK_SYMBOL);
+    lv_label_set_text(labelUnlockButton, StringConstants::UNLOCK_SYMBOL);
     lv_btn_set_fit(unlockButton, LV_FIT_TIGHT);
     lv_obj_set_event_cb(unlockButton, unlockButton_task);
 

@@ -107,17 +107,13 @@ bool my_touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
         return false;
     }
 
-    if (touchX > SCREEN_WIDTH || touchY > SCREEN_HEIGHT)
-    {
+    if (touchX > Constants::SCREEN_WIDTH || touchY > Constants::SCREEN_HEIGHT) {
         // Serial.println("Y or y outside of expected parameters..");
         // Serial.print("y:");
         // Serial.print(touchX);
         // Serial.print(" x:");
         // Serial.print(touchY);
-    }
-    else
-    {
-
+    } else {
         data->state = touched ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
 
         /*Save the state and save the pressed coordinate*/
@@ -139,8 +135,8 @@ bool my_touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
 
 void setup()
 {
-    pinMode(FAN_PIN, OUTPUT);
-    digitalWrite(FAN_PIN, LOW);
+    pinMode(Constants::FAN_PIN, OUTPUT);
+    digitalWrite(Constants::FAN_PIN, LOW);
     sqlite3_initialize();
     // Serial debug
     Serial.begin(115200);
@@ -152,15 +148,14 @@ void setup()
     tft.begin(); /* TFT init */
     tft.setRotation(3);
 
-    uint16_t calData[5] = {275, 3620, 264, 3532, 1};
-    tft.setTouch(calData);
+    tft.setTouch(Constants::TOUCH_CALIBRATION);
 
     lv_disp_buf_init(&disp_buf, buf, NULL, LV_HOR_RES_MAX * 10);
     // Initialize the display
     lv_disp_drv_t disp_drv;
     lv_disp_drv_init(&disp_drv);
-    disp_drv.hor_res = SCREEN_WIDTH;
-    disp_drv.ver_res = SCREEN_HEIGHT;
+    disp_drv.hor_res = Constants::SCREEN_WIDTH;
+    disp_drv.ver_res = Constants::SCREEN_HEIGHT;
     disp_drv.flush_cb = my_disp_flush;
     disp_drv.buffer = &disp_buf;
     lv_disp_drv_register(&disp_drv);
@@ -205,7 +200,7 @@ void setup()
 
     lv_disp_load_scr(mainScr);
 
-    mySDCard.loadConfig(config, configFilePath);
+    mySDCard.loadConfig(config, StringConstants::CONFIG_FILE_PATH);
     delay(1000);
 
     lv_dropdown_set_selected(lockScreenDDlist, getDDListIndexBasedOnLcdLockTime(config.lcdLockTime));
@@ -218,9 +213,9 @@ void setup()
     lv_spinbox_set_value(measureAvPeriod, (config.measurePeriod / 1000));
     lv_spinbox_set_value(measureNumber, config.numberOfSamples);
     lv_spinbox_set_value(turnFanOnTime, (config.turnFanTime / 1000));
-    set_spinbox_digit_format(measureNumber, MIN_RANGE, MAX_RANGE, 0);
-    set_spinbox_digit_format(measureAvPeriod, MIN_RANGE, MAX_RANGE, 0);
-    set_spinbox_digit_format(turnFanOnTime, MIN_RANGE, MAX_RANGE, 0);
+    set_spinbox_digit_format(measureNumber, Constants::MIN_RANGE, Constants::MAX_RANGE, 0);
+    set_spinbox_digit_format(measureAvPeriod, Constants::MIN_RANGE, Constants::MAX_RANGE, 0);
+    set_spinbox_digit_format(turnFanOnTime, Constants::MIN_RANGE, Constants::MAX_RANGE, 0);
 
     getSample = lv_task_create(getSampleFunc, (config.timeBetweenSavingSamples - (config.numberOfSamples - 1) * config.measurePeriod), LV_TASK_PRIO_HIGH, NULL);
     turnFanOn = lv_task_create(turnFanOnFunc, config.timeBetweenSavingSamples - config.turnFanTime, LV_TASK_PRIO_HIGHEST, NULL);
@@ -232,7 +227,7 @@ void setup()
     lv_task_handler();
     if (config.ssid != "")
     {
-        mySDCard.printConfig(configFilePath);
+        mySDCard.printConfig(StringConstants::CONFIG_FILE_PATH);
         Serial.print(getMainTimestamp(Rtc).c_str());
         WiFi.begin(config.ssid.c_str(), config.password.c_str());
         volatile int attempts = 0;

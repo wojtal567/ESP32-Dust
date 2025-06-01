@@ -7,8 +7,8 @@
 #include <Wire.h>
 #include <lvgl.h>
 
+#include <sensors/pms.h>
 #include <MySD.hpp>
-#include <PMS5003.hpp>
 
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
@@ -33,7 +33,7 @@ extern lv_font_t hugeSymbolsFont48;
 
 //RTC, PMS5003 and SHT30 objects declaration
 RtcDS1307<TwoWire> Rtc(Wire);
-PMS5003 *pmsSensor;
+PMS *pmsSensor;
 SHT3X sht30(0x44); // TODO extract address to config
 
 std::map<std::string, float> data;

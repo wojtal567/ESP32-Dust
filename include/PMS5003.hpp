@@ -36,6 +36,5 @@ class PMS5003
         PMS5003(HardwareSerial *reader, HardwareSerial *debugger);
         bool readData();
         std::map<std::string, float> returnData();
-        Types::ParticleData getParticleData(); // New method to return structured data
         void dumpSamples();
 };

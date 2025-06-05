@@ -21,6 +21,10 @@ constexpr int LONG_LOCK_TIME = 600000;    // 10 minutes
 constexpr int DEBUG_SERIAL_BAUD = 115200;
 constexpr int PMS_SERIAL_BAUD = 9600;
 
+// PMS sensor constants
+constexpr int PMS_BUFFER_SIZE = 32;
+constexpr uint8_t PMS_START_BYTE = 0x42;
+
 // sampling constants
 constexpr int MIN_RANGE = 1;
 constexpr int MAX_RANGE = 999;

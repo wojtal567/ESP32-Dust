@@ -1,4 +1,5 @@
 #include "sensors/pms.h"
+#include "utils/constants.h"
 
 const std::array<std::string, 15> PMS::SENSOR_LABELS = {"framelen",
                                                         "pm10_standard",
@@ -29,23 +30,20 @@ bool PMS::readData()
         _reader->println("Debugger unavailable");
         return false;
     }*/
-    if (m_reader->peek() != 0x42) {
+    if (m_reader->peek() != Constants::PMS_START_BYTE) {
         m_reader->read();
         m_debugger->println("PMS5003 -> Reading bytes...");
         return false;
     }
 
-    if (m_reader->available() < 32) {
+    if (m_reader->available() < Constants::PMS_BUFFER_SIZE) {
         m_debugger->println("PMS5003 -> Can't read all bytes from PMS. Exiting. False.");
         return false;
     }
 
-    const uint8_t bufferSize = 32;
+    uint8_t buffer[Constants::PMS_BUFFER_SIZE];    int32_t checkSum{0};
 
-    uint8_t buffer[bufferSize];
-    int32_t checkSum{0};
-
-    m_reader->readBytes(buffer, bufferSize);
+    m_reader->readBytes(buffer, Constants::PMS_BUFFER_SIZE);
 
     for (uint8_t i = 0; i < 30; i++) {
         checkSum += buffer[i];

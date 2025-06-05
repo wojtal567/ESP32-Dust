@@ -148,7 +148,7 @@ void setup()
     tft.begin(); /* TFT init */
     tft.setRotation(3);
 
-    tft.setTouch(Constants::TOUCH_CALIBRATION);
+    tft.setTouch(const_cast<uint16_t *>(Constants::TOUCH_CALIBRATION));
 
     lv_disp_buf_init(&disp_buf, buf, NULL, LV_HOR_RES_MAX * 10);
     // Initialize the display

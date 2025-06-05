@@ -36,7 +36,7 @@ constexpr int DEFAULT_SAMPLES = 10;           // 10 samples
 constexpr int DEFAULT_FAN_TIME = 30000;       // 30 seconds
 
 // touch screen calibration
-uint16_t TOUCH_CALIBRATION[5] = {275, 3620, 264, 3532, 1};
+constexpr uint16_t TOUCH_CALIBRATION[5] = {275, 3620, 264, 3532, 1};
 
 // buffer sizes
 constexpr int JSON_BUFFER_SIZE = 512;

@@ -135,14 +135,13 @@ bool my_touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
 
 void setup()
 {
-    pinMode(Constants::FAN_PIN, OUTPUT);
-    digitalWrite(Constants::FAN_PIN, LOW);
     sqlite3_initialize();
     // Serial debug
     Serial.begin(Constants::DEBUG_SERIAL_BAUD);
     Serial2.begin(Constants::PMS_SERIAL_BAUD, SERIAL_8N1, Constants::PMS_RX_PIN, Constants::PMS_TX_PIN);
-    // PMS sensor initialization
-    pmsSensor = new PMS(&Serial, &Serial2);
+
+    // Initialize sensors
+    sensorManager.initialize(&Serial, &Serial2);
 
     lv_init();
     tft.begin(); /* TFT init */

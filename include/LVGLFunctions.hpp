@@ -1,6 +1,7 @@
 #include <GlobalVariables.hpp>
 
 #include "Utils/stringConstants.h"
+#include "managers/SensorManager.h"
 #include "utils/timeUtils.h"
 
 void set_spinbox_digit_format(lv_obj_t *spinbox, int32_t range_min, int32_t range_max, int offset)
@@ -132,7 +133,7 @@ void display_current_config()
 // Function that turns fan on
 void turnFanOnFunc(lv_task_t *task)
 {
-    digitalWrite(Constants::FAN_PIN, HIGH);
+    sensorManager.wakeDustSensor();
     lv_task_set_prio(turnFanOn, LV_TASK_PRIO_OFF);
 }
 
@@ -189,35 +190,35 @@ void setAqiStateNColor()
 // Get single sample and set text
 void getSampleFunc(lv_task_t *task)
 {
-    sht30.get();
+    sensorManager.readTemperatureHumiditySensor();
     if (config.currentSampleNumber != 0 && config.currentSampleNumber < config.numberOfSamples)
     {
-        if (pmsSensor->readData())
-        {
+        if (sensorManager.readDustSensor()) {
             Serial.println("Succesfully read data from dust sensor.");
-            std::map<std::string, float> tmpData = pmsSensor->returnData();
-            pmsSensor->dumpSamples();
+            std::map<std::string, float> tmpData = sensorManager.getDustData();
             for (uint8_t i = 0; i < 15; i++)
             {
                 data[labels[i]] += tmpData[labels[i]];
             }
             config.currentSampleNumber++;
-            temp += sht30.cTemp;
-            humi += sht30.humidity;
+            temp += sensorManager.getTemperature();
+            humi += sensorManager.getHumidity();
+        } else {
+            Serial.println("Failed to read data from dust sensor.");
         }
     }
     if (config.currentSampleNumber == 0)
     {
         lv_task_set_period(getSample, config.measurePeriod);
-        if (pmsSensor->readData())
-        {
+
+        if (sensorManager.readDustSensor()) {
             Serial.println("Succesfully read data from dust sensor.");
-            std::map<std::string, float> tmpData = pmsSensor->returnData();
-            pmsSensor->dumpSamples();
-            data = tmpData;
+            data = sensorManager.getDustData();
             config.currentSampleNumber++;
-            temp = sht30.cTemp;
-            humi = sht30.humidity;
+            temp = sensorManager.getTemperature();
+            humi = sensorManager.getHumidity();
+        } else {
+            Serial.println("Failed to read data from dust sensor.");
         }
     }
     if (config.currentSampleNumber == config.numberOfSamples)
@@ -269,12 +270,13 @@ void getSampleFunc(lv_task_t *task)
             lastSampleTimestamp = getMainTimestamp(Rtc);
             Serial.print("lastSampleTimestamp przed wrzuceniem do bazy: " + lastSampleTimestamp);
             mySDCard.save(data, temp, humi, lastSampleTimestamp, &sampleDB, &Serial);
-        }
-        else
+        } else {
             Serial.println("RTC is not running, not saving");
+        }
         lv_task_reset(turnFanOn);
         lv_task_set_prio(turnFanOn, LV_TASK_PRIO_HIGHEST);
-        digitalWrite(Constants::FAN_PIN, LOW);
+
+        sensorManager.sleepDustSensor();
         if (isLastSampleSaved())
         {
             lv_obj_set_style_local_bg_color(ledAtLock, LV_LED_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_GREEN);

@@ -9,6 +9,7 @@
 
 #include <sensors/pms.h>
 #include <MySD.hpp>
+#include "managers/SensorManager.h"
 
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
@@ -33,8 +34,6 @@ extern lv_font_t hugeSymbolsFont48;
 
 //RTC, PMS5003 and SHT30 objects declaration
 RtcDS1307<TwoWire> Rtc(Wire);
-PMS *pmsSensor;
-SHT3X sht30(0x44); // TODO extract address to config
 
 std::map<std::string, float> data;
 const char *labels[15] = {

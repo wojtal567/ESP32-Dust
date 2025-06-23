@@ -372,30 +372,30 @@ static void ta_event_cb(lv_obj_t *ta, lv_event_t event)
 
 static void btn_connect(lv_obj_t *obj, lv_event_t event)
 {
-    if (event == LV_EVENT_CLICKED and
-        ((lv_textarea_get_text(ssidTA) != NULL and
-          lv_textarea_get_text(ssidTA)[0] != '\0') or
-         (lv_textarea_get_text(pwdTA) != NULL and lv_textarea_get_text(pwdTA)[0] != '\0')))
-    {
-        uint8_t wifiAttempts = 10;
+    if (event == LV_EVENT_CLICKED
+        && ((lv_textarea_get_text(ssidTA) != NULL && lv_textarea_get_text(ssidTA)[0] != '\0')
+            || (lv_textarea_get_text(pwdTA) != NULL && lv_textarea_get_text(pwdTA)[0] != '\0'))) {
+        String ssid = lv_textarea_get_text(ssidTA);
+        String pwd = lv_textarea_get_text(pwdTA);
 
-        config.ssid = lv_textarea_get_text(ssidTA);
+        config.ssid = ssid.c_str();
+        config.password = pwd.c_str();
+
+        networkManager.setCredentials(config.ssid, config.password);
         Serial.println(config.ssid.c_str());
-        config.password = lv_textarea_get_text(pwdTA);
+        networkManager.setCredentials(config.ssid, config.password);
 
         mySDCard.saveConfig(config, StringConstants::CONFIG_FILE_PATH);
-        mySDCard.printConfig(StringConstants::CONFIG_FILE_PATH);
-        WiFi.begin(config.ssid.c_str(), config.password.c_str());
-        while (WiFi.status() != WL_CONNECTED and wifiAttempts > 0)
-        {
-            delay(500);
-            wifiAttempts--;
-        }
 
-        if (WiFi.status() == WL_CONNECTED)
-            Serial.println("btn_connect -> connected to Wi-Fi! IP: " + WiFi.localIP().toString());
-        else if (WiFi.status() == WL_DISCONNECTED)
+        mySDCard.printConfig(StringConstants::CONFIG_FILE_PATH);
+        bool connected = networkManager.connect();
+        if (connected) {
+            Serial.println("btn_connect -> connected to Wi-Fi! IP: "
+                           + networkManager.getIpAddress());
+        }
+        else {
             Serial.println("btn_connect -> can't connect. Probably you have entered wrong credentials.");
+        }
         lv_disp_load_scr(mainScr);
         lv_textarea_set_text(ssidTA, "");
         lv_textarea_set_text(pwdTA, "");

@@ -9,8 +9,9 @@
 
 #include <sensors/pms.h>
 #include <MySD.hpp>
-#include "managers/SensorManager.h"
 
+#include "managers/SensorManager.h"
+#include "managers/networkmanager.h"
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
 
@@ -29,7 +30,6 @@ Config config =
 
 //Include additional font with lock and unlock symbol
 extern lv_font_t monte16lock;
-
 extern lv_font_t hugeSymbolsFont48;
 
 //RTC, PMS5003 and SHT30 objects declaration
@@ -70,6 +70,9 @@ static lv_color_t buf[LV_HOR_RES_MAX * 10];
 //SD Card and sqlite database objects declaration
 MySD mySDCard(Constants::SD_CARD_PIN);
 SQLiteDb sampleDB("/sd/database.db", "/database.db", "samples");
+
+// NetworkManager instance
+NetworkManager networkManager(&mySDCard);
 
 String lastSampleTimestamp;
 

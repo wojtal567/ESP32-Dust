@@ -224,27 +224,21 @@ void setup()
     lv_task_set_period(getAppLastRecordAndSynchronize, fetchPeriod);
     lv_task_set_prio(getAppLastRecordAndSynchronize, LV_TASK_PRIO_MID);
     lv_task_handler();
-    if (config.ssid != "")
-    {
-        mySDCard.printConfig(StringConstants::CONFIG_FILE_PATH);
+    mySDCard.printConfig(StringConstants::CONFIG_FILE_PATH);
+
+    if (config.ssid != "") {
         Serial.print(getMainTimestamp(Rtc).c_str());
-        WiFi.begin(config.ssid.c_str(), config.password.c_str());
-        volatile int attempts = 0;
-        while (WiFi.status() != WL_CONNECTED and attempts != 20)
-        {
-            delay(500);
-            Serial.print(".");
-            attempts++;
-        }
-        if (WiFi.status() == WL_CONNECTED)
-        {
-            Serial.println("setup -> connected to Wi-Fi provided by data from configuration file! IP: " + WiFi.localIP().toString());
+        networkManager.setCredentials(config.ssid.c_str(), config.password.c_str());
+        bool connected = networkManager.connect();
+        if (connected) {
+            Serial.println(
+                "setup -> connected to Wi-Fi provided by data from configuration file! IP: "
+                + networkManager.getIpAddress());
             config_time();
             restServerRouting();
             server.onNotFound(handleNotFound);
             server.begin();
-        }
-        else if (WiFi.status() == WL_DISCONNECTED)
+        } else
             Serial.println("setup -> can't connect to Wi-Fi - probably no data or corrupted or wrong!");
     }
     display_current_config();

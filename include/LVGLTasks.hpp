@@ -99,14 +99,11 @@ void dateTimeFunc(lv_task_t *task)
 
 void statusFunc(lv_task_t *task)
 {
-    if (WiFi.status() == WL_CONNECTED)
-    {
+    if (networkManager.isConnected()) {
         lv_obj_set_hidden(wifiStatusAtLockWarning, true);
         lv_obj_set_hidden(wifiStatusAtMainWarning, true);
-        lv_label_set_text(infoWifiAddressLabel, WiFi.localIP().toString().c_str());
-    }
-    else
-    {
+        lv_label_set_text(infoWifiAddressLabel, networkManager.getIpAddress().c_str());
+    } else {
         lv_obj_set_hidden(wifiStatusAtLockWarning, false);
         lv_obj_set_hidden(wifiStatusAtMainWarning, false);
         lv_label_set_text(infoWifiAddressLabel, "No WiFi connection");
@@ -116,15 +113,9 @@ void statusFunc(lv_task_t *task)
     {
         lv_obj_set_hidden(sdStatusAtLockWarning, true);
         lv_obj_set_hidden(sdStatusAtMainWarning, true);
-        if (config.ssid == "" && config.password == "")
-        {
-            mySDCard.loadWiFi(config, StringConstants::CONFIG_FILE_PATH);
-            mySDCard.saveConfig(config, StringConstants::CONFIG_FILE_PATH);
-        }
-        if (config.ssid != "" && config.password != "")
-        {
-            if (!(WiFi.status() == WL_CONNECTED))
-                WiFi.begin(config.ssid.c_str(), config.password.c_str());
+        if (!networkManager.isConnected() && (config.ssid != "" && config.password != "")) {
+            networkManager.setCredentials(config.ssid.c_str(), config.password.c_str());
+            networkManager.connect();
         }
     }
     else

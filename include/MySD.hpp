@@ -1,3 +1,5 @@
+#pragma once
+
 #include <SD.h>
 #include <SQLiteDb.hpp>
 #include <string>

@@ -381,9 +381,9 @@ static void btn_connect(lv_obj_t *obj, lv_event_t event)
         config.ssid = ssid.c_str();
         config.password = pwd.c_str();
 
-        networkManager.setCredentials(config.ssid, config.password);
+        networkManager.setCredentials(config.ssid.c_str(), config.password.c_str());
         Serial.println(config.ssid.c_str());
-        networkManager.setCredentials(config.ssid, config.password);
+        networkManager.setCredentials(config.ssid.c_str(), config.password.c_str());
 
         mySDCard.saveConfig(config, StringConstants::CONFIG_FILE_PATH);
 

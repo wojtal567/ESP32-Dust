@@ -4,8 +4,6 @@
 #include <Arduino.h>
 #include <MySD.hpp>
 
-#include "utils/types.h"
-
 class NetworkManager {
 public:
     NetworkManager(MySD* sdCard);

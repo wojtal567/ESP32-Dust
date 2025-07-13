@@ -11,6 +11,7 @@
 #include <MySD.hpp>
 
 #include "managers/SensorManager.h"
+#include "managers/displaymanager.h"
 #include "managers/networkmanager.h"
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
@@ -62,17 +63,13 @@ WebServer server(80);
 String appIpAddress = "";
 int fetchPeriod = 30000;
 
-//TFT display using TFT_eSPI and lvgl library
-TFT_eSPI tft = TFT_eSPI();
-static lv_disp_buf_t disp_buf;
-static lv_color_t buf[LV_HOR_RES_MAX * 10];
-
 //SD Card and sqlite database objects declaration
 MySD mySDCard(Constants::SD_CARD_PIN);
 SQLiteDb sampleDB("/sd/database.db", "/database.db", "samples");
 
-// NetworkManager instance
+// Manager instances
 NetworkManager networkManager(&mySDCard);
+DisplayManager displayManager;
 
 String lastSampleTimestamp;
 

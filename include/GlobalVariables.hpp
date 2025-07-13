@@ -1,3 +1,5 @@
+#pragma once
+
 #include <NTPClient.h>
 #include <RtcDS1307.h>
 #include <TFT_eSPI.h>

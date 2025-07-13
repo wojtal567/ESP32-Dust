@@ -18,7 +18,6 @@ struct ConfigData {
     // WiFi settings
     String ssid;
     String password;
-    String appIpAddress;
 
     // Measurement settings
     int measurePeriod;             // Period between measurements in ms
@@ -28,8 +27,5 @@ struct ConfigData {
 
     // Display settings
     int lcdLockTime;  // Screen lock timeout in ms
-
-    // Fan control settings
-    int fanMode;  // 0=auto, 1=on, 2=off
 };
 }  // namespace Types

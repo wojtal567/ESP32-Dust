@@ -148,23 +148,9 @@ extern lv_obj_t *labelParticlesNumber[6];
 extern lv_obj_t *contParticlesNumber[6];
 extern lv_obj_t *ledAtMain;
 
-// ============================================
-// LVGL UI Objects - Main Screen Graphics Data
-// ============================================
-// TODO: Move to Utils/stringConstants.h when implemented
-extern String particlesSize[7];
-// TODO: Move to Utils/constants.h when implemented
-extern int labelParticleSizePosX[7];
-extern int contParticleNumberPosX[6];
-extern lv_point_t mainLinePoints[];
-
-//An array of points pairs instead of multiple names and declarations
-extern lv_point_t dividingLinesPoints[][7];
-//Main line at the bottom declaration
+// LVGL UI runtime objects
 extern lv_obj_t *mainLine;
-//An array of lines dividing main one
 extern lv_obj_t *dividingLines[7];
-//An array of colors used depending on actual pm2.5 value
 extern lv_color_t airQualityColors[6];
 
 // ============================================

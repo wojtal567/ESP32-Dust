@@ -3,17 +3,13 @@
 // ============================================
 // Configuration
 // ============================================
-Types::ConfigData config = {
-    .ssid = "",
-    .password = "",
-    .appIpAddress = "192.168.1.1",
-    .measurePeriod = 30000,
-    .numberOfSamples = 5,
-    .timeBetweenSavingSamples = 3600000,
-    .turnFanTime = 30000,
-    .lcdLockTime = 60000,
-    .fanMode = 0
-};
+Types::ConfigData config = {.ssid = "",
+                            .password = "",
+                            .measurePeriod = 30000,
+                            .numberOfSamples = 5,
+                            .timeBetweenSavingSamples = 3600000,
+                            .turnFanTime = 30000,
+                            .lcdLockTime = 60000};
 
 // ============================================
 // Hardware Components
@@ -91,20 +87,7 @@ lv_obj_t *labelParticlesNumber[6] = {nullptr};
 lv_obj_t *contParticlesNumber[6] = {nullptr};
 lv_obj_t *ledAtMain = nullptr;
 
-// ============================================
-// Arrays and Static Data
-// ============================================
-String particlesSize[7] = {"0.0", "0.3", "0.5", "1.0", "2.5", "5.0", "10.0"};
-int labelParticleSizePosX[7] = {9, 56, 103, 153, 198, 245, 288};
-int contParticleNumberPosX[6] = {18, 65, 112, 159, 206, 253};
-lv_point_t mainLinePoints[] = {{18, 210}, {300, 210}};
-lv_point_t dividingLinesPoints[][7] = {{{18, 205} , {18, 215}}, 
-                                      {{65, 205} , {65, 215}},
-                                      {{112, 205}, {112, 215}},
-                                      {{159, 205}, {159, 215}},
-                                      {{206, 205}, {206, 215}},
-                                      {{253, 205}, {253, 215}},
-                                      {{300, 205}, {300, 215}}};
+// LVGL UI runtime objects
 lv_obj_t *mainLine = nullptr;
 lv_obj_t *dividingLines[7] = {nullptr};
 lv_color_t airQualityColors[6] = {LV_COLOR_GREEN, LV_COLOR_GREEN, LV_COLOR_YELLOW, LV_COLOR_ORANGE, LV_COLOR_RED, LV_COLOR_RED};

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
+#include <lvgl.h>
 
 namespace Constants {
 // screen dimensions
@@ -49,4 +50,21 @@ constexpr int SD_CARD_PIN = 27;  // pin of SD_CS
 
 // AQI standard breakpoints
 constexpr float AQI_STANDARDS[5] = {21.0f, 61.0f, 101.0f, 141.0f, 201.0f};
+
+// UI Layout Constants
+constexpr int LABEL_PARTICLE_SIZE_POS_X[7] = {9, 56, 103, 153, 198, 245, 288};
+constexpr int CONT_PARTICLE_NUMBER_POS_X[6] = {18, 65, 112, 159, 206, 253};
+
+
+constexpr lv_point_t MAIN_LINE_POINTS[] = {{18, 210}, {300, 210}};
+
+constexpr lv_point_t DIVIDING_LINES_POINTS[][7] = {{{18, 205}, {18, 215}},
+                                       {{65, 205}, {65, 215}},
+                                       {{112, 205}, {112, 215}},
+                                       {{159, 205}, {159, 215}},
+                                       {{206, 205}, {206, 215}},
+                                       {{253, 205}, {253, 215}},
+                                       {{300, 205}, {300, 215}}};
+
+
 }  // namespace Constants

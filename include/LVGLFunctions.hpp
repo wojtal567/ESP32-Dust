@@ -308,14 +308,14 @@ void drawParticlesIndicator()
     for (int i = 0; i < 7; i++)
     {
         dividingLines[i] = lv_line_create(mainScr, NULL);
-        lv_line_set_points(dividingLines[i], dividingLinesPoints[i], 2);
+        lv_line_set_points(dividingLines[i], Constants::DIVIDING_LINES_POINTS[i], 2);
         lv_obj_add_style(dividingLines[i], LV_LINE_PART_MAIN, &lineStyle);
 
         labelParticleSizeum[i] = lv_label_create(mainScr, NULL);
-        lv_label_set_text(labelParticleSizeum[i], particlesSize[i].c_str());
+        lv_label_set_text(labelParticleSizeum[i], StringConstants::PARTICLES_SIZE[i].c_str());
         lv_obj_add_style(labelParticleSizeum[i], LV_LABEL_PART_MAIN, &font12Style);
         lv_obj_add_style(labelParticleSizeum[i], LV_LABEL_PART_MAIN, &whiteFontStyle);
-        lv_obj_set_pos(labelParticleSizeum[i], labelParticleSizePosX[i], 190); // 12
+        lv_obj_set_pos(labelParticleSizeum[i], Constants::LABEL_PARTICLE_SIZE_POS_X[i], 190); // 12
     }
 
     for (int j = 0; j < 6; j++)
@@ -327,7 +327,7 @@ void drawParticlesIndicator()
         lv_obj_set_click(contParticlesNumber[j], false);
         lv_obj_set_size(contParticlesNumber[j], 47, 14);
         labelParticlesNumber[j] = lv_label_create(contParticlesNumber[j], NULL);
-        lv_obj_set_pos(contParticlesNumber[j], contParticleNumberPosX[j], 215); // 20
+        lv_obj_set_pos(contParticlesNumber[j], Constants::CONT_PARTICLE_NUMBER_POS_X[j], 215); // 20
         lv_label_set_align(labelParticlesNumber[j], LV_LABEL_ALIGN_CENTER);
         lv_obj_set_auto_realign(labelParticlesNumber[j], true);
         lv_label_set_text(labelParticlesNumber[j], "-");
@@ -336,7 +336,7 @@ void drawParticlesIndicator()
     }
 
     mainLine = lv_line_create(mainScr, NULL);
-    lv_line_set_points(mainLine, mainLinePoints, 2);
+    lv_line_set_points(mainLine, Constants::MAIN_LINE_POINTS, 2);
     lv_line_set_auto_size(mainLine, true);
     lv_obj_add_style(mainLine, LV_LINE_PART_MAIN, &lineStyle);
 }

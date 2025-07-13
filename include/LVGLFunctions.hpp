@@ -141,10 +141,8 @@ void config_time()
 {
     if (WiFi.status() == WL_CONNECTED)
     {
-        for (int i = 0; i < 500; i++)
-            dateTimeClient.update();
-        configTime(Rtc, dateTimeClient);
-        Serial.println("Succesfully updated time on RTC.");
+        networkManager.updateDateTime();
+        Serial.println("Successfully updated time on RTC.");
     }
 }
 
@@ -190,74 +188,84 @@ void setAqiStateNColor()
 // Get single sample and set text
 void getSampleFunc(lv_task_t *task)
 {
+    // Static variables to accumulate samples for averaging
+    static std::map<std::string, float> accumulatedData;
+    static float accumulatedTemp = 0.0f;
+    static float accumulatedHumi = 0.0f;
+
     sensorManager.readTemperatureHumiditySensor();
-    if (config.currentSampleNumber != 0 && config.currentSampleNumber < config.numberOfSamples)
-    {
+    if (currentSampleNumber != 0 && currentSampleNumber < config.numberOfSamples) {
         if (sensorManager.readDustSensor()) {
-            Serial.println("Succesfully read data from dust sensor.");
-            std::map<std::string, float> tmpData = sensorManager.getDustData();
-            for (uint8_t i = 0; i < 15; i++)
-            {
-                data[labels[i]] += tmpData[labels[i]];
+            Serial.println("Successfully read data from dust sensor.");
+            const std::map<std::string, float> &tmpData = sensorManager.getDustData();
+            for (const auto &pair : tmpData) {
+                accumulatedData[pair.first] += pair.second;
             }
-            config.currentSampleNumber++;
-            temp += sensorManager.getTemperature();
-            humi += sensorManager.getHumidity();
+            currentSampleNumber++;
+            accumulatedTemp += sensorManager.getTemperature();
+            accumulatedHumi += sensorManager.getHumidity();
         } else {
             Serial.println("Failed to read data from dust sensor.");
         }
     }
-    if (config.currentSampleNumber == 0)
-    {
+    if (currentSampleNumber == 0) {
         lv_task_set_period(getSample, config.measurePeriod);
 
         if (sensorManager.readDustSensor()) {
-            Serial.println("Succesfully read data from dust sensor.");
-            data = sensorManager.getDustData();
-            config.currentSampleNumber++;
-            temp = sensorManager.getTemperature();
-            humi = sensorManager.getHumidity();
+            Serial.println("Successfully read data from dust sensor.");
+            accumulatedData = sensorManager.getDustData();
+            currentSampleNumber++;
+            accumulatedTemp = sensorManager.getTemperature();
+            accumulatedHumi = sensorManager.getHumidity();
         } else {
             Serial.println("Failed to read data from dust sensor.");
         }
     }
-    if (config.currentSampleNumber == config.numberOfSamples)
-    {
+    if (currentSampleNumber == config.numberOfSamples) {
         char buffer[7];
-        for (uint8_t i = 0; i < 15; i++)
-            data[labels[i]] = data[labels[i]] / config.numberOfSamples;
-        config.currentSampleNumber = 0;
-        temp = temp / config.numberOfSamples;
-        humi = humi / config.numberOfSamples;
+        // Calculate averages
+        std::map<std::string, float> averagedData;
+        for (const auto &pair : accumulatedData) {
+            averagedData[pair.first] = pair.second / config.numberOfSamples;
+        }
+        currentSampleNumber = 0;
+        temp = accumulatedTemp / config.numberOfSamples;
+        humi = accumulatedHumi / config.numberOfSamples;
+
+        // Reset accumulators
+        accumulatedData.clear();
+        accumulatedTemp = 0.0f;
+        accumulatedHumi = 0.0f;
+
         lv_task_set_period(getSample, (config.timeBetweenSavingSamples - (config.numberOfSamples - 1) * config.measurePeriod));
 
-        itoa(data["pm10_standard"], buffer, 10);
+        itoa(averagedData["pm10_standard"], buffer, 10);
         lv_label_set_text(labelPM10Data, buffer);
 
-        itoa(data["pm25_standard"], buffer, 10);
-        pm25Aqi = data["pm25_standard"];
+        itoa(averagedData["pm25_standard"], buffer, 10);
+        pm25Aqi = averagedData["pm25_standard"];
         lv_label_set_text(labelPM25Data, buffer);
         setAqiStateNColor();
 
-        itoa(data["pm100_standard"], buffer, 10);
+        itoa(averagedData["pm100_standard"], buffer, 10);
         lv_label_set_text(labelPM100Data, buffer);
 
-        itoa(data["particles_03um"], buffer, 10);
+        itoa(averagedData["particles_03um"], buffer, 10);
         lv_label_set_text(labelParticlesNumber[0], buffer);
 
-        itoa(data["particles_05um"], buffer, 10);
+        itoa(averagedData["particles_05um"], buffer, 10);
         lv_label_set_text(labelParticlesNumber[1], buffer);
 
-        itoa(data["particles_10um"], buffer, 10);
+        itoa(averagedData["particles_10um"], buffer, 10);
         lv_label_set_text(labelParticlesNumber[2], buffer);
 
-        itoa(data["particles_25um"], buffer, 10);
+        itoa(averagedData["particles_25um"], buffer, 10);
         lv_label_set_text(labelParticlesNumber[3], buffer);
 
-        itoa(data["particles_50um"], buffer, 10);
+        itoa(averagedData["particles_50um"], buffer, 10);
         lv_label_set_text(labelParticlesNumber[4], buffer);
 
-        itoa(data["particles_100um"], buffer, 10);
+        itoa(averagedData["particles_100um"], buffer, 10);
         lv_label_set_text(labelParticlesNumber[5], buffer);
 
         dtostrf(temp, 10, 2, buffer);
@@ -268,8 +276,8 @@ void getSampleFunc(lv_task_t *task)
         if (Rtc.GetIsRunning())
         {
             lastSampleTimestamp = getMainTimestamp(Rtc);
-            Serial.print("lastSampleTimestamp przed wrzuceniem do bazy: " + lastSampleTimestamp);
-            mySDCard.save(data, temp, humi, lastSampleTimestamp, &sampleDB, &Serial);
+            Serial.print("lastSampleTimestamp before saving to database: " + lastSampleTimestamp);
+            mySDCard.save(averagedData, temp, humi, lastSampleTimestamp, &sampleDB, &Serial);
         } else {
             Serial.println("RTC is not running, not saving");
         }
@@ -385,9 +393,9 @@ static void btn_connect(lv_obj_t *obj, lv_event_t event)
         Serial.println(config.ssid.c_str());
         networkManager.setCredentials(config.ssid.c_str(), config.password.c_str());
 
-        mySDCard.saveConfig(config, StringConstants::CONFIG_FILE_PATH);
+        networkManager.saveConfig(config, StringConstants::CONFIG_FILE_PATH);
 
-        mySDCard.printConfig(StringConstants::CONFIG_FILE_PATH);
+        networkManager.printConfig(StringConstants::CONFIG_FILE_PATH);
         bool connected = networkManager.connect();
         if (connected) {
             Serial.println("btn_connect -> connected to Wi-Fi! IP: "
@@ -521,8 +529,8 @@ void timesettings_save_btn(lv_obj_t *obj, lv_event_t event)
             config.lcdLockTime = 60000;
             break;
         }
-        mySDCard.saveConfig(config, StringConstants::CONFIG_FILE_PATH);
-        mySDCard.printConfig(StringConstants::CONFIG_FILE_PATH);
+        networkManager.saveConfig(config, StringConstants::CONFIG_FILE_PATH);
+        networkManager.printConfig(StringConstants::CONFIG_FILE_PATH);
         if (timeChanged == true)
         {
             String datet = lv_label_get_text(dateBtnLabel) + (String)lv_textarea_get_text(timeHour) + ":" + (String)lv_textarea_get_text(timeMinute);
@@ -908,8 +916,8 @@ static void sampling_settings_save_btn(lv_obj_t *btn, lv_event_t event)
         config.turnFanTime = lv_spinbox_get_value(turnFanOnTime) * 1000;
         getSample = lv_task_create(getSampleFunc, (config.timeBetweenSavingSamples - (config.numberOfSamples - 1) * config.measurePeriod), LV_TASK_PRIO_HIGH, NULL);
         turnFanOn = lv_task_create(turnFanOnFunc, config.timeBetweenSavingSamples - config.turnFanTime, LV_TASK_PRIO_HIGHEST, NULL);
-        mySDCard.saveConfig(config, StringConstants::CONFIG_FILE_PATH);
-        mySDCard.printConfig(StringConstants::CONFIG_FILE_PATH);
+        networkManager.saveConfig(config, StringConstants::CONFIG_FILE_PATH);
+        networkManager.printConfig(StringConstants::CONFIG_FILE_PATH);
         lv_scr_load(mainScr);
         display_current_config();
     }

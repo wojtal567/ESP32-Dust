@@ -1,4 +1,6 @@
 #include <LVGLFunctions.hpp>
+#include "GlobalVariables.hpp"
+
 void inactive_screen(lv_task_t *task)
 {
     if (config.lcdLockTime != -1)

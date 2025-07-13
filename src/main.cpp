@@ -11,6 +11,7 @@
 // ! --------------------------------------------REST WebServer config
 void setAppIp()
 {
+    WebServer &server = networkManager.getServer();
     String postBody = server.arg("plain");
     Serial.println(postBody);
     DynamicJsonDocument doc(512);
@@ -61,14 +62,17 @@ void setAppIp()
 
 void restServerRouting()
 {
-    server.on("/", HTTP_GET, []()
-              { server.send(200, F("text/html"),
-                            F("You have entered the wrong neighbourhood")); });
+    WebServer &server = networkManager.getServer();
+    server.on("/", HTTP_GET, []() {
+        WebServer &server = networkManager.getServer();
+        server.send(200, F("text/html"), F("You have entered the wrong neighbourhood"));
+    });
     server.on(F("/setAppIp"), HTTP_POST, setAppIp);
 }
 
 void handleNotFound()
 {
+    WebServer &server = networkManager.getServer();
     String message = "File Not Found \n\n" + (String) "URI: " + server.uri() + "\n Method: " + (server.method() == HTTP_GET) ? "GET" : "POST" + (String) "\n Arguments: " + server.args() + "\n";
 
     for (uint8_t i = 0; i < server.args(); i++)
@@ -121,7 +125,7 @@ void setup()
 
     lv_disp_load_scr(mainScr);
 
-    mySDCard.loadConfig(config, StringConstants::CONFIG_FILE_PATH);
+    networkManager.loadConfig(config, StringConstants::CONFIG_FILE_PATH);
     delay(1000);
 
     lv_dropdown_set_selected(lockScreenDDlist, getDDListIndexBasedOnLcdLockTime(config.lcdLockTime));
@@ -143,10 +147,11 @@ void setup()
     inactiveTime = lv_task_create(inactive_screen, 1, LV_TASK_PRIO_HIGH, NULL);
     getAppLastRecordAndSynchronize = lv_task_create_basic();
     lv_task_set_cb(getAppLastRecordAndSynchronize, fetchLastRecordAndSynchronize);
-    lv_task_set_period(getAppLastRecordAndSynchronize, fetchPeriod);
+    lv_task_set_period(getAppLastRecordAndSynchronize,
+                       30000); // Fixed period instead of fetchPeriod
     lv_task_set_prio(getAppLastRecordAndSynchronize, LV_TASK_PRIO_MID);
     lv_task_handler();
-    mySDCard.printConfig(StringConstants::CONFIG_FILE_PATH);
+    networkManager.printConfig(StringConstants::CONFIG_FILE_PATH);
 
     if (config.ssid != "") {
         Serial.print(getMainTimestamp(Rtc).c_str());
@@ -156,8 +161,9 @@ void setup()
             Serial.println(
                 "setup -> connected to Wi-Fi provided by data from configuration file! IP: "
                 + networkManager.getIpAddress());
-            config_time();
+            networkManager.updateDateTime();
             restServerRouting();
+            WebServer &server = networkManager.getServer();
             server.onNotFound(handleNotFound);
             server.begin();
         } else
@@ -170,6 +176,6 @@ void setup()
 void loop()
 {
     displayManager.handleTasks();
-    server.handleClient();
+    networkManager.handleServerClient();
     delay(5);
 }

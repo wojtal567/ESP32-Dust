@@ -14,7 +14,6 @@ Types::ConfigData config = {.ssid = "",
 // ============================================
 // Hardware Components
 // ============================================
-RtcDS1307<TwoWire> Rtc(Wire);
 String appIpAddress = "192.168.1.1";
 
 // ============================================
@@ -28,6 +27,7 @@ SQLiteDb sampleDB("/sd/database.db", "/database.db", "samples");
 // ============================================
 NetworkManager networkManager(&mySDCard);
 DisplayManager displayManager;
+RTCManager rtcManager;
 
 // ============================================
 // Application State Variables

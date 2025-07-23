@@ -1,10 +1,6 @@
 #include <Arduino.h>
-#include <WiFi.h>
-#include <rtc.hpp>
 #include <HTTPClient.h>
 #include <time.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_BusIO_Register.h>
 
 #include <LVGLInits.hpp>
 
@@ -154,7 +150,6 @@ void setup()
     networkManager.printConfig(StringConstants::CONFIG_FILE_PATH);
 
     if (config.ssid != "") {
-        Serial.print(getMainTimestamp(Rtc).c_str());
         networkManager.setCredentials(config.ssid.c_str(), config.password.c_str());
         bool connected = networkManager.connect();
         if (connected) {

@@ -13,6 +13,11 @@
 #include <lvgl.h>
 
 // ============================================
+// Project Includes
+// ============================================
+#include "managers/rtcmanager.h"
+
+// ============================================
 // Project Includes - Legacy Components
 // ============================================
 #include <sensors/pms.h>
@@ -39,12 +44,6 @@ extern lv_font_t monte16lock;
 extern lv_font_t hugeSymbolsFont48;
 
 // ============================================
-// Hardware Components (Legacy - should migrate to RTCManager)
-// ============================================
-// RTC object declaration (used by legacy rtc.hpp functions)
-extern RtcDS1307<TwoWire> Rtc;
-
-// ============================================
 // Network Components - Application IP Address
 // ============================================
 extern String appIpAddress;
@@ -61,6 +60,7 @@ extern SQLiteDb sampleDB;
 // ============================================
 extern NetworkManager networkManager;
 extern DisplayManager displayManager;
+extern RTCManager rtcManager;
 
 // ============================================
 // Application State Variables

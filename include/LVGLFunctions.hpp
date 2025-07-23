@@ -1,5 +1,6 @@
 #include <GlobalVariables.hpp>
 
+#include "Utils/constants.h"
 #include "Utils/stringConstants.h"
 #include "managers/SensorManager.h"
 #include "utils/timeUtils.h"
@@ -139,10 +140,11 @@ void turnFanOnFunc(lv_task_t *task)
 
 void config_time()
 {
-    if (WiFi.status() == WL_CONNECTED)
-    {
-        networkManager.updateDateTime();
-        Serial.println("Successfully updated time on RTC.");
+    // Use RTCManager's convenient syncWithNTP method instead of duplicating NTP client setup
+    bool success = rtcManager.syncWithNTP(StringConstants::NTP_SERVER, Constants::GMT_OFFSET_SEC);
+
+    if (!success) {
+        Serial.println("Time synchronization failed.");
     }
 }
 
@@ -273,9 +275,9 @@ void getSampleFunc(lv_task_t *task)
 
         dtostrf(humi, 10, 2, buffer);
         lv_label_set_text(labelHumiValue, strcat(buffer, "%"));
-        if (Rtc.GetIsRunning())
+        if (rtcManager.isRunning())
         {
-            lastSampleTimestamp = getMainTimestamp(Rtc);
+            lastSampleTimestamp = Utils::formatMainTimestamp(rtcManager.getCurrentDateTime());
             Serial.print("lastSampleTimestamp before saving to database: " + lastSampleTimestamp);
             mySDCard.save(averagedData, temp, humi, lastSampleTimestamp, &sampleDB, &Serial);
         } else {
@@ -536,16 +538,16 @@ void timesettings_save_btn(lv_obj_t *obj, lv_event_t event)
             String datet = lv_label_get_text(dateBtnLabel) + (String)lv_textarea_get_text(timeHour) + ":" + (String)lv_textarea_get_text(timeMinute);
             Serial.println(datet);
             RtcDateTime *dt = new RtcDateTime(atoi(datet.substring(6, 10).c_str()), atoi(datet.substring(3, 6).c_str()), atoi(datet.substring(0, 2).c_str()), datet.substring(10, 12).toDouble(), datet.substring(13, 15).toDouble(), 0);
-            Rtc.SetDateTime(*dt);
-            Rtc.SetIsRunning(true);
+            rtcManager.setDateTime(*dt);
+            rtcManager.setIsRunning(true);
         }
         if (dateChanged == true)
         {
-            RtcDateTime ori = Rtc.GetDateTime();
+            RtcDateTime ori = rtcManager.getCurrentDateTime();
             String date = lv_label_get_text(dateBtnLabel);
             RtcDateTime *dt = new RtcDateTime(atoi(date.substring(6).c_str()), atoi(date.substring(3, 6).c_str()), atoi(date.substring(0, 2).c_str()), ori.Hour(), ori.Minute(), ori.Second());
-            Rtc.SetDateTime(*dt);
-            Rtc.SetIsRunning(true);
+            rtcManager.setDateTime(*dt);
+            rtcManager.setIsRunning(true);
         }
         lv_disp_load_scr(mainScr);
         inTimeSettings = false;

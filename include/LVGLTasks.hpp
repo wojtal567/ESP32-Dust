@@ -73,20 +73,21 @@ void fetchLastRecordAndSynchronize(lv_task_t *task)
 void dateTimeFunc(lv_task_t *task)
 {
 
-    if (Rtc.GetIsRunning())
-    {
-        lv_label_set_text(dateAndTimeAtBar, getMainTimestamp(Rtc).c_str());
-        lv_label_set_text(labelTimeLock, getTime(Rtc).c_str());
-        lv_label_set_text(labelDateLock, getDate(Rtc).c_str());
+    if (rtcManager.isRunning()) {
+        lv_label_set_text(dateAndTimeAtBar,
+                          Utils::formatMainTimestamp(rtcManager.getCurrentDateTime()).c_str());
+        lv_label_set_text(labelTimeLock, rtcManager.getTime().c_str());
+        lv_label_set_text(labelDateLock, rtcManager.getDate().c_str());
         if (inTimeSettings == false)
         {
-            lv_spinbox_set_value(timeHour, getTime(Rtc).substring(0, getTime(Rtc).indexOf(":")).toInt());
-            lv_spinbox_set_value(timeMinute, getTime(Rtc).substring(3, 5).toInt());
-            lv_label_set_text(dateBtnLabel, getDate(Rtc).c_str());
+            lv_spinbox_set_value(timeHour,
+                                 rtcManager.getTime()
+                                     .substring(0, rtcManager.getTime().indexOf(":"))
+                                     .toInt());
+            lv_spinbox_set_value(timeMinute, rtcManager.getTime().substring(3, 5).toInt());
+            lv_label_set_text(dateBtnLabel, rtcManager.getDate().c_str());
         }
-    }
-    else
-    {
+    } else {
         if (inTimeSettings == false)
             lv_label_set_text(dateBtnLabel, "01.01.2021");
         if (isDefaultTimeOnDisplay)

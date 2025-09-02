@@ -3,6 +3,7 @@
 #include "Utils/constants.h"
 #include "Utils/stringConstants.h"
 #include "managers/SensorManager.h"
+#include "managers/stylemanager.h"
 #include "utils/timeUtils.h"
 
 void set_spinbox_digit_format(lv_obj_t *spinbox, int32_t range_min, int32_t range_max, int offset)
@@ -311,12 +312,11 @@ void drawParticlesIndicator()
     {
         dividingLines[i] = lv_line_create(mainScr, NULL);
         lv_line_set_points(dividingLines[i], Constants::DIVIDING_LINES_POINTS[i], 2);
-        lv_obj_add_style(dividingLines[i], LV_LINE_PART_MAIN, &lineStyle);
+        StyleManager::applyStandardLine(dividingLines[i]);
 
         labelParticleSizeum[i] = lv_label_create(mainScr, NULL);
         lv_label_set_text(labelParticleSizeum[i], StringConstants::PARTICLES_SIZE[i].c_str());
-        lv_obj_add_style(labelParticleSizeum[i], LV_LABEL_PART_MAIN, &font12Style);
-        lv_obj_add_style(labelParticleSizeum[i], LV_LABEL_PART_MAIN, &whiteFontStyle);
+        StyleManager::applyFont12White(labelParticleSizeum[i]);
         lv_obj_set_pos(labelParticleSizeum[i], Constants::LABEL_PARTICLE_SIZE_POS_X[i], 190); // 12
     }
 
@@ -324,8 +324,8 @@ void drawParticlesIndicator()
     {
 
         contParticlesNumber[j] = lv_cont_create(mainScr, NULL);
-        lv_obj_add_style(contParticlesNumber[j], LV_OBJ_PART_MAIN, &containerStyle);
-        lv_obj_set_style_local_border_opa(contParticlesNumber[j], LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_OPA_0);
+        StyleManager::applyStandardContainer(contParticlesNumber[j]);
+        StyleManager::applyBorderlessContainer(contParticlesNumber[j]);
         lv_obj_set_click(contParticlesNumber[j], false);
         lv_obj_set_size(contParticlesNumber[j], 47, 14);
         labelParticlesNumber[j] = lv_label_create(contParticlesNumber[j], NULL);
@@ -333,14 +333,13 @@ void drawParticlesIndicator()
         lv_label_set_align(labelParticlesNumber[j], LV_LABEL_ALIGN_CENTER);
         lv_obj_set_auto_realign(labelParticlesNumber[j], true);
         lv_label_set_text(labelParticlesNumber[j], "-");
-        lv_obj_add_style(labelParticlesNumber[j], LV_LABEL_PART_MAIN, &font12Style);
-        lv_obj_add_style(labelParticlesNumber[j], LV_LABEL_PART_MAIN, &whiteFontStyle);
+        StyleManager::applyFont12White(labelParticlesNumber[j]);
     }
 
     mainLine = lv_line_create(mainScr, NULL);
     lv_line_set_points(mainLine, Constants::MAIN_LINE_POINTS, 2);
     lv_line_set_auto_size(mainLine, true);
-    lv_obj_add_style(mainLine, LV_LINE_PART_MAIN, &lineStyle);
+    StyleManager::applyStandardLine(mainLine);
 }
 
 static void kb_cb(lv_obj_t *kb, lv_event_t event)

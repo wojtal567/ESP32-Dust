@@ -88,26 +88,6 @@ extern float temp, humi, pm25Aqi;
 extern int currentSampleNumber;
 
 // ============================================
-// LVGL Styles (to be migrated to DisplayManager/UIManager)
-// ============================================
-//Basic container with white border and transparent background
-static lv_style_t containerStyle;
-
-//Different font sizes using lvgl styles
-static lv_style_t whiteFontStyle;
-static lv_style_t font12Style;
-static lv_style_t font16Style;
-static lv_style_t font20Style;
-static lv_style_t font22Style;
-
-//Additional styles with initalization functions
-static lv_style_t warningStyle;
-static lv_style_t whiteButtonStyle;
-static lv_style_t lineStyle;
-static lv_style_t transparentBackgroundStyle;
-static lv_style_t borderlessStyle;
-static lv_style_t hugeFontStyle;
-// ============================================
 // LVGL UI Objects - Main Screen
 // ============================================
 //Main screen objects declaration

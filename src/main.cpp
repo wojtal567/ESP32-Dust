@@ -92,8 +92,8 @@ void setup()
                               Constants::SCREEN_HEIGHT,
                               Constants::TOUCH_CALIBRATION);
 
-    // Styles initialization function
-    stylesInits();
+    // Initialize StyleManager for centralized styling
+    StyleManager::initialize();
 
     mainScr = lv_cont_create(NULL, NULL);
     lv_obj_set_style_local_bg_color(mainScr, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_BLACK);

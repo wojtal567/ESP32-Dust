@@ -28,6 +28,8 @@ SQLiteDb sampleDB("/sd/database.db", "/database.db", "samples");
 NetworkManager networkManager(&mySDCard);
 DisplayManager displayManager;
 RTCManager rtcManager;
+ScreenManager screenManager;
+MainScreen *mainScreen = nullptr;
 
 // ============================================
 // Application State Variables
@@ -44,53 +46,7 @@ int currentSampleNumber = 1;
 // Legacy variables still used in main.cpp
 String lastSampleTimestamp;
 bool inTimeSettings = false;
-bool isDefaultTimeOnDisplay = false;
 float temp, humi, pm25Aqi;
-
-// ============================================
-// LVGL UI Objects - Main Screen
-// ============================================
-lv_obj_t *mainScr = nullptr;
-lv_obj_t *wifiStatusAtMain = nullptr;
-lv_obj_t *sdStatusAtMain = nullptr;
-lv_obj_t *wifiStatusAtMainWarning = nullptr;
-lv_obj_t *sdStatusAtMainWarning = nullptr;
-lv_obj_t *dateAndTimeAtBar = nullptr;
-lv_obj_t *contTemp = nullptr;
-lv_obj_t *contHumi = nullptr;
-lv_obj_t *contPM10 = nullptr;
-lv_obj_t *contPM25 = nullptr;
-lv_obj_t *contPM100 = nullptr;
-lv_obj_t *contAQI = nullptr;
-lv_obj_t *contAQIColorBar = nullptr;
-lv_obj_t *labelLockButton = nullptr;
-lv_obj_t *lockButton = nullptr;
-lv_obj_t *labelSetButton = nullptr;
-lv_obj_t *setButton = nullptr;
-lv_obj_t *labelTemp = nullptr;
-lv_obj_t *labelHumi = nullptr;
-lv_obj_t *labelTempValue = nullptr;
-lv_obj_t *labelHumiValue = nullptr;
-lv_obj_t *labelPM10 = nullptr;
-lv_obj_t *labelPM10UpperIndex = nullptr;
-lv_obj_t *labelPM25 = nullptr;
-lv_obj_t *labelPM25UpperIndex = nullptr;
-lv_obj_t *labelPM100 = nullptr;
-lv_obj_t *labelPM100UpperIndex = nullptr;
-lv_obj_t *labelPM10Data = nullptr;
-lv_obj_t *labelPM25Data = nullptr;
-lv_obj_t *labelPM100Data = nullptr;
-lv_obj_t *labelAQI = nullptr;
-lv_obj_t *labelAQIColorBar = nullptr;
-lv_obj_t *labelParticleSizeum[7] = {nullptr};
-lv_obj_t *labelParticlesNumber[6] = {nullptr};
-lv_obj_t *contParticlesNumber[6] = {nullptr};
-lv_obj_t *ledAtMain = nullptr;
-
-// LVGL UI runtime objects
-lv_obj_t *mainLine = nullptr;
-lv_obj_t *dividingLines[7] = {nullptr};
-lv_color_t airQualityColors[6] = {LV_COLOR_GREEN, LV_COLOR_GREEN, LV_COLOR_YELLOW, LV_COLOR_ORANGE, LV_COLOR_RED, LV_COLOR_RED};
 
 // ============================================
 // LVGL UI Objects - WiFi Screen

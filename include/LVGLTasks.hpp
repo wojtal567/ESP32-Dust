@@ -74,8 +74,8 @@ void dateTimeFunc(lv_task_t *task)
 {
 
     if (rtcManager.isRunning()) {
-        lv_label_set_text(dateAndTimeAtBar,
-                          Utils::formatMainTimestamp(rtcManager.getCurrentDateTime()).c_str());
+        mainScreen->updateDateTimeLabel(
+            Utils::formatMainTimestamp(rtcManager.getCurrentDateTime()).c_str());
         lv_label_set_text(labelTimeLock, rtcManager.getTime().c_str());
         lv_label_set_text(labelDateLock, rtcManager.getDate().c_str());
         if (inTimeSettings == false)
@@ -90,40 +90,34 @@ void dateTimeFunc(lv_task_t *task)
     } else {
         if (inTimeSettings == false)
             lv_label_set_text(dateBtnLabel, "01.01.2021");
-        if (isDefaultTimeOnDisplay)
-            lv_label_set_text(dateAndTimeAtBar, "");
-        else
-        {
-            lv_label_set_text(dateAndTimeAtBar, "01.01.2021 00:00:00");
-        }
-        isDefaultTimeOnDisplay = !isDefaultTimeOnDisplay;
+
+        mainScreen->updateDateTimeLabel("\0");
     }
 }
 
 void statusFunc(lv_task_t *task)
 {
-    if (networkManager.isConnected()) {
+    const bool isNetworkConnected = networkManager.isConnected();
+    mainScreen->updateWiFiStatus(isNetworkConnected);
+    if (isNetworkConnected) {
         lv_obj_set_hidden(wifiStatusAtLockWarning, true);
-        lv_obj_set_hidden(wifiStatusAtMainWarning, true);
         lv_label_set_text(infoWifiAddressLabel, networkManager.getIpAddress().c_str());
     } else {
         lv_obj_set_hidden(wifiStatusAtLockWarning, false);
-        lv_obj_set_hidden(wifiStatusAtMainWarning, false);
         lv_label_set_text(infoWifiAddressLabel, "No WiFi connection");
     }
 
-    if (mySDCard.start(&sampleDB, &Serial2))
-    {
+    const bool isSDCardConnected = mySDCard.start(&sampleDB, &Serial2);
+
+    if (isSDCardConnected) {
         lv_obj_set_hidden(sdStatusAtLockWarning, true);
-        lv_obj_set_hidden(sdStatusAtMainWarning, true);
         if (!networkManager.isConnected() && (config.ssid != "" && config.password != "")) {
             networkManager.setCredentials(config.ssid.c_str(), config.password.c_str());
             networkManager.connect();
         }
-    }
-    else
-    {
+    } else {
         lv_obj_set_hidden(sdStatusAtLockWarning, false);
-        lv_obj_set_hidden(sdStatusAtMainWarning, false);
     }
+
+    mainScreen->updateSDStatus(isSDCardConnected);
 }

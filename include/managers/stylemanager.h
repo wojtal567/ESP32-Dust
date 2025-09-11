@@ -22,6 +22,7 @@ public:
     static void applyFont20(lv_obj_t *label);
     static void applyFont22(lv_obj_t *label);
     static void applyHugeFont(lv_obj_t *label);
+    static void applyLockFont(lv_obj_t *label);
 
     static void applyFont12White(lv_obj_t *label);
     static void applyFont16White(lv_obj_t *label);
@@ -29,6 +30,10 @@ public:
     static void applyFont22White(lv_obj_t *label);
 
     static void applyStandardLine(lv_obj_t *line);
+
+    // Font access methods
+    static const lv_font_t* getHugeSymbolsFont();
+    static const lv_font_t* getMonte16LockFont();
 
     static void cleanup();
 
@@ -43,6 +48,7 @@ private:
     static lv_style_t m_font20;
     static lv_style_t m_font22;
     static lv_style_t m_hugeFont;
+    static lv_style_t m_lockFont;
     static lv_style_t m_container;
     static lv_style_t m_whiteButton;
     static lv_style_t m_line;

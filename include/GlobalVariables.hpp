@@ -33,15 +33,10 @@
 // ============================================
 // Project Includes - Utilities
 // ============================================
+#include "screens/mainscreen.h"
+#include "screens/screenmanager.h"
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
-
-// ============================================
-// External Fonts
-// ============================================
-//Include additional font with lock and unlock symbol
-extern lv_font_t monte16lock;
-extern lv_font_t hugeSymbolsFont48;
 
 // ============================================
 // Network Components - Application IP Address
@@ -61,6 +56,8 @@ extern SQLiteDb sampleDB;
 extern NetworkManager networkManager;
 extern DisplayManager displayManager;
 extern RTCManager rtcManager;
+extern ScreenManager screenManager;
+extern MainScreen *mainScreen;
 
 // ============================================
 // Application State Variables
@@ -82,56 +79,10 @@ extern bool lockTimeChanged;
 extern bool samplingChanged;
 
 //Temperature, relative humidity and pm2.5 per ug/m3 variables
-extern float temp, humi, pm25Aqi;
+extern float temp, humi;
 
 // Runtime sampling state
 extern int currentSampleNumber;
-
-// ============================================
-// LVGL UI Objects - Main Screen
-// ============================================
-//Main screen objects declaration
-extern lv_obj_t *mainScr; // LVGL Object that represents main screen
-extern lv_obj_t *wifiStatusAtMain;
-extern lv_obj_t *sdStatusAtMain;
-extern lv_obj_t *wifiStatusAtMainWarning;
-extern lv_obj_t *sdStatusAtMainWarning;
-extern lv_obj_t *dateAndTimeAtBar;
-extern lv_obj_t *contTemp;
-extern lv_obj_t *contHumi;
-extern lv_obj_t *contPM10;
-extern lv_obj_t *contPM25;
-extern lv_obj_t *contPM100;
-extern lv_obj_t *contAQI;
-extern lv_obj_t *contAQIColorBar;
-extern lv_obj_t *labelLockButton;
-extern lv_obj_t *lockButton;
-extern lv_obj_t *labelSetButton;
-extern lv_obj_t *setButton;
-extern lv_obj_t *labelTemp;
-extern lv_obj_t *labelHumi;
-extern lv_obj_t *labelTempValue;
-extern lv_obj_t *labelHumiValue;
-extern lv_obj_t *labelPM10;
-extern lv_obj_t *labelPM10UpperIndex;
-extern lv_obj_t *labelPM25;
-extern lv_obj_t *labelPM25UpperIndex;
-extern lv_obj_t *labelPM100;
-extern lv_obj_t *labelPM100UpperIndex;
-extern lv_obj_t *labelPM10Data;
-extern lv_obj_t *labelPM25Data;
-extern lv_obj_t *labelPM100Data;
-extern lv_obj_t *labelAQI;
-extern lv_obj_t *labelAQIColorBar;
-extern lv_obj_t *labelParticleSizeum[7];
-extern lv_obj_t *labelParticlesNumber[6];
-extern lv_obj_t *contParticlesNumber[6];
-extern lv_obj_t *ledAtMain;
-
-// LVGL UI runtime objects
-extern lv_obj_t *mainLine;
-extern lv_obj_t *dividingLines[7];
-extern lv_color_t airQualityColors[6];
 
 // ============================================
 // LVGL UI Objects - WiFi Screen

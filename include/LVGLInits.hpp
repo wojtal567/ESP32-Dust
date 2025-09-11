@@ -130,115 +130,6 @@ void infoScreen()
     configLabel = my_lv_label_create(infoScr, NULL, 5, 70, "");
 }
 
-void mainScreen()
-{
-    setButton = my_lv_btn_create(mainScr, NULL, 16, 18, 32, 7, setButton_task);
-    labelSetButton = lv_label_create(setButton, NULL);
-    lv_label_set_text(labelSetButton, LV_SYMBOL_SETTINGS);
-    StyleManager::applyTransparentButton(setButton);
-
-    lockButton = my_lv_btn_create(mainScr, setButton, 14, 18, 95, 7, lockButton_task);
-    labelLockButton = lv_label_create(lockButton, NULL);
-    lv_obj_set_style_local_text_font(lockButton, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, &monte16lock);
-    lv_label_set_text(labelLockButton, StringConstants::LOCK_SYMBOL);
-
-    wifiStatusAtMain = my_lv_label_create(mainScr, NULL, 52, 7, LV_SYMBOL_WIFI, LV_COLOR_WHITE);
-    wifiStatusAtMainWarning = my_lv_label_create(wifiStatusAtMain, NULL, 6, 6, LV_SYMBOL_CLOSE, LV_COLOR_RED);
-    StyleManager::applyTransparentContainer(wifiStatusAtMainWarning);
-    StyleManager::applyFont12(wifiStatusAtMainWarning);
-
-    sdStatusAtMain = my_lv_label_create(mainScr, wifiStatusAtMain, 77, 7, LV_SYMBOL_SD_CARD, LV_COLOR_WHITE);
-    sdStatusAtMainWarning = my_lv_label_create(sdStatusAtMain, wifiStatusAtMainWarning, 2, 6, LV_SYMBOL_CLOSE, LV_COLOR_RED);
-
-    dateAndTimeAtBar = my_lv_label_create(mainScr, NULL, 157, 7, "");
-
-    contPM25 = my_lv_cont_create(mainScr, NULL, 180, 90, 10, 30);
-    lv_obj_set_click(contPM25, false);
-    StyleManager::applyStandardContainer(contPM25);
-
-    contTemp = my_lv_cont_create(mainScr, contPM25, 122, 46, 188, 30);
-    lv_obj_set_click(contTemp, false);
-
-    contHumi = my_lv_cont_create(mainScr, contPM25, 122, 46, 188, 74);
-    lv_obj_set_click(contHumi, false);
-
-    contPM10 = my_lv_cont_create(mainScr, NULL, 91, 62, 10, 118);
-    lv_obj_set_click(contPM10, false);
-    StyleManager::applyStandardContainer(contPM10);
-    StyleManager::applyFont12(contPM10);
-
-    contPM100 = my_lv_cont_create(mainScr, contPM10, 91, 62, 99, 118);
-    lv_obj_set_click(contPM100, false);
-
-    contAQI = my_lv_cont_create(mainScr, contPM10, 122, 62, 188, 118);
-    lv_obj_set_click(contAQI, false);
-
-    contAQIColorBar = my_lv_cont_create(contAQI, contAQI, 92, 24, 15, 25);
-    lv_obj_set_style_local_bg_opa(contAQIColorBar, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_OPA_70);
-    lv_obj_set_click(contAQIColorBar, false);
-    
-    labelTemp = my_lv_label_create(contTemp, NULL, 5, 3, "Temp");
-
-    labelTempValue = my_lv_label_create(contTemp, NULL, 16, 22, "         -");
-    StyleManager::applyFont20(labelTempValue);
-    lv_label_set_align(labelTempValue, LV_LABEL_ALIGN_LEFT);
-
-    labelHumi = my_lv_label_create(contHumi, NULL, 5, 3, "RH");
-
-    labelHumiValue = my_lv_label_create(contHumi, NULL, 16, 22, "         -");
-    StyleManager::applyFont20(labelHumiValue);
-
-    labelPM10 = my_lv_label_create(contPM10, NULL, 5, 5, "PM 1.0 ug/m");
-
-    labelPM10UpperIndex = my_lv_label_create(contPM10, NULL, 80, 3, "3");
-
-    labelPM25 = my_lv_label_create(contPM25, NULL, 5, 5, "PM 2.5                ug/m");
-
-    labelPM25UpperIndex = my_lv_label_create(contPM25, NULL, 167, 3 , "3");
-    StyleManager::applyFont12(labelPM25UpperIndex);
-
-    labelPM100 = my_lv_label_create(contPM100, NULL, 5, 5, "PM 10 ug/m");
-
-    labelPM100UpperIndex = my_lv_label_create(contPM100, NULL, 77, 3, "3");
-    StyleManager::applyFont12(labelPM100UpperIndex);
-
-    labelPM10Data = lv_label_create(contPM10, NULL);
-    StyleManager::applyFont22White(labelPM10Data);
-    lv_obj_set_auto_realign(labelPM10Data, true);
-    lv_obj_align(labelPM10Data, NULL, LV_ALIGN_CENTER, 0, 5);
-    lv_label_set_text(labelPM10Data, "-");
-
-    labelPM25Data = lv_label_create(contPM25, NULL);
-    StyleManager::applyFont22White(labelPM25Data);
-    lv_obj_set_auto_realign(labelPM25Data, true);
-    lv_obj_align(labelPM25Data, NULL, LV_ALIGN_CENTER, 0, 10);
-    lv_label_set_text(labelPM25Data, "-");
-
-    labelPM100Data = lv_label_create(contPM100, NULL);
-    StyleManager::applyFont22White(labelPM100Data);
-    lv_obj_set_auto_realign(labelPM100Data, true);
-    lv_obj_align(labelPM100Data, NULL, LV_ALIGN_CENTER, 0, 5);
-    lv_label_set_text(labelPM100Data, "-");
-
-    labelAQI = my_lv_label_create(contAQI, NULL, 5, 5, "Air Quality  PM 2.5");
-
-    labelAQIColorBar = lv_label_create(contAQIColorBar, NULL);
-    lv_obj_set_auto_realign(labelAQIColorBar, true);
-    lv_obj_align(labelAQIColorBar, NULL, LV_ALIGN_CENTER, 0, 0);
-    lv_label_set_text(labelAQIColorBar, "-");
-    StyleManager::applyWhiteFont(labelAQIColorBar);
-
-    ledAtMain = lv_led_create(mainScr, NULL);
-    lv_obj_set_size(ledAtMain, 13, 13);
-    lv_obj_set_pos(ledAtMain, 13, 10);
-    lv_led_set_bright(ledAtMain, 200);
-    lv_obj_set_style_local_bg_color(ledAtMain, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_YELLOW);
-    lv_obj_set_style_local_shadow_color(ledAtMain, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_YELLOW);
-    lv_obj_set_style_local_border_opa(ledAtMain, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_OPA_0);
-    //Function that draws lines and st text above those
-    drawParticlesIndicator();
-}
-
 void samplingsettingsScreen()
 {
     backSamplingSettingsBtn = my_lv_btn_create(samplingSettingsScr, backSettingsBtn, 30, 15, 14, 10, sampling_settings_back_btn); 
@@ -409,9 +300,12 @@ void lockScreen()
     StyleManager::applyBorderlessContainer(contDateTimeAtLock);
     StyleManager::applyWhiteFont(contDateTimeAtLock);
 
-    unlockButton = lv_btn_create(lockScr, setButton);//TODO BRAK POS
+    unlockButton = lv_btn_create(lockScr, nullptr); // setButton);//TODO BRAK POS
     labelUnlockButton = lv_label_create(unlockButton, NULL);
-    lv_obj_set_style_local_text_font(unlockButton, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, &monte16lock);
+    lv_obj_set_style_local_text_font(unlockButton,
+                                     LV_OBJ_PART_MAIN,
+                                     LV_STATE_DEFAULT,
+                                     StyleManager::getMonte16LockFont());
     lv_obj_align(unlockButton, NULL, LV_ALIGN_IN_BOTTOM_MID, 0, -25);
     lv_label_set_text(labelUnlockButton, StringConstants::UNLOCK_SYMBOL);
     lv_btn_set_fit(unlockButton, LV_FIT_TIGHT);
@@ -426,12 +320,17 @@ void lockScreen()
     lv_label_set_text(labelDateLock, "");
     lv_obj_align(labelDateLock, NULL, LV_ALIGN_CENTER, 0, 0);
 
-    wifiStatusAtLock = lv_label_create(lockScr, wifiStatusAtMain);
+    wifiStatusAtLock = lv_label_create(lockScr, nullptr); // wifiStatusAtMain);
     lv_obj_align(wifiStatusAtLock, NULL, LV_ALIGN_CENTER, -36, 10);
     lv_label_set_text(wifiStatusAtLock, LV_SYMBOL_WIFI);
-    wifiStatusAtLockWarning = my_lv_label_create(wifiStatusAtLock,  wifiStatusAtMainWarning, 6, 6, LV_SYMBOL_CLOSE, LV_COLOR_RED);
+    wifiStatusAtLockWarning = my_lv_label_create(wifiStatusAtLock,
+                                                 nullptr, // m_wifiStatusWarning from MainScreen);
+                                                 6,
+                                                 6,
+                                                 LV_SYMBOL_CLOSE,
+                                                 LV_COLOR_RED);
 
-    sdStatusAtLock = lv_label_create(lockScr, sdStatusAtMain);
+    sdStatusAtLock = lv_label_create(lockScr, nullptr); // m_sdStatus from MainScreen);
     lv_obj_align(sdStatusAtLock, NULL, LV_ALIGN_CENTER, 36, 10);
     lv_label_set_text(sdStatusAtLock, LV_SYMBOL_SD_CARD);
     sdStatusAtLockWarning = my_lv_label_create(sdStatusAtLock, wifiStatusAtLockWarning, 2, 6, LV_SYMBOL_CLOSE, LV_COLOR_RED);

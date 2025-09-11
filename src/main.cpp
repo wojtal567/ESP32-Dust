@@ -12,24 +12,20 @@ void setAppIp()
     Serial.println(postBody);
     DynamicJsonDocument doc(512);
     DeserializationError error = deserializeJson(doc, postBody);
-    if (error)
-    {
+    if (error) {
         Serial.print(F(error.c_str()));
 
-        server.send(400, F("text/html"),
+        server.send(400,
+                    F("text/html"),
                     "Error while parsing json body! <br>" + (String)error.c_str());
-    }
-    else
-    {
+    } else {
         JsonObject postObj = doc.as<JsonObject>();
 
         Serial.print(F("HTTP Method: "));
         Serial.println(server.method());
 
-        if (server.method() == HTTP_POST)
-        {
-            if (postObj.containsKey("ip"))
-            {
+        if (server.method() == HTTP_POST) {
+            if (postObj.containsKey("ip")) {
 
                 appIpAddress = postObj["ip"].as<String>();
 
@@ -40,9 +36,7 @@ void setAppIp()
                 lv_task_set_prio(getAppLastRecordAndSynchronize, LV_TASK_PRIO_MID);
 
                 server.send(201, F("application/json"), buf);
-            }
-            else
-            {
+            } else {
                 DynamicJsonDocument doc(512);
                 doc["status"] = "OK";
                 doc["message"] = F("No data found or incorrect!");
@@ -69,7 +63,10 @@ void restServerRouting()
 void handleNotFound()
 {
     WebServer &server = networkManager.getServer();
-    String message = "File Not Found \n\n" + (String) "URI: " + server.uri() + "\n Method: " + (server.method() == HTTP_GET) ? "GET" : "POST" + (String) "\n Arguments: " + server.args() + "\n";
+    String message = "File Not Found \n\n" + (String) "URI: " + server.uri()
+                             + "\n Method: " + (server.method() == HTTP_GET)
+                         ? "GET"
+                         : "POST" + (String) "\n Arguments: " + server.args() + "\n";
 
     for (uint8_t i = 0; i < server.args(); i++)
         message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
@@ -82,7 +79,10 @@ void setup()
     sqlite3_initialize();
     // Serial debug
     Serial.begin(Constants::DEBUG_SERIAL_BAUD);
-    Serial2.begin(Constants::PMS_SERIAL_BAUD, SERIAL_8N1, Constants::PMS_RX_PIN, Constants::PMS_TX_PIN);
+    Serial2.begin(Constants::PMS_SERIAL_BAUD,
+                  SERIAL_8N1,
+                  Constants::PMS_RX_PIN,
+                  Constants::PMS_TX_PIN);
 
     // Initialize sensors
     sensorManager.initialize(&Serial, &Serial2);
@@ -95,23 +95,27 @@ void setup()
     // Initialize StyleManager for centralized styling
     StyleManager::initialize();
 
-    mainScr = lv_cont_create(NULL, NULL);
-    lv_obj_set_style_local_bg_color(mainScr, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_BLACK);
+    // Create old-style screen containers for existing screens
     settingsScr = lv_cont_create(NULL, NULL);
     lv_obj_set_style_local_bg_color(settingsScr, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_BLACK);
     infoScr = lv_cont_create(NULL, NULL);
     lv_obj_set_style_local_bg_color(infoScr, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_BLACK);
     timeSettingsScr = lv_cont_create(NULL, NULL);
-    lv_obj_set_style_local_bg_color(timeSettingsScr, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_BLACK);
+    lv_obj_set_style_local_bg_color(timeSettingsScr,
+                                    LV_OBJ_PART_MAIN,
+                                    LV_STATE_DEFAULT,
+                                    LV_COLOR_BLACK);
     wifiScr = lv_cont_create(NULL, NULL);
     lv_obj_set_style_local_bg_color(wifiScr, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_BLACK);
     lockScr = lv_cont_create(NULL, NULL);
     lv_obj_set_style_local_bg_color(lockScr, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_BLACK);
     samplingSettingsScr = lv_cont_create(NULL, NULL);
-    lv_obj_set_style_local_bg_color(samplingSettingsScr, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_BLACK);
+    lv_obj_set_style_local_bg_color(samplingSettingsScr,
+                                    LV_OBJ_PART_MAIN,
+                                    LV_STATE_DEFAULT,
+                                    LV_COLOR_BLACK);
 
-    // Screens initialization function
-    mainScreen();
+    // Initialize other screens using old functions
     wifiScreen();
     lockScreen();
     settingsScreen();
@@ -119,7 +123,11 @@ void setup()
     timesettingsScreen();
     samplingsettingsScreen();
 
-    lv_disp_load_scr(mainScr);
+    mainScreen = new MainScreen();
+    mainScreen->initialize();
+
+    // Initialize ScreenManager with the new main screen
+    screenManager.initialize(mainScreen);
 
     networkManager.loadConfig(config, StringConstants::CONFIG_FILE_PATH);
     delay(1000);
@@ -138,8 +146,15 @@ void setup()
     set_spinbox_digit_format(measureAvPeriod, Constants::MIN_RANGE, Constants::MAX_RANGE, 0);
     set_spinbox_digit_format(turnFanOnTime, Constants::MIN_RANGE, Constants::MAX_RANGE, 0);
 
-    getSample = lv_task_create(getSampleFunc, (config.timeBetweenSavingSamples - (config.numberOfSamples - 1) * config.measurePeriod), LV_TASK_PRIO_HIGH, NULL);
-    turnFanOn = lv_task_create(turnFanOnFunc, config.timeBetweenSavingSamples - config.turnFanTime, LV_TASK_PRIO_HIGHEST, NULL);
+    getSample = lv_task_create(getSampleFunc,
+                               (config.timeBetweenSavingSamples
+                                - (config.numberOfSamples - 1) * config.measurePeriod),
+                               LV_TASK_PRIO_HIGH,
+                               NULL);
+    turnFanOn = lv_task_create(turnFanOnFunc,
+                               config.timeBetweenSavingSamples - config.turnFanTime,
+                               LV_TASK_PRIO_HIGHEST,
+                               NULL);
     inactiveTime = lv_task_create(inactive_screen, 1, LV_TASK_PRIO_HIGH, NULL);
     getAppLastRecordAndSynchronize = lv_task_create_basic();
     lv_task_set_cb(getAppLastRecordAndSynchronize, fetchLastRecordAndSynchronize);
@@ -162,9 +177,13 @@ void setup()
             server.onNotFound(handleNotFound);
             server.begin();
         } else
-            Serial.println("setup -> can't connect to Wi-Fi - probably no data or corrupted or wrong!");
+            Serial.println(
+                "setup -> can't connect to Wi-Fi - probably no data or corrupted or wrong!");
     }
     display_current_config();
+
+    screenManager.switchToScreen(BaseScreen::ScreenType::MAIN);
+
     delay(500);
 }
 

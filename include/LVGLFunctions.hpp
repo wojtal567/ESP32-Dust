@@ -170,24 +170,6 @@ bool isLastSampleSaved()
     }
 }
 
-void setAqiStateNColor()
-{
-    float aqi = Utils::calculatePM25AQI(pm25Aqi);
-
-    // determine the air quality category based on AQI value
-    int categoryIndex = (aqi <= 50) ? 0 : (aqi <= 100) ? 1 : (aqi <= 150) ? 2 : (aqi <= 200) ? 3 : (aqi <= 300) ? 4 : 5;
-
-    // map category index to the appropriate quality text
-    static const char *qualityTexts[] = {
-        StringConstants::AIR_QUALITY_EXCELLENT, StringConstants::AIR_QUALITY_GOOD,
-        StringConstants::AIR_QUALITY_MODERATE,  StringConstants::AIR_QUALITY_UNHEALTHY,
-        StringConstants::AIR_QUALITY_BAD,       StringConstants::AIR_QUALITY_HAZARDOUS};
-
-    lv_label_set_text(labelAQIColorBar, qualityTexts[categoryIndex]);
-    lv_obj_set_style_local_bg_color(contAQIColorBar, LV_CONT_PART_MAIN, LV_STATE_DEFAULT,
-                                    airQualityColors[categoryIndex]);
-}
-
 // Get single sample and set text
 void getSampleFunc(lv_task_t *task)
 {
@@ -225,7 +207,6 @@ void getSampleFunc(lv_task_t *task)
         }
     }
     if (currentSampleNumber == config.numberOfSamples) {
-        char buffer[7];
         // Calculate averages
         std::map<std::string, float> averagedData;
         for (const auto &pair : accumulatedData) {
@@ -240,44 +221,12 @@ void getSampleFunc(lv_task_t *task)
         accumulatedTemp = 0.0f;
         accumulatedHumi = 0.0f;
 
-        lv_task_set_period(getSample, (config.timeBetweenSavingSamples - (config.numberOfSamples - 1) * config.measurePeriod));
+        lv_task_set_period(getSample,
+                           (config.timeBetweenSavingSamples
+                            - (config.numberOfSamples - 1) * config.measurePeriod));
+        mainScreen->updateSensorData(temp, humi, averagedData);
 
-        itoa(averagedData["pm10_standard"], buffer, 10);
-        lv_label_set_text(labelPM10Data, buffer);
-
-        itoa(averagedData["pm25_standard"], buffer, 10);
-        pm25Aqi = averagedData["pm25_standard"];
-        lv_label_set_text(labelPM25Data, buffer);
-        setAqiStateNColor();
-
-        itoa(averagedData["pm100_standard"], buffer, 10);
-        lv_label_set_text(labelPM100Data, buffer);
-
-        itoa(averagedData["particles_03um"], buffer, 10);
-        lv_label_set_text(labelParticlesNumber[0], buffer);
-
-        itoa(averagedData["particles_05um"], buffer, 10);
-        lv_label_set_text(labelParticlesNumber[1], buffer);
-
-        itoa(averagedData["particles_10um"], buffer, 10);
-        lv_label_set_text(labelParticlesNumber[2], buffer);
-
-        itoa(averagedData["particles_25um"], buffer, 10);
-        lv_label_set_text(labelParticlesNumber[3], buffer);
-
-        itoa(averagedData["particles_50um"], buffer, 10);
-        lv_label_set_text(labelParticlesNumber[4], buffer);
-
-        itoa(averagedData["particles_100um"], buffer, 10);
-        lv_label_set_text(labelParticlesNumber[5], buffer);
-
-        dtostrf(temp, 10, 2, buffer);
-        lv_label_set_text(labelTempValue, strcat(buffer, "°C"));
-
-        dtostrf(humi, 10, 2, buffer);
-        lv_label_set_text(labelHumiValue, strcat(buffer, "%"));
-        if (rtcManager.isRunning())
-        {
+        if (rtcManager.isRunning()) {
             lastSampleTimestamp = Utils::formatMainTimestamp(rtcManager.getCurrentDateTime());
             Serial.print("lastSampleTimestamp before saving to database: " + lastSampleTimestamp);
             mySDCard.save(averagedData, temp, humi, lastSampleTimestamp, &sampleDB, &Serial);
@@ -288,58 +237,31 @@ void getSampleFunc(lv_task_t *task)
         lv_task_set_prio(turnFanOn, LV_TASK_PRIO_HIGHEST);
 
         sensorManager.sleepDustSensor();
-        if (isLastSampleSaved())
-        {
-            lv_obj_set_style_local_bg_color(ledAtLock, LV_LED_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_GREEN);
-            lv_obj_set_style_local_bg_color(ledAtMain, LV_LED_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_GREEN);
-            lv_obj_set_style_local_shadow_color(ledAtLock, LV_LED_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_GREEN);
-            lv_obj_set_style_local_shadow_color(ledAtMain, LV_LED_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_GREEN);
+
+        bool lastSampleSaved = isLastSampleSaved();
+        if (lastSampleSaved) {
+            lv_obj_set_style_local_bg_color(ledAtLock,
+                                            LV_LED_PART_MAIN,
+                                            LV_STATE_DEFAULT,
+                                            LV_COLOR_GREEN);
+            lv_obj_set_style_local_shadow_color(ledAtLock,
+                                                LV_LED_PART_MAIN,
+                                                LV_STATE_DEFAULT,
+                                                LV_COLOR_GREEN);
+
+        } else {
+            lv_obj_set_style_local_bg_color(ledAtLock,
+                                            LV_LED_PART_MAIN,
+                                            LV_STATE_DEFAULT,
+                                            LV_COLOR_RED);
+            lv_obj_set_style_local_shadow_color(ledAtLock,
+                                                LV_LED_PART_MAIN,
+                                                LV_STATE_DEFAULT,
+                                                LV_COLOR_RED);
         }
-        else
-        {
-            lv_obj_set_style_local_bg_color(ledAtLock, LV_LED_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_RED);
-            lv_obj_set_style_local_bg_color(ledAtMain, LV_LED_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_RED);
-            lv_obj_set_style_local_shadow_color(ledAtLock, LV_LED_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_RED);
-            lv_obj_set_style_local_shadow_color(ledAtMain, LV_LED_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_RED);
-        }
+
+        mainScreen->updateLedStatus(isLastSampleSaved);
     }
-}
-
-// Draw a line-like thing
-void drawParticlesIndicator()
-{
-    for (int i = 0; i < 7; i++)
-    {
-        dividingLines[i] = lv_line_create(mainScr, NULL);
-        lv_line_set_points(dividingLines[i], Constants::DIVIDING_LINES_POINTS[i], 2);
-        StyleManager::applyStandardLine(dividingLines[i]);
-
-        labelParticleSizeum[i] = lv_label_create(mainScr, NULL);
-        lv_label_set_text(labelParticleSizeum[i], StringConstants::PARTICLES_SIZE[i].c_str());
-        StyleManager::applyFont12White(labelParticleSizeum[i]);
-        lv_obj_set_pos(labelParticleSizeum[i], Constants::LABEL_PARTICLE_SIZE_POS_X[i], 190); // 12
-    }
-
-    for (int j = 0; j < 6; j++)
-    {
-
-        contParticlesNumber[j] = lv_cont_create(mainScr, NULL);
-        StyleManager::applyStandardContainer(contParticlesNumber[j]);
-        StyleManager::applyBorderlessContainer(contParticlesNumber[j]);
-        lv_obj_set_click(contParticlesNumber[j], false);
-        lv_obj_set_size(contParticlesNumber[j], 47, 14);
-        labelParticlesNumber[j] = lv_label_create(contParticlesNumber[j], NULL);
-        lv_obj_set_pos(contParticlesNumber[j], Constants::CONT_PARTICLE_NUMBER_POS_X[j], 215); // 20
-        lv_label_set_align(labelParticlesNumber[j], LV_LABEL_ALIGN_CENTER);
-        lv_obj_set_auto_realign(labelParticlesNumber[j], true);
-        lv_label_set_text(labelParticlesNumber[j], "-");
-        StyleManager::applyFont12White(labelParticlesNumber[j]);
-    }
-
-    mainLine = lv_line_create(mainScr, NULL);
-    lv_line_set_points(mainLine, Constants::MAIN_LINE_POINTS, 2);
-    lv_line_set_auto_size(mainLine, true);
-    StyleManager::applyStandardLine(mainLine);
 }
 
 static void kb_cb(lv_obj_t *kb, lv_event_t event)
@@ -405,7 +327,7 @@ static void btn_connect(lv_obj_t *obj, lv_event_t event)
         else {
             Serial.println("btn_connect -> can't connect. Probably you have entered wrong credentials.");
         }
-        lv_disp_load_scr(mainScr);
+        screenManager.switchToScreen(BaseScreen::ScreenType::MAIN);
         lv_textarea_set_text(ssidTA, "");
         lv_textarea_set_text(pwdTA, "");
     }
@@ -430,7 +352,7 @@ static void unlockButton_task(lv_obj_t *obj, lv_event_t event)
 {
     Serial.print(lv_btn_get_state(unlockButton));
     if (event == LV_EVENT_CLICKED)
-        lv_disp_load_scr(mainScr);
+        screenManager.switchToScreen(BaseScreen::ScreenType::MAIN);
 }
 
 // Exit from wifi settings button clicked
@@ -447,7 +369,7 @@ static void btn_cancel(lv_obj_t *obj, lv_event_t event)
 static void btn_settings_back(lv_obj_t *obj, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED)
-        lv_disp_load_scr(mainScr);
+        screenManager.switchToScreen(BaseScreen::ScreenType::MAIN);
 }
 
 static void WiFi_btn(lv_obj_t *obj, lv_event_t event)
@@ -548,7 +470,7 @@ void timesettings_save_btn(lv_obj_t *obj, lv_event_t event)
             rtcManager.setDateTime(*dt);
             rtcManager.setIsRunning(true);
         }
-        lv_disp_load_scr(mainScr);
+        screenManager.switchToScreen(BaseScreen::ScreenType::SETTINGS);
         inTimeSettings = false;
         timeChanged = false;
         dateChanged = false;
@@ -919,7 +841,7 @@ static void sampling_settings_save_btn(lv_obj_t *btn, lv_event_t event)
         turnFanOn = lv_task_create(turnFanOnFunc, config.timeBetweenSavingSamples - config.turnFanTime, LV_TASK_PRIO_HIGHEST, NULL);
         networkManager.saveConfig(config, StringConstants::CONFIG_FILE_PATH);
         networkManager.printConfig(StringConstants::CONFIG_FILE_PATH);
-        lv_scr_load(mainScr);
+        screenManager.switchToScreen(BaseScreen::ScreenType::MAIN);
         display_current_config();
     }
 }

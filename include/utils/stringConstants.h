@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Arduino.h>
+
 namespace StringConstants {
 // UI symbols
 constexpr const char *LOCK_SYMBOL = "\xEF\x80\xA3";

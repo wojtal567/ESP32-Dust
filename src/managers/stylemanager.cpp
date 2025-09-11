@@ -1,5 +1,8 @@
 #include "managers/stylemanager.h"
-#include "GlobalVariables.hpp"
+
+// Forward declarations of fonts
+extern lv_font_t hugeSymbolsFont48;
+extern lv_font_t monte16lock;
 
 // Static member initialization
 bool StyleManager::m_initialized = false;
@@ -13,6 +16,7 @@ lv_style_t StyleManager::m_font16;
 lv_style_t StyleManager::m_font20;
 lv_style_t StyleManager::m_font22;
 lv_style_t StyleManager::m_hugeFont;
+lv_style_t StyleManager::m_lockFont;
 lv_style_t StyleManager::m_container;
 lv_style_t StyleManager::m_whiteButton;
 lv_style_t StyleManager::m_line;
@@ -62,6 +66,9 @@ void StyleManager::initializeStyles()
 
     lv_style_init(&m_hugeFont);
     lv_style_set_text_font(&m_hugeFont, LV_STATE_DEFAULT, &hugeSymbolsFont48);
+
+    lv_style_init(&m_lockFont);
+    lv_style_set_text_font(&m_lockFont, LV_STATE_DEFAULT, &monte16lock);
 
     // Initialize container style
     lv_style_init(&m_container);
@@ -212,12 +219,30 @@ void StyleManager::applyFont22White(lv_obj_t *label)
     lv_obj_add_style(label, LV_LABEL_PART_MAIN, &m_whiteFont);
 }
 
+void StyleManager::applyLockFont(lv_obj_t *label)
+{
+    if (!m_initialized || !label)
+        return;
+
+    lv_obj_add_style(label, LV_OBJ_PART_MAIN, &m_lockFont);
+}
+
 void StyleManager::applyStandardLine(lv_obj_t *line)
 {
     if (!m_initialized || !line)
         return;
 
     lv_obj_add_style(line, LV_LINE_PART_MAIN, &m_line);
+}
+
+const lv_font_t* StyleManager::getHugeSymbolsFont()
+{
+    return &hugeSymbolsFont48;
+}
+
+const lv_font_t* StyleManager::getMonte16LockFont()
+{
+    return &monte16lock;
 }
 
 void StyleManager::cleanup()

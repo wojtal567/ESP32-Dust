@@ -25,6 +25,6 @@ constexpr const char *AIR_QUALITY_UNHEALTHY = "Unhealthy";
 constexpr const char *AIR_QUALITY_BAD = "Bad";
 constexpr const char *AIR_QUALITY_HAZARDOUS = "Hazardous";
 
-inline const String PARTICLES_SIZE[7] = {"0.0", "0.3", "0.5", "1.0", "2.5", "5.0", "10.0"};
+constexpr const char *PARTICLES_SIZE[7] = {"0.0", "0.3", "0.5", "1.0", "2.5", "5.0", "10.0"};
 
 } // namespace StringConstants

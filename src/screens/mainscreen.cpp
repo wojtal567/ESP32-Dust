@@ -140,9 +140,9 @@ void MainScreen::initialize()
         StyleManager::applyStandardLine(m_dividingLines[i]);
 
         m_particleSizeLabel[i] = lv_label_create(m_screenContainer, NULL);
-        lv_label_set_text(m_particleSizeLabel[i], StringConstants::PARTICLES_SIZE[i].c_str());
+        lv_label_set_text(m_particleSizeLabel[i], StringConstants::PARTICLES_SIZE[i]);
         StyleManager::applyFont12White(m_particleSizeLabel[i]);
-        lv_obj_set_pos(m_particleSizeLabel[i], Constants::LABEL_PARTICLE_SIZE_POS_X[i], 190); // 12
+        lv_obj_set_pos(m_particleSizeLabel[i], Constants::LABEL_PARTICLE_SIZE_POS_X[i], 190); 
     }
 
     for (int j = 0; j < PARTICLE_SIZE_COUNT - 1; j++) {

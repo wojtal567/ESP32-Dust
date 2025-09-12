@@ -7,6 +7,7 @@ NetworkManager::NetworkManager(MySD *sdCard)
     : sdCard_(sdCard)
     , m_server(80)
     , m_dateTimeClient(m_ntpUDP, StringConstants::NTP_SERVER, Constants::GMT_OFFSET_SEC)
+    , m_wifiTaskHandle(nullptr)
 {}
 
 bool NetworkManager::connect()
@@ -36,7 +37,46 @@ void NetworkManager::setCredentials(const String &ssid, const String &password)
 {
     m_ssid = ssid;
     m_password = password;
-    WiFi.begin(m_ssid.c_str(), m_password.c_str());
+}
+
+void NetworkManager::connectAsync(const String &ssid, const String &password)
+{
+    // Store credentials
+    m_ssid = ssid;
+    m_password = password;
+
+    // If already connecting, stop the previous task
+    if (m_wifiTaskHandle != nullptr) {
+        vTaskDelete(m_wifiTaskHandle);
+        m_wifiTaskHandle = nullptr;
+    }
+
+    // Create FreeRTOS task for WiFi connection
+    xTaskCreate(wifiConnectionTask, "WiFiConnection", 4096, this, 1, &m_wifiTaskHandle);
+}
+
+// Static task function that runs in separate thread
+void NetworkManager::wifiConnectionTask(void *parameter)
+{
+    NetworkManager *networkManager = static_cast<NetworkManager *>(parameter);
+
+    // Start WiFi connection
+    WiFi.begin(networkManager->m_ssid.c_str(), networkManager->m_password.c_str());
+
+    // Wait for connection with timeout
+    int attempts = 0;
+    const int maxAttempts = 20; // 10 seconds timeout (500ms * 20)
+
+    while (WiFi.status() != WL_CONNECTED && attempts < maxAttempts) {
+        vTaskDelay(500 / portTICK_PERIOD_MS); // Non-blocking delay
+        attempts++;
+    }
+
+    // Clean up task handle
+    networkManager->m_wifiTaskHandle = nullptr;
+
+    // Delete this task
+    vTaskDelete(NULL);
 }
 
 WebServer &NetworkManager::getServer()

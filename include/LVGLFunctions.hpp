@@ -264,75 +264,6 @@ void getSampleFunc(lv_task_t *task)
     }
 }
 
-static void kb_cb(lv_obj_t *kb, lv_event_t event)
-{
-    if (event != LV_EVENT_CANCEL)
-    {
-        lv_keyboard_def_event_cb(kb, event);
-    }
-}
-
-static void ta_event_cb(lv_obj_t *ta, lv_event_t event)
-{
-    if (event == LV_EVENT_CLICKED)
-    {
-        if (ta == ssidTA)
-        {
-            lv_textarea_set_cursor_hidden(ssidTA, false);
-            lv_textarea_set_cursor_hidden(pwdTA, true);
-        }
-        if (ta == pwdTA)
-        {
-            lv_textarea_set_cursor_hidden(pwdTA, false);
-            lv_textarea_set_cursor_hidden(ssidTA, true);
-        }
-
-        if (keyboard == NULL)
-        {
-            keyboard = lv_keyboard_create(lv_scr_act(), NULL);
-            lv_obj_set_size(keyboard, LV_HOR_RES, LV_VER_RES / 2);
-            lv_obj_set_event_cb(keyboard, kb_cb);
-            lv_keyboard_set_textarea(keyboard, ta);
-        }
-        else
-        {
-            lv_keyboard_set_textarea(keyboard, ta);
-        }
-    }
-}
-
-static void btn_connect(lv_obj_t *obj, lv_event_t event)
-{
-    if (event == LV_EVENT_CLICKED
-        && ((lv_textarea_get_text(ssidTA) != NULL && lv_textarea_get_text(ssidTA)[0] != '\0')
-            || (lv_textarea_get_text(pwdTA) != NULL && lv_textarea_get_text(pwdTA)[0] != '\0'))) {
-        String ssid = lv_textarea_get_text(ssidTA);
-        String pwd = lv_textarea_get_text(pwdTA);
-
-        config.ssid = ssid.c_str();
-        config.password = pwd.c_str();
-
-        networkManager.setCredentials(config.ssid.c_str(), config.password.c_str());
-        Serial.println(config.ssid.c_str());
-        networkManager.setCredentials(config.ssid.c_str(), config.password.c_str());
-
-        networkManager.saveConfig(config, StringConstants::CONFIG_FILE_PATH);
-
-        networkManager.printConfig(StringConstants::CONFIG_FILE_PATH);
-        bool connected = networkManager.connect();
-        if (connected) {
-            Serial.println("btn_connect -> connected to Wi-Fi! IP: "
-                           + networkManager.getIpAddress());
-        }
-        else {
-            Serial.println("btn_connect -> can't connect. Probably you have entered wrong credentials.");
-        }
-        screenManager.switchToScreen(BaseScreen::ScreenType::MAIN);
-        lv_textarea_set_text(ssidTA, "");
-        lv_textarea_set_text(pwdTA, "");
-    }
-}
-
 // Settings button clicked
 static void setButton_task(lv_obj_t *obj, lv_event_t event)
 {
@@ -355,17 +286,6 @@ static void unlockButton_task(lv_obj_t *obj, lv_event_t event)
         screenManager.switchToScreen(BaseScreen::ScreenType::MAIN);
 }
 
-// Exit from wifi settings button clicked
-static void btn_cancel(lv_obj_t *obj, lv_event_t event)
-{
-    if (event == LV_EVENT_CLICKED)
-    {
-        lv_disp_load_scr(settingsScr);
-        lv_textarea_set_text(ssidTA, "");
-        lv_textarea_set_text(pwdTA, "");
-    }
-}
-
 static void btn_settings_back(lv_obj_t *obj, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED)
@@ -376,7 +296,7 @@ static void WiFi_btn(lv_obj_t *obj, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED)
     {
-        lv_scr_load(wifiScr);
+        screenManager.switchToScreen(BaseScreen::ScreenType::WIFI);
     }
 }
 
@@ -742,26 +662,6 @@ static void date_button_func(lv_obj_t *btn, lv_event_t event)
         today.day = atoi(now.substring(0, 2).c_str());
         lv_calendar_set_today_date(calendar, &today);
         lv_calendar_set_showed_date(calendar, &today);
-    }
-}
-
-static void showHideBtn_func(lv_obj_t *btn, lv_event_t event)
-{
-    if (event == LV_EVENT_CLICKED)
-    {
-        if (lv_textarea_get_pwd_mode(pwdTA))
-        {
-            lv_textarea_set_pwd_mode(pwdTA, false);
-            lv_label_set_text(showHideBtnLabel, LV_SYMBOL_EYE_CLOSE);
-        }
-        else
-        {
-            lv_textarea_set_pwd_mode(pwdTA, true);
-            lv_textarea_set_pwd_show_time(pwdTA, 1);
-            lv_textarea_set_text(pwdTA, lv_textarea_get_text(pwdTA));
-            lv_textarea_set_pwd_show_time(pwdTA, 5000);
-            lv_label_set_text(showHideBtnLabel, LV_SYMBOL_EYE_OPEN);
-        }
     }
 }
 

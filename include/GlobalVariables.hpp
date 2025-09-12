@@ -35,6 +35,7 @@
 // ============================================
 #include "screens/mainscreen.h"
 #include "screens/screenmanager.h"
+#include "screens/wifiscreen.h"
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
 
@@ -58,6 +59,7 @@ extern DisplayManager displayManager;
 extern RTCManager rtcManager;
 extern ScreenManager screenManager;
 extern MainScreen *mainScreen;
+extern WifiScreen *wifiScreen;
 
 // ============================================
 // Application State Variables
@@ -83,23 +85,6 @@ extern float temp, humi;
 
 // Runtime sampling state
 extern int currentSampleNumber;
-
-// ============================================
-// LVGL UI Objects - WiFi Screen
-// ============================================
-extern lv_obj_t *wifiLabelAtBar;
-extern lv_obj_t *wifiScr;
-extern lv_obj_t *keyboard;
-extern lv_obj_t *ssidTA;
-extern lv_obj_t *pwdTA;
-extern lv_obj_t *ssidLabel;
-extern lv_obj_t *pwdLabel;
-extern lv_obj_t *applyBtn;
-extern lv_obj_t *applyLabel;
-extern lv_obj_t *cancelBtn;
-extern lv_obj_t *cancelLabel;
-extern lv_obj_t *showHideBtn;
-extern lv_obj_t *showHideBtnLabel;
 
 // ============================================
 // LVGL UI Objects - Info Screen

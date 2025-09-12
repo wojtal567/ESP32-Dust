@@ -242,53 +242,6 @@ void samplingsettingsScreen()
     lv_obj_set_style_local_value_str(turnFanOnTimeDecrement, LV_BTN_PART_MAIN, LV_STATE_DEFAULT, LV_SYMBOL_MINUS);
 }
 
-void wifiScreen()
-{
-    cancelBtn = my_lv_btn_create(wifiScr, backSettingsBtn, 30, 15, 14, 10, btn_cancel);
-    cancelLabel = lv_label_create(cancelBtn, NULL);
-    lv_label_set_text(cancelLabel, LV_SYMBOL_LEFT);
-    StyleManager::applyTransparentButton(cancelBtn);
-    StyleManager::applyWhiteFont(cancelBtn);
-
-    wifiLabelAtBar = my_lv_label_create(wifiScr, NULL, 201, 10, "WiFi settings");
-
-    ssidLabel = my_lv_label_create(wifiScr, NULL, 5, 53, "SSID: ");
-   
-    ssidTA = lv_textarea_create(wifiScr, NULL);
-    lv_textarea_set_text(ssidTA, "");
-    lv_textarea_set_pwd_mode(ssidTA, false);
-    lv_textarea_set_one_line(ssidTA, true);    
-    lv_obj_set_event_cb(ssidTA, ta_event_cb);
-    lv_textarea_set_cursor_hidden(ssidTA, true);
-    lv_obj_set_size(ssidTA, 140, 34);
-    lv_obj_set_pos(ssidTA, 100, 45);
-    StyleManager::applyBorderlessContainer(ssidTA);
-
-    pwdLabel = my_lv_label_create(wifiScr, NULL, 5, 92, "Password: ");
-
-    pwdTA = lv_textarea_create(wifiScr, NULL);
-    lv_textarea_set_text(pwdTA, "");
-    lv_textarea_set_pwd_show_time(pwdTA, 5000);
-    lv_textarea_set_pwd_mode(pwdTA, true);
-    lv_textarea_set_one_line(pwdTA, true);
-    lv_obj_set_event_cb(pwdTA, ta_event_cb);
-    lv_textarea_set_cursor_hidden(pwdTA, true);
-    lv_obj_set_size(pwdTA, 140, 34); 
-    lv_obj_set_pos(pwdTA, 100, 85);
-    StyleManager::applyBorderlessContainer(pwdTA);
-
-    showHideBtn = my_lv_btn_create(wifiScr, NULL, 75, 43, 243, 85, showHideBtn_func);
-    showHideBtnLabel = lv_label_create(showHideBtn, NULL);
-    lv_label_set_text(showHideBtnLabel, LV_SYMBOL_EYE_OPEN);
-    StyleManager::applyTransparentButton(showHideBtn);
-    StyleManager::applyWhiteFont(showHideBtnLabel);
-
-    applyBtn = my_lv_btn_create(wifiScr, NULL, 75, 43, 243, 43, btn_connect);
-    applyLabel = lv_label_create(applyBtn, NULL);
-    lv_label_set_text(applyLabel, "Connect");
-    StyleManager::applyWhiteButton(applyBtn);
-}
-
 void lockScreen()
 {
     contDateTimeAtLock = lv_cont_create(lockScr, NULL);

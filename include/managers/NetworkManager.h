@@ -8,6 +8,8 @@
 #include <WiFiUdp.h>
 #include <string>
 #include "utils/types.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 class NetworkManager {
 public:
@@ -16,6 +18,8 @@ public:
     bool isConnected() const;
     String getIpAddress() const;
     void setCredentials(const String& ssid, const String& password);
+    
+    void connectAsync(const String& ssid, const String& password);
     
     // Web Server functionality
     WebServer& getServer();
@@ -37,4 +41,10 @@ private:
     WebServer m_server;
     WiFiUDP m_ntpUDP;
     NTPClient m_dateTimeClient;
+    
+    // WiFi connection state management
+    TaskHandle_t m_wifiTaskHandle;
+    
+    // Static task function for FreeRTOS
+    static void wifiConnectionTask(void* parameter);
 };

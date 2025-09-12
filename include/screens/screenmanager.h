@@ -8,8 +8,8 @@ public:
     ScreenManager();
 
     void initialize(BaseScreen *mainScreen,
-                    BaseScreen *settingsScreen = nullptr,
-                    BaseScreen *wifiScreen = nullptr,
+                    BaseScreen *settingsScreen,
+                    BaseScreen *wifiScreen,
                     BaseScreen *infoScreen = nullptr,
                     BaseScreen *timeSettingsScreen = nullptr,
                     BaseScreen *samplingSettingsScreen = nullptr,

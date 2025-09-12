@@ -112,8 +112,7 @@ void statusFunc(lv_task_t *task)
     if (isSDCardConnected) {
         lv_obj_set_hidden(sdStatusAtLockWarning, true);
         if (!networkManager.isConnected() && (config.ssid != "" && config.password != "")) {
-            networkManager.setCredentials(config.ssid.c_str(), config.password.c_str());
-            networkManager.connect();
+            networkManager.connectAsync(config.ssid.c_str(), config.password.c_str());
         }
     } else {
         lv_obj_set_hidden(sdStatusAtLockWarning, false);

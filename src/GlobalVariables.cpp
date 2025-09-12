@@ -30,6 +30,7 @@ DisplayManager displayManager;
 RTCManager rtcManager;
 ScreenManager screenManager;
 MainScreen *mainScreen = nullptr;
+WifiScreen *wifiScreen = nullptr;
 
 // ============================================
 // Application State Variables
@@ -47,23 +48,6 @@ int currentSampleNumber = 1;
 String lastSampleTimestamp;
 bool inTimeSettings = false;
 float temp, humi, pm25Aqi;
-
-// ============================================
-// LVGL UI Objects - WiFi Screen
-// ============================================
-lv_obj_t *wifiLabelAtBar = nullptr;
-lv_obj_t *wifiScr = nullptr;
-lv_obj_t *keyboard = nullptr;
-lv_obj_t *ssidTA = nullptr;
-lv_obj_t *pwdTA = nullptr;
-lv_obj_t *ssidLabel = nullptr;
-lv_obj_t *pwdLabel = nullptr;
-lv_obj_t *applyBtn = nullptr;
-lv_obj_t *applyLabel = nullptr;
-lv_obj_t *cancelBtn = nullptr;
-lv_obj_t *cancelLabel = nullptr;
-lv_obj_t *showHideBtn = nullptr;
-lv_obj_t *showHideBtnLabel = nullptr;
 
 // ============================================
 // LVGL UI Objects - Info Screen

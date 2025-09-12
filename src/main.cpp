@@ -105,8 +105,6 @@ void setup()
                                     LV_OBJ_PART_MAIN,
                                     LV_STATE_DEFAULT,
                                     LV_COLOR_BLACK);
-    wifiScr = lv_cont_create(NULL, NULL);
-    lv_obj_set_style_local_bg_color(wifiScr, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_BLACK);
     lockScr = lv_cont_create(NULL, NULL);
     lv_obj_set_style_local_bg_color(lockScr, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_BLACK);
     samplingSettingsScr = lv_cont_create(NULL, NULL);
@@ -116,7 +114,6 @@ void setup()
                                     LV_COLOR_BLACK);
 
     // Initialize other screens using old functions
-    wifiScreen();
     lockScreen();
     settingsScreen();
     infoScreen();
@@ -126,8 +123,11 @@ void setup()
     mainScreen = new MainScreen();
     mainScreen->initialize();
 
+    wifiScreen = new WifiScreen();
+    wifiScreen->initialize();
+
     // Initialize ScreenManager with the new main screen
-    screenManager.initialize(mainScreen);
+    screenManager.initialize(mainScreen, nullptr, wifiScreen);
 
     networkManager.loadConfig(config, StringConstants::CONFIG_FILE_PATH);
     delay(1000);
@@ -191,5 +191,8 @@ void loop()
 {
     displayManager.handleTasks();
     networkManager.handleServerClient();
+
+    lv_task_handler();
+
     delay(5);
 }

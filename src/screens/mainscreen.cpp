@@ -47,7 +47,7 @@ void MainScreen::initialize()
         = createLabel(m_sdStatus, m_wifiStatusWarning, 2, 6, LV_SYMBOL_CLOSE, LV_COLOR_RED);
 
     // date and time label
-    m_dateTimeLabel = createLabel(m_screenContainer, NULL, 157, 7, "No Datetime set");
+    m_dateTimeLabel = createLabel(m_screenContainer, NULL, 150, 7, "No Datetime set");
 
     // sample containers
     m_pm25Container = createContainer(m_screenContainer, NULL, 180, 90, 10, 30);

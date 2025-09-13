@@ -101,11 +101,12 @@ void statusFunc(lv_task_t *task)
     mainScreen->updateWiFiStatus(isNetworkConnected);
     if (isNetworkConnected) {
         lv_obj_set_hidden(wifiStatusAtLockWarning, true);
-        lv_label_set_text(infoWifiAddressLabel, networkManager.getIpAddress().c_str());
+
     } else {
         lv_obj_set_hidden(wifiStatusAtLockWarning, false);
-        lv_label_set_text(infoWifiAddressLabel, "No WiFi connection");
     }
+
+    infoScreen->updateWiFiStatus();
 
     const bool isSDCardConnected = mySDCard.start(&sampleDB, &Serial2);
 

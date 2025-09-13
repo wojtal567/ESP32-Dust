@@ -38,6 +38,7 @@
 #include "screens/wifiscreen.h"
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
+#include "screens/infoscreen.h"
 
 // ============================================
 // Network Components - Application IP Address
@@ -60,6 +61,7 @@ extern RTCManager rtcManager;
 extern ScreenManager screenManager;
 extern MainScreen *mainScreen;
 extern WifiScreen *wifiScreen;
+extern InfoScreen *infoScreen;
 
 // ============================================
 // Application State Variables
@@ -86,16 +88,7 @@ extern float temp, humi;
 // Runtime sampling state
 extern int currentSampleNumber;
 
-// ============================================
-// LVGL UI Objects - Info Screen
-// ============================================
-extern lv_obj_t *infoScr;
-extern lv_obj_t *backInfoBtn;
-extern lv_obj_t *backInfoLabel;
-extern lv_obj_t *lcdLabelAtBar;
-extern lv_obj_t *infoWifiLabel;
-extern lv_obj_t *infoWifiAddressLabel;
-extern lv_obj_t *configLabel;
+
 
 // ============================================
 // LVGL UI Objects - Settings Screen

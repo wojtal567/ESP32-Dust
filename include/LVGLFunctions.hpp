@@ -128,8 +128,7 @@ void display_current_config()
     {
         current_config += (config.timeBetweenSavingSamples / 1000) + (String) "s";
     }
-    lv_obj_set_style_local_text_font(configLabel, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, &lv_font_montserrat_14);
-    lv_label_set_text(configLabel, current_config.c_str());
+    infoScreen->updateConfigLabel(current_config);
 }
 
 // Function that turns fan on
@@ -264,13 +263,6 @@ void getSampleFunc(lv_task_t *task)
     }
 }
 
-// Settings button clicked
-static void setButton_task(lv_obj_t *obj, lv_event_t event)
-{
-    if (event == LV_EVENT_CLICKED)
-        lv_disp_load_scr(settingsScr);
-}
-
 // Locking button clicked
 static void lockButton_task(lv_obj_t *obj, lv_event_t event)
 {
@@ -303,7 +295,7 @@ static void WiFi_btn(lv_obj_t *obj, lv_event_t event)
 static void info_btn(lv_obj_t *obj, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED)
-        lv_scr_load(infoScr);
+        screenManager.switchToScreen(BaseScreen::ScreenType::INFO);
 }
 
 static void time_settings_btn(lv_obj_t *obj, lv_event_t event)

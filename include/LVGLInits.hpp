@@ -114,22 +114,6 @@ void settingsScreen()
     tempBtnName = my_lv_label_create(settingsScr, wifiBtnName, 180, 200, "Sampling");
 }
 
-void infoScreen()
-{
-    backInfoBtn = my_lv_btn_create(infoScr, backSettingsBtn, 30, 15, 14, 10, setButton_task);
-    backInfoLabel = lv_label_create(backInfoBtn, NULL);
-    lv_label_set_text(backInfoLabel, LV_SYMBOL_LEFT);
-
-    lcdLabelAtBar = my_lv_label_create(infoScr, NULL, 216, 10, "Device info");
-
-    infoWifiLabel = my_lv_label_create(infoScr, NULL, 5, 53, "WiFi address: ");
-    lv_obj_set_style_local_text_font(infoWifiLabel, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, &lv_font_montserrat_14);
-    
-    infoWifiAddressLabel = my_lv_label_create(infoScr, infoWifiLabel, 115, 53, "");
-
-    configLabel = my_lv_label_create(infoScr, NULL, 5, 70, "");
-}
-
 void samplingsettingsScreen()
 {
     backSamplingSettingsBtn = my_lv_btn_create(samplingSettingsScr, backSettingsBtn, 30, 15, 14, 10, sampling_settings_back_btn); 

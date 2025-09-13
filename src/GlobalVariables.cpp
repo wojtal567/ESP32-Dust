@@ -31,6 +31,7 @@ RTCManager rtcManager;
 ScreenManager screenManager;
 MainScreen *mainScreen = nullptr;
 WifiScreen *wifiScreen = nullptr;
+InfoScreen *infoScreen = nullptr;
 
 // ============================================
 // Application State Variables
@@ -48,17 +49,6 @@ int currentSampleNumber = 1;
 String lastSampleTimestamp;
 bool inTimeSettings = false;
 float temp, humi, pm25Aqi;
-
-// ============================================
-// LVGL UI Objects - Info Screen
-// ============================================
-lv_obj_t *infoScr = nullptr;
-lv_obj_t *backInfoBtn = nullptr;
-lv_obj_t *backInfoLabel = nullptr;
-lv_obj_t *lcdLabelAtBar = nullptr;
-lv_obj_t *infoWifiLabel = nullptr;
-lv_obj_t *infoWifiAddressLabel = nullptr;
-lv_obj_t *configLabel = nullptr;
 
 // ============================================
 // LVGL UI Objects - Settings Screen

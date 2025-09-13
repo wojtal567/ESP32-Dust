@@ -98,8 +98,6 @@ void setup()
     // Create old-style screen containers for existing screens
     settingsScr = lv_cont_create(NULL, NULL);
     lv_obj_set_style_local_bg_color(settingsScr, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_BLACK);
-    infoScr = lv_cont_create(NULL, NULL);
-    lv_obj_set_style_local_bg_color(infoScr, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_BLACK);
     timeSettingsScr = lv_cont_create(NULL, NULL);
     lv_obj_set_style_local_bg_color(timeSettingsScr,
                                     LV_OBJ_PART_MAIN,
@@ -116,7 +114,6 @@ void setup()
     // Initialize other screens using old functions
     lockScreen();
     settingsScreen();
-    infoScreen();
     timesettingsScreen();
     samplingsettingsScreen();
 
@@ -126,8 +123,11 @@ void setup()
     wifiScreen = new WifiScreen();
     wifiScreen->initialize();
 
+    infoScreen = new InfoScreen(networkManager);
+    infoScreen->initialize();
+
     // Initialize ScreenManager with the new main screen
-    screenManager.initialize(mainScreen, nullptr, wifiScreen);
+    screenManager.initialize(mainScreen, nullptr, wifiScreen, infoScreen);
 
     networkManager.loadConfig(config, StringConstants::CONFIG_FILE_PATH);
     delay(1000);

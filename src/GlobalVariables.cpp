@@ -32,7 +32,7 @@ ScreenManager screenManager;
 MainScreen *mainScreen = nullptr;
 WifiScreen *wifiScreen = nullptr;
 InfoScreen *infoScreen = nullptr;
-
+SettingsScreen *settingsScreen = nullptr;
 // ============================================
 // Application State Variables
 // ============================================
@@ -49,26 +49,6 @@ int currentSampleNumber = 1;
 String lastSampleTimestamp;
 bool inTimeSettings = false;
 float temp, humi, pm25Aqi;
-
-// ============================================
-// LVGL UI Objects - Settings Screen
-// ============================================
-lv_obj_t *settingsScr = nullptr;
-lv_obj_t *backSettingsBtn = nullptr;
-lv_obj_t *backSettingsLabel = nullptr;
-lv_obj_t *settingsLabelAtBar = nullptr;
-lv_obj_t *wifiBtn = nullptr;
-lv_obj_t *infoBtn = nullptr;
-lv_obj_t *timeBtn = nullptr;
-lv_obj_t *wifiBtnLabel = nullptr;
-lv_obj_t *infoBtnLabel = nullptr;
-lv_obj_t *timeBtnLabel = nullptr;
-lv_obj_t *tempBtn = nullptr;
-lv_obj_t *tempBtnLabel = nullptr;
-lv_obj_t *wifiBtnName = nullptr;
-lv_obj_t *infoBtnName = nullptr;
-lv_obj_t *timeBtnName = nullptr;
-lv_obj_t *tempBtnName = nullptr;
 
 // ============================================
 // LVGL UI Objects - Time Settings Screen

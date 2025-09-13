@@ -332,7 +332,7 @@ void timesettings_back_btn(lv_obj_t *obj, lv_event_t event)
             lv_dropdown_set_selected(lockScreenDDlist, 0);
             break;
         }
-        lv_scr_load(settingsScr);
+        screenManager.switchToScreen(BaseScreen::ScreenType::SETTINGS);
         inTimeSettings = false;
         timeChanged = false;
         dateChanged = false;
@@ -744,6 +744,6 @@ static void sampling_settings_back_btn(lv_obj_t *btn, lv_event_t event)
     {
         lv_spinbox_set_value(measurePeriodHour, ((config.timeBetweenSavingSamples / 60000) / 60));
         lv_spinbox_set_value(measurePeriodMinute, ((config.timeBetweenSavingSamples / 60000) % 60));
-        lv_scr_load(settingsScr);
+        screenManager.switchToScreen(BaseScreen::ScreenType::SETTINGS);
     }
 }

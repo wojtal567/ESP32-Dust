@@ -10,10 +10,10 @@ public:
     void initialize(BaseScreen *mainScreen,
                     BaseScreen *settingsScreen,
                     BaseScreen *wifiScreen,
-                    BaseScreen *infoScreen = nullptr,
-                    BaseScreen *timeSettingsScreen = nullptr,
-                    BaseScreen *samplingSettingsScreen = nullptr,
-                    BaseScreen *lockScreen = nullptr);
+                    BaseScreen *infoScreen,
+                    BaseScreen *timeSettingsScreen,
+                    BaseScreen *samplingSettingsScreen,
+                    BaseScreen *lockScreen);
 
     bool switchToScreen(BaseScreen::ScreenType type);
 

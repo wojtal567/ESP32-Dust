@@ -5,6 +5,9 @@
 #include <utils/stringConstants.h>
 #include <utils/timeUtils.h>
 
+
+#include <GlobalVariables.hpp>
+
 MainScreen::MainScreen()
     : BaseScreen(ScreenType::MAIN)
 {}
@@ -17,7 +20,7 @@ void MainScreen::initialize()
     m_setButton
         = createButton(m_screenContainer, NULL, 16, 18, 32, 7, [](lv_obj_t *obj, lv_event_t event) {
               if (event == LV_EVENT_CLICKED) {
-                  // screenManager.switchToScreen(BaseScreen::ScreenType::SETTINGS);
+                  screenManager.switchToScreen(BaseScreen::ScreenType::SETTINGS);
               }
           });
     m_setButtonLabel = lv_label_create(m_setButton, NULL);

@@ -39,6 +39,7 @@
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
 #include "screens/infoscreen.h"
+#include "screens/settingsscreen.h"
 
 // ============================================
 // Network Components - Application IP Address
@@ -62,6 +63,7 @@ extern ScreenManager screenManager;
 extern MainScreen *mainScreen;
 extern WifiScreen *wifiScreen;
 extern InfoScreen *infoScreen;
+extern SettingsScreen *settingsScreen;
 
 // ============================================
 // Application State Variables
@@ -87,28 +89,6 @@ extern float temp, humi;
 
 // Runtime sampling state
 extern int currentSampleNumber;
-
-
-
-// ============================================
-// LVGL UI Objects - Settings Screen
-// ============================================
-extern lv_obj_t *settingsScr;
-extern lv_obj_t *backSettingsBtn;
-extern lv_obj_t *backSettingsLabel;
-extern lv_obj_t *settingsLabelAtBar;
-extern lv_obj_t *wifiBtn;
-extern lv_obj_t *infoBtn;
-extern lv_obj_t *timeBtn;
-extern lv_obj_t *wifiBtnLabel;
-extern lv_obj_t *infoBtnLabel;
-extern lv_obj_t *timeBtnLabel;
-extern lv_obj_t *tempBtn;
-extern lv_obj_t *tempBtnLabel;
-extern lv_obj_t *wifiBtnName;
-extern lv_obj_t *infoBtnName;
-extern lv_obj_t *timeBtnName;
-extern lv_obj_t *tempBtnName;
 
 // ============================================
 // LVGL UI Objects - Time Settings Screen

@@ -17,8 +17,9 @@ WifiScreen::~WifiScreen() {}
 
 void WifiScreen::initialize()
 {
-    m_cancelButton
-        = createButton(m_screenContainer, backSettingsBtn, 30, 15, 14, 10, cancelButtonCallback);
+    m_cancelButton = createButton(m_screenContainer, nullptr, 30, 15, 14, 10, cancelButtonCallback);
+
+    StyleManager::applyTransparentButton(m_cancelButton);
 
     m_cancelButtonLabel = lv_label_create(m_cancelButton, NULL);
     lv_label_set_text(m_cancelButtonLabel, LV_SYMBOL_LEFT);
@@ -99,8 +100,7 @@ void WifiScreen::handleKeyboardEvent(lv_obj_t *kb, lv_event_t event)
 void WifiScreen::handleCancelButtonEvent(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
-        // screenManager.switchToScreen(BaseScreen::ScreenType::SETTINGS);
-        lv_disp_load_scr(settingsScr);
+        screenManager.switchToScreen(BaseScreen::ScreenType::SETTINGS);
         lv_textarea_set_text(m_ssidTextArea, "");
         lv_textarea_set_text(m_passwordTextArea, "");
     }

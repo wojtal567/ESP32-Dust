@@ -3,7 +3,9 @@
 
 void timesettingsScreen()
 {
-    backTimeSettingsBtn = my_lv_btn_create(timeSettingsScr, backSettingsBtn, 30, 15, 14, 10, timesettings_back_btn); 
+    backTimeSettingsBtn = my_lv_btn_create(timeSettingsScr, nullptr, 30, 15, 14, 10, timesettings_back_btn);
+    StyleManager::applyTransparentButton(backTimeSettingsBtn);
+
     backTimeSettingsLabel = lv_label_create(backTimeSettingsBtn, NULL);
     lv_label_set_text(backTimeSettingsLabel, LV_SYMBOL_LEFT);
 
@@ -73,50 +75,12 @@ void timesettingsScreen()
     StyleManager::applyWhiteButton(syncRtcBtn);
 }
 
-void settingsScreen()
-{
-    backSettingsBtn = my_lv_btn_create(settingsScr, NULL, 30, 15, 14, 10, btn_settings_back);
-    backSettingsLabel = lv_label_create(backSettingsBtn, NULL);
-    lv_label_set_text(backSettingsLabel, LV_SYMBOL_LEFT);
-    StyleManager::applyTransparentButton(backSettingsBtn);
-
-    settingsLabelAtBar = my_lv_label_create(settingsScr, NULL, 239, 10, "Settings");
-
-    wifiBtn = my_lv_btn_create(settingsScr, NULL, 60, 60, 60, 38, WiFi_btn);
-    wifiBtnLabel = lv_label_create(wifiBtn, NULL);
-    lv_label_set_text(wifiBtnLabel, StringConstants::WIFI_SYMBOL);
-    StyleManager::applyTransparentButton(wifiBtn);
-    StyleManager::applyHugeFont(wifiBtnLabel);
-
-    wifiBtnName = my_lv_label_create(settingsScr, NULL, 63, 103, "WiFi");
-    StyleManager::applyFont20(wifiBtnName);
-
-    infoBtn = my_lv_btn_create(settingsScr, wifiBtn, 60, 60, 200, 38, info_btn);
-    infoBtnLabel = lv_label_create(infoBtn, NULL);
-    lv_label_set_text(infoBtnLabel, StringConstants::INFO_SYMBOL);
-    StyleManager::applyTransparentButton(infoBtn);
-    StyleManager::applyHugeFont(infoBtnLabel);
-
-    infoBtnName = my_lv_label_create(settingsScr, wifiBtnName, 207, 103, "Info");
-
-    timeBtn = my_lv_btn_create(settingsScr, wifiBtn, 60, 60, 60, 140, time_settings_btn);
-    timeBtnLabel = lv_label_create(timeBtn, NULL);
-    lv_label_set_text(timeBtnLabel, StringConstants::CLOCK_SYMBOL);
-    StyleManager::applyTransparentButton(timeBtn);
-    StyleManager::applyHugeFont(timeBtnLabel);
-
-    timeBtnName = my_lv_label_create(settingsScr, wifiBtnName, 65, 200, "Time");
-
-    tempBtn = my_lv_btn_create(settingsScr, wifiBtn, 60, 60, 200, 140, temp_settings_btn);
-    tempBtnLabel = lv_label_create(tempBtn, wifiBtnName);
-    lv_label_set_text(tempBtnLabel, StringConstants::COGS_SYMBOL);
-    StyleManager::applyHugeFont(tempBtnLabel);
-    tempBtnName = my_lv_label_create(settingsScr, wifiBtnName, 180, 200, "Sampling");
-}
-
 void samplingsettingsScreen()
 {
-    backSamplingSettingsBtn = my_lv_btn_create(samplingSettingsScr, backSettingsBtn, 30, 15, 14, 10, sampling_settings_back_btn); 
+    backSamplingSettingsBtn
+        = my_lv_btn_create(samplingSettingsScr, nullptr, 30, 15, 14, 10, sampling_settings_back_btn);
+    StyleManager::applyTransparentButton(backSamplingSettingsBtn);
+
     backSamplingSettingsLabel = lv_label_create(backSamplingSettingsBtn, NULL);
     lv_label_set_text(backSamplingSettingsLabel, LV_SYMBOL_LEFT);
 

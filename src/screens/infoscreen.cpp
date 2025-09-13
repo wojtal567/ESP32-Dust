@@ -2,6 +2,8 @@
 
 #include "globalvariables.hpp"
 
+#include <managers/stylemanager.h>
+
 InfoScreen::InfoScreen(const NetworkManager &networkManager)
     : BaseScreen(ScreenType::INFO)
     , m_networkManager(networkManager)
@@ -12,17 +14,19 @@ InfoScreen::~InfoScreen() {}
 void InfoScreen::initialize()
 {
     m_backButton = createButton(m_screenContainer,
-                                backSettingsBtn,
+                                nullptr,
                                 30,
                                 15,
                                 14,
                                 10,
                                 [](lv_obj_t *obj, lv_event_t event) {
                                     if (event == LV_EVENT_CLICKED) {
-                                        lv_disp_load_scr(settingsScr);
-                                        // screenManager.switchToScreen(BaseScreen::ScreenType::SETTINGS);
+                                        screenManager.switchToScreen(
+                                            BaseScreen::ScreenType::SETTINGS);
                                     }
                                 });
+    StyleManager::applyTransparentButton(m_backButton);
+
     m_backButtonLabel = lv_label_create(m_backButton, NULL);
     lv_label_set_text(m_backButtonLabel, LV_SYMBOL_LEFT);
 

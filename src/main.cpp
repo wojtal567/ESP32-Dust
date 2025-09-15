@@ -96,11 +96,6 @@ void setup()
     StyleManager::initialize();
 
     // Create old-style screen containers for existing screens
-    timeSettingsScr = lv_cont_create(NULL, NULL);
-    lv_obj_set_style_local_bg_color(timeSettingsScr,
-                                    LV_OBJ_PART_MAIN,
-                                    LV_STATE_DEFAULT,
-                                    LV_COLOR_BLACK);
     lockScr = lv_cont_create(NULL, NULL);
     lv_obj_set_style_local_bg_color(lockScr, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_BLACK);
     samplingSettingsScr = lv_cont_create(NULL, NULL);
@@ -111,8 +106,9 @@ void setup()
 
     // Initialize other screens using old functions
     lockScreen();
-    timesettingsScreen();
     samplingsettingsScreen();
+
+    networkManager.loadConfig(config, StringConstants::CONFIG_FILE_PATH);
 
     mainScreen = new MainScreen();
     mainScreen->initialize();
@@ -126,14 +122,18 @@ void setup()
     settingsScreen = new SettingsScreen();
     settingsScreen->initialize();
 
-    // Initialize ScreenManager with the new main screen
-    screenManager
-        .initialize(mainScreen, settingsScreen, wifiScreen, infoScreen, nullptr, nullptr, nullptr);
+    timeSettingsScreen = new TimeSettingsScreen(config, rtcManager);
+    timeSettingsScreen->initialize();
 
-    networkManager.loadConfig(config, StringConstants::CONFIG_FILE_PATH);
+    screenManager.initialize(mainScreen,
+                             settingsScreen,
+                             wifiScreen,
+                             infoScreen,
+                             timeSettingsScreen,
+                             nullptr,
+                             nullptr);
+
     delay(1000);
-
-    lv_dropdown_set_selected(lockScreenDDlist, getDDListIndexBasedOnLcdLockTime(config.lcdLockTime));
 
     date = lv_task_create(dateTimeFunc, 800, LV_TASK_PRIO_MID, NULL);
     status = lv_task_create(statusFunc, 5000, LV_TASK_PRIO_LOW, NULL);

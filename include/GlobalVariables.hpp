@@ -33,13 +33,14 @@
 // ============================================
 // Project Includes - Utilities
 // ============================================
+#include "screens/infoscreen.h"
 #include "screens/mainscreen.h"
 #include "screens/screenmanager.h"
+#include "screens/settingsscreen.h"
+#include "screens/timesettingsscreen.h"
 #include "screens/wifiscreen.h"
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
-#include "screens/infoscreen.h"
-#include "screens/settingsscreen.h"
 
 // ============================================
 // Network Components - Application IP Address
@@ -64,6 +65,7 @@ extern MainScreen *mainScreen;
 extern WifiScreen *wifiScreen;
 extern InfoScreen *infoScreen;
 extern SettingsScreen *settingsScreen;
+extern TimeSettingsScreen *timeSettingsScreen;
 
 // ============================================
 // Application State Variables
@@ -77,9 +79,6 @@ extern String password;
 
 // Application state flags
 extern bool sdCardStatus;
-extern bool inTimeSettings;
-extern bool timeChanged;
-extern bool dateChanged;
 extern bool isDefaultTimeOnDisplay;
 extern bool lockTimeChanged;
 extern bool samplingChanged;
@@ -90,41 +89,6 @@ extern float temp, humi;
 // Runtime sampling state
 extern int currentSampleNumber;
 
-// ============================================
-// LVGL UI Objects - Time Settings Screen
-// ============================================
-extern lv_obj_t *timeSettingsScr;
-
-extern lv_obj_t *backTimeSettingsBtn;
-extern lv_obj_t *backTimeSettingsLabel;
-extern lv_obj_t *timeSettingsLabelAtBar;
-
-extern lv_obj_t *timeScrollPage;
-extern lv_obj_t *timeLabel;
-extern lv_obj_t *timeHour;
-extern lv_obj_t *timeHourIncrement;
-extern lv_obj_t *timeHourDecrement;
-
-extern lv_obj_t *timeColonLabel;
-
-extern lv_obj_t *timeMinute;
-extern lv_obj_t *timeMinuteIncrement;
-extern lv_obj_t *timeMinuteDecrement;
-
-extern lv_obj_t *dateLabel;
-extern lv_obj_t *dateBtn;
-extern lv_obj_t *dateBtnLabel;
-
-extern lv_obj_t *calendar;
-
-extern lv_obj_t *lockScreenLabel;
-extern lv_obj_t *lockScreenDDlist;
-
-extern lv_obj_t *timeSettingsBtn;
-extern lv_obj_t *timeSettingsLabel;
-extern lv_obj_t *syncRtcBtn;
-extern lv_obj_t *syncRtcLabel;
-extern lv_obj_t *alertBox;
 // ============================================
 // LVGL UI Objects - Sampling Settings Screen
 // ============================================

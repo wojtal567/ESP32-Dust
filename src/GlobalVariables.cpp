@@ -33,50 +33,21 @@ MainScreen *mainScreen = nullptr;
 WifiScreen *wifiScreen = nullptr;
 InfoScreen *infoScreen = nullptr;
 SettingsScreen *settingsScreen = nullptr;
+TimeSettingsScreen *timeSettingsScreen = nullptr;
+
 // ============================================
 // Application State Variables
 // ============================================
 String ssid;
 String password;
 bool sdCardStatus = false;
-bool timeChanged = false;
-bool dateChanged = false;
 bool lockTimeChanged = false;
 bool samplingChanged = false;
 int currentSampleNumber = 1;
 
 // Legacy variables still used in main.cpp
 String lastSampleTimestamp;
-bool inTimeSettings = false;
 float temp, humi, pm25Aqi;
-
-// ============================================
-// LVGL UI Objects - Time Settings Screen
-// ============================================
-lv_obj_t *timeSettingsScr = nullptr;
-lv_obj_t *backTimeSettingsBtn = nullptr;
-lv_obj_t *backTimeSettingsLabel = nullptr;
-lv_obj_t *timeSettingsLabelAtBar = nullptr;
-lv_obj_t *timeScrollPage = nullptr;
-lv_obj_t *timeLabel = nullptr;
-lv_obj_t *timeHour = nullptr;
-lv_obj_t *timeHourIncrement = nullptr;
-lv_obj_t *timeHourDecrement = nullptr;
-lv_obj_t *timeColonLabel = nullptr;
-lv_obj_t *timeMinute = nullptr;
-lv_obj_t *timeMinuteIncrement = nullptr;
-lv_obj_t *timeMinuteDecrement = nullptr;
-lv_obj_t *dateLabel = nullptr;
-lv_obj_t *dateBtn = nullptr;
-lv_obj_t *dateBtnLabel = nullptr;
-lv_obj_t *calendar = nullptr;
-lv_obj_t *lockScreenLabel = nullptr;
-lv_obj_t *lockScreenDDlist = nullptr;
-lv_obj_t *timeSettingsBtn = nullptr;
-lv_obj_t *timeSettingsLabel = nullptr;
-lv_obj_t *syncRtcBtn = nullptr;
-lv_obj_t *syncRtcLabel = nullptr;
-lv_obj_t *alertBox = nullptr;
 
 // ============================================
 // LVGL UI Objects - Sampling Settings Screen

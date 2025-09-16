@@ -46,31 +46,6 @@ lv_obj_t *my_lv_label_create(lv_obj_t *par, const lv_obj_t *copy, lv_coord_t x_p
     return new_label;
 }
 
-void display_current_config()
-{
-    String current_config = (String) "SSID: " + config.ssid.c_str();
-    current_config += (String) "\nNumber of samples: " + (String)config.numberOfSamples;
-    if (config.lcdLockTime == -1)
-        current_config += "\nLCD lock time: Never";
-    if (config.lcdLockTime == 30000)
-        current_config += "\nLCD lock time: 30s";
-    if (config.lcdLockTime > 30000)
-        current_config += "\nLCD lock time: " + (String)(config.lcdLockTime / 60000) + "m";
-    current_config += (String) "\nFan running time before measure: " + config.turnFanTime / 1000 + "s\n";
-    current_config += (String) "Time between measurments: " + config.measurePeriod / 1000 + "s\nMeasurements saving time: ";
-    if (config.timeBetweenSavingSamples >= 3600000)
-        current_config += config.timeBetweenSavingSamples / 60000 / 60 + (String) "h" + (config.timeBetweenSavingSamples / 60000) % 60 + (String) "m" + (config.timeBetweenSavingSamples / 1000) % 60 + "s";
-    else if (config.timeBetweenSavingSamples >= 60000)
-    {
-        current_config += (config.timeBetweenSavingSamples / 60000) % 60 + (String) "m " + (config.timeBetweenSavingSamples / 1000) % 60 + "s";
-    }
-    else
-    {
-        current_config += (config.timeBetweenSavingSamples / 1000) + (String) "s";
-    }
-    infoScreen->updateConfigLabel(current_config);
-}
-
 // Function that turns fan on
 void turnFanOnFunc(lv_task_t *task)
 {
@@ -414,7 +389,6 @@ static void sampling_settings_save_btn(lv_obj_t *btn, lv_event_t event)
         networkManager.saveConfig(config, StringConstants::CONFIG_FILE_PATH);
         networkManager.printConfig(StringConstants::CONFIG_FILE_PATH);
         screenManager.switchToScreen(BaseScreen::ScreenType::MAIN);
-        display_current_config();
     }
 }
 

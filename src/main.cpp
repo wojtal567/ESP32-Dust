@@ -116,7 +116,7 @@ void setup()
     wifiScreen = new WifiScreen();
     wifiScreen->initialize();
 
-    infoScreen = new InfoScreen(networkManager);
+    infoScreen = new InfoScreen(networkManager, config);
     infoScreen->initialize();
 
     settingsScreen = new SettingsScreen();
@@ -181,7 +181,6 @@ void setup()
             Serial.println(
                 "setup -> can't connect to Wi-Fi - probably no data or corrupted or wrong!");
     }
-    display_current_config();
 
     screenManager.switchToScreen(BaseScreen::ScreenType::MAIN);
 

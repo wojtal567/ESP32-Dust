@@ -4,9 +4,10 @@
 
 #include <managers/stylemanager.h>
 
-InfoScreen::InfoScreen(const NetworkManager &networkManager)
+InfoScreen::InfoScreen(const NetworkManager &networkManager, const Types::ConfigData &config)
     : BaseScreen(ScreenType::INFO)
     , m_networkManager(networkManager)
+    , m_config(config)
 {}
 
 InfoScreen::~InfoScreen() {}
@@ -43,15 +44,34 @@ void InfoScreen::initialize()
     m_configLabel = createLabel(m_screenContainer, NULL, 5, 70, "");
 }
 
-void InfoScreen::updateConfigLabel(const String &configText)
+void InfoScreen::updateConfigLabel()
 {
-    lv_label_set_text(m_configLabel, configText.c_str());
-}
+    String current_config = (String) "SSID: " + m_config.ssid.c_str();
+    current_config += (String) "\nNumber of samples: " + (String)m_config.numberOfSamples;
+    if (m_config.lcdLockTime == -1)
+        current_config += "\nLCD lock time: Never";
+    if (m_config.lcdLockTime == 30000)
+        current_config += "\nLCD lock time: 30s";
+    if (m_config.lcdLockTime > 30000)
+        current_config += "\nLCD lock time: " + (String)(m_config.lcdLockTime / 60000) + "m";
+    current_config += (String) "\nFan running time before measure: " + m_config.turnFanTime / 1000
+                      + "s\n";
+    current_config += (String) "Time between measurments: " + m_config.measurePeriod / 1000
+                      + "s\nMeasurements saving time: ";
+    if (m_config.timeBetweenSavingSamples >= 3600000)
+        current_config += m_config.timeBetweenSavingSamples / 60000 / 60 + (String) "h"
+                          + (m_config.timeBetweenSavingSamples / 60000) % 60 + (String) "m"
+                          + (m_config.timeBetweenSavingSamples / 1000) % 60 + "s";
+    else if (m_config.timeBetweenSavingSamples >= 60000) {
+        current_config += (m_config.timeBetweenSavingSamples / 60000) % 60 + (String) "m "
+                          + (m_config.timeBetweenSavingSamples / 1000) % 60 + "s";
+    } else {
+        current_config += (m_config.timeBetweenSavingSamples / 1000) + (String) "s";
+    }
 
-void InfoScreen::updateWiFiStatus()
-{
+    lv_label_set_text(m_configLabel, current_config.c_str());
+
     const bool isConnected = m_networkManager.isConnected();
     lv_label_set_text(m_wifiAddressLabel,
-                      isConnected
-                      ? networkManager.getIpAddress().c_str() : "No WiFi connection");
+                      isConnected ? m_networkManager.getIpAddress().c_str() : "No WiFi connection");
 }

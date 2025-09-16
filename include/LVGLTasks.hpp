@@ -94,8 +94,6 @@ void statusFunc(lv_task_t *task)
         lv_obj_set_hidden(wifiStatusAtLockWarning, false);
     }
 
-    infoScreen->updateWiFiStatus();
-
     const bool isSDCardConnected = mySDCard.start(&sampleDB, &Serial2);
 
     if (isSDCardConnected) {

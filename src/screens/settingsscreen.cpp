@@ -46,6 +46,7 @@ void SettingsScreen::initialize()
                                 38,
                                 [](lv_obj_t *obj, lv_event_t event) {
                                     if (event == LV_EVENT_CLICKED) {
+                                        infoScreen->updateConfigLabel();
                                         screenManager.switchToScreen(BaseScreen::ScreenType::INFO);
                                     }
                                 });

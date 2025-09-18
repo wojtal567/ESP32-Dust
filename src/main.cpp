@@ -98,15 +98,9 @@ void setup()
     // Create old-style screen containers for existing screens
     lockScr = lv_cont_create(NULL, NULL);
     lv_obj_set_style_local_bg_color(lockScr, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_BLACK);
-    samplingSettingsScr = lv_cont_create(NULL, NULL);
-    lv_obj_set_style_local_bg_color(samplingSettingsScr,
-                                    LV_OBJ_PART_MAIN,
-                                    LV_STATE_DEFAULT,
-                                    LV_COLOR_BLACK);
 
     // Initialize other screens using old functions
     lockScreen();
-    samplingsettingsScreen();
 
     networkManager.loadConfig(config, StringConstants::CONFIG_FILE_PATH);
 
@@ -125,27 +119,21 @@ void setup()
     timeSettingsScreen = new TimeSettingsScreen(config, rtcManager);
     timeSettingsScreen->initialize();
 
+    samplingSettingsScreen = new SamplingSettingsScreen(config);
+    samplingSettingsScreen->initialize();
+
     screenManager.initialize(mainScreen,
                              settingsScreen,
                              wifiScreen,
                              infoScreen,
                              timeSettingsScreen,
-                             nullptr,
+                             samplingSettingsScreen,
                              nullptr);
 
     delay(1000);
 
     date = lv_task_create(dateTimeFunc, 800, LV_TASK_PRIO_MID, NULL);
     status = lv_task_create(statusFunc, 5000, LV_TASK_PRIO_LOW, NULL);
-    lv_spinbox_set_value(measurePeriodHour, ((config.timeBetweenSavingSamples / 60000) / 60));
-    lv_spinbox_set_value(measurePeriodsecond, (config.timeBetweenSavingSamples / 1000) % 60);
-    lv_spinbox_set_value(measurePeriodMinute, ((config.timeBetweenSavingSamples / 60000) % 60));
-    lv_spinbox_set_value(measureAvPeriod, (config.measurePeriod / 1000));
-    lv_spinbox_set_value(measureNumber, config.numberOfSamples);
-    lv_spinbox_set_value(turnFanOnTime, (config.turnFanTime / 1000));
-    set_spinbox_digit_format(measureNumber, Constants::MIN_RANGE, Constants::MAX_RANGE, 0);
-    set_spinbox_digit_format(measureAvPeriod, Constants::MIN_RANGE, Constants::MAX_RANGE, 0);
-    set_spinbox_digit_format(turnFanOnTime, Constants::MIN_RANGE, Constants::MAX_RANGE, 0);
 
     getSample = lv_task_create(getSampleFunc,
                                (config.timeBetweenSavingSamples

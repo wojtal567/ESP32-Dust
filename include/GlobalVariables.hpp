@@ -35,6 +35,7 @@
 // ============================================
 #include "screens/infoscreen.h"
 #include "screens/mainscreen.h"
+#include "screens/samplingsettingsscreen.h"
 #include "screens/screenmanager.h"
 #include "screens/settingsscreen.h"
 #include "screens/timesettingsscreen.h"
@@ -66,6 +67,7 @@ extern WifiScreen *wifiScreen;
 extern InfoScreen *infoScreen;
 extern SettingsScreen *settingsScreen;
 extern TimeSettingsScreen *timeSettingsScreen;
+extern SamplingSettingsScreen *samplingSettingsScreen;
 
 // ============================================
 // Application State Variables
@@ -90,50 +92,6 @@ extern float temp, humi;
 extern int currentSampleNumber;
 
 // ============================================
-// LVGL UI Objects - Sampling Settings Screen
-// ============================================
-extern lv_obj_t *samplingSettingsScr;
-extern lv_obj_t *backSamplingSettingsBtn;
-extern lv_obj_t *backSamplingSettingsLabel;
-extern lv_obj_t *SamplingSettingsLabelAtBar;
-
-extern lv_obj_t *measurePeriodlabel;
-
-extern lv_obj_t *measurePeriodHour;
-extern lv_obj_t *measurePeriodHourIncrement;
-extern lv_obj_t *measurePeriodHourDecrement;
-
-extern lv_obj_t *measureColonLabel;
-
-extern lv_obj_t *measurePeriodMinute;
-extern lv_obj_t *measurePeriodMinuteIncrement;
-extern lv_obj_t *measurePeriodMinuteDecrement;
-
-extern lv_obj_t *measureColonLabel2;
-
-extern lv_obj_t *measurePeriodsecond;
-extern lv_obj_t *measurePeriodsecondIncrement;
-extern lv_obj_t *measurePeriodsecondDecrement;
-
-extern lv_obj_t *measureNumberLabel;
-extern lv_obj_t *measureNumber;
-extern lv_obj_t *measureNumberIncrement;
-extern lv_obj_t *measureNumberDecrement;
-
-extern lv_obj_t *measureAvPeriodLabel;
-extern lv_obj_t *measureAvPeriod;
-extern lv_obj_t *measureAvPeriodIncrement;
-extern lv_obj_t *measureAvPeriodDecrement;
-
-extern lv_obj_t *turnFanOnTimeLabel;
-extern lv_obj_t *turnFanOnTime;
-extern lv_obj_t *turnFanOnTimeIncrement;
-extern lv_obj_t *turnFanOnTimeDecrement;
-
-extern lv_obj_t *samplingSaveBtn;
-extern lv_obj_t *samplingSaveLabel;
-
-// ============================================
 // LVGL UI Objects - Lock Screen
 // ============================================
 extern lv_obj_t *lockScr;
@@ -156,3 +114,13 @@ extern lv_task_t *getAppLastRecordAndSynchronize;
 extern lv_task_t *inactiveTime;
 extern lv_task_t *date;
 extern lv_task_t *status;
+
+// temporarily here - will be moved to TaskManager
+
+// Get single sample and set text
+void getSampleFunc(lv_task_t *task);
+
+bool isLastSampleSaved();
+
+// Function that turns fan on
+void turnFanOnFunc(lv_task_t *task);

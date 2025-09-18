@@ -89,8 +89,9 @@ void SettingsScreen::initialize()
                                             140,
                                             [](lv_obj_t *obj, lv_event_t event) {
                                                 if (event == LV_EVENT_CLICKED) {
-                                                    lv_scr_load(samplingSettingsScr);
-                                                    // screenManager.switchToScreen(BaseScreen::ScreenType::SAMPLING_SETTINGS);
+                                                    samplingSettingsScreen->updateData();
+                                                    screenManager.switchToScreen(
+                                                        BaseScreen::ScreenType::SAMPLING_SETTINGS);
                                                 }
                                             });
     m_samplingSettingsButtonIcon = lv_label_create(m_samplingSettingsButton, NULL);

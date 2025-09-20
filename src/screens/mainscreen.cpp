@@ -5,7 +5,6 @@
 #include <utils/stringConstants.h>
 #include <utils/timeUtils.h>
 
-
 #include <GlobalVariables.hpp>
 
 MainScreen::MainScreen()
@@ -28,8 +27,17 @@ void MainScreen::initialize()
     StyleManager::applyTransparentButton(m_setButton);
 
     // lock button
-    m_lockButton
-        = createButton(m_screenContainer, m_setButton, 14, 18, 95, 7, nullptr); // TODO handle
+    m_lockButton = createButton(m_screenContainer,
+                                m_setButton,
+                                14,
+                                18,
+                                95,
+                                7,
+                                [](lv_obj_t *obj, lv_event_t event) {
+                                    if (event == LV_EVENT_CLICKED) {
+                                        screenManager.switchToScreen(BaseScreen::ScreenType::LOCK);
+                                    }
+                                });
     m_lockButtonLabel = lv_label_create(m_lockButton, NULL);
     lv_obj_set_style_local_text_font(m_lockButton,
                                      LV_OBJ_PART_MAIN,
@@ -145,7 +153,7 @@ void MainScreen::initialize()
         m_particleSizeLabel[i] = lv_label_create(m_screenContainer, NULL);
         lv_label_set_text(m_particleSizeLabel[i], StringConstants::PARTICLES_SIZE[i]);
         StyleManager::applyFont12White(m_particleSizeLabel[i]);
-        lv_obj_set_pos(m_particleSizeLabel[i], Constants::LABEL_PARTICLE_SIZE_POS_X[i], 190); 
+        lv_obj_set_pos(m_particleSizeLabel[i], Constants::LABEL_PARTICLE_SIZE_POS_X[i], 190);
     }
 
     for (int j = 0; j < PARTICLE_SIZE_COUNT - 1; j++) {

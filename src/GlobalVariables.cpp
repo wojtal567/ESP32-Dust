@@ -37,6 +37,7 @@ InfoScreen *infoScreen = nullptr;
 SettingsScreen *settingsScreen = nullptr;
 TimeSettingsScreen *timeSettingsScreen = nullptr;
 SamplingSettingsScreen *samplingSettingsScreen = nullptr;
+LockScreen *lockScreen = nullptr;
 
 // ============================================
 // Application State Variables
@@ -51,21 +52,6 @@ int currentSampleNumber = 1;
 // Legacy variables still used in main.cpp
 String lastSampleTimestamp;
 float temp, humi, pm25Aqi;
-
-// ============================================
-// LVGL UI Objects - Lock Screen
-// ============================================
-lv_obj_t *lockScr = nullptr;
-lv_obj_t *contDateTimeAtLock = nullptr;
-lv_obj_t *labelUnlockButton = nullptr;
-lv_obj_t *unlockButton = nullptr;
-lv_obj_t *labelDateLock = nullptr;
-lv_obj_t *labelTimeLock = nullptr;
-lv_obj_t *wifiStatusAtLock = nullptr;
-lv_obj_t *sdStatusAtLock = nullptr;
-lv_obj_t *wifiStatusAtLockWarning = nullptr;
-lv_obj_t *sdStatusAtLockWarning = nullptr;
-lv_obj_t *ledAtLock = nullptr;
 
 // ============================================
 // LVGL Task Objects (Legacy - should migrate to TaskManager)
@@ -145,28 +131,9 @@ void getSampleFunc(lv_task_t *task)
         sensorManager.sleepDustSensor();
 
         bool lastSampleSaved = isLastSampleSaved();
-        if (lastSampleSaved) {
-            lv_obj_set_style_local_bg_color(ledAtLock,
-                                            LV_LED_PART_MAIN,
-                                            LV_STATE_DEFAULT,
-                                            LV_COLOR_GREEN);
-            lv_obj_set_style_local_shadow_color(ledAtLock,
-                                                LV_LED_PART_MAIN,
-                                                LV_STATE_DEFAULT,
-                                                LV_COLOR_GREEN);
 
-        } else {
-            lv_obj_set_style_local_bg_color(ledAtLock,
-                                            LV_LED_PART_MAIN,
-                                            LV_STATE_DEFAULT,
-                                            LV_COLOR_RED);
-            lv_obj_set_style_local_shadow_color(ledAtLock,
-                                                LV_LED_PART_MAIN,
-                                                LV_STATE_DEFAULT,
-                                                LV_COLOR_RED);
-        }
-
-        mainScreen->updateLedStatus(isLastSampleSaved);
+        mainScreen->updateLedStatus(lastSampleSaved);
+        lockScreen->updateLedStatus(lastSampleSaved);
     }
 }
 

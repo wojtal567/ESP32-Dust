@@ -34,6 +34,7 @@
 // Project Includes - Utilities
 // ============================================
 #include "screens/infoscreen.h"
+#include "screens/lockscreen.h"
 #include "screens/mainscreen.h"
 #include "screens/samplingsettingsscreen.h"
 #include "screens/screenmanager.h"
@@ -68,6 +69,7 @@ extern InfoScreen *infoScreen;
 extern SettingsScreen *settingsScreen;
 extern TimeSettingsScreen *timeSettingsScreen;
 extern SamplingSettingsScreen *samplingSettingsScreen;
+extern LockScreen *lockScreen;
 
 // ============================================
 // Application State Variables
@@ -91,20 +93,6 @@ extern float temp, humi;
 // Runtime sampling state
 extern int currentSampleNumber;
 
-// ============================================
-// LVGL UI Objects - Lock Screen
-// ============================================
-extern lv_obj_t *lockScr;
-extern lv_obj_t *contDateTimeAtLock;
-extern lv_obj_t *labelUnlockButton;
-extern lv_obj_t *unlockButton;
-extern lv_obj_t *labelDateLock;
-extern lv_obj_t *labelTimeLock;
-extern lv_obj_t *wifiStatusAtLock;
-extern lv_obj_t *sdStatusAtLock;
-extern lv_obj_t *wifiStatusAtLockWarning;
-extern lv_obj_t *sdStatusAtLockWarning;
-extern lv_obj_t *ledAtLock;
 // ============================================
 // LVGL Task Objects (Legacy - should migrate to TaskManager)
 // ============================================

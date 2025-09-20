@@ -2,7 +2,8 @@
 #include <HTTPClient.h>
 #include <time.h>
 
-#include <LVGLInits.hpp>
+#include <managers/stylemanager.h>
+#include <LVGLTasks.hpp>
 
 // ! --------------------------------------------REST WebServer config
 void setAppIp()
@@ -95,13 +96,6 @@ void setup()
     // Initialize StyleManager for centralized styling
     StyleManager::initialize();
 
-    // Create old-style screen containers for existing screens
-    lockScr = lv_cont_create(NULL, NULL);
-    lv_obj_set_style_local_bg_color(lockScr, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_BLACK);
-
-    // Initialize other screens using old functions
-    lockScreen();
-
     networkManager.loadConfig(config, StringConstants::CONFIG_FILE_PATH);
 
     mainScreen = new MainScreen();
@@ -122,13 +116,16 @@ void setup()
     samplingSettingsScreen = new SamplingSettingsScreen(config);
     samplingSettingsScreen->initialize();
 
+    lockScreen = new LockScreen();
+    lockScreen->initialize();
+
     screenManager.initialize(mainScreen,
                              settingsScreen,
                              wifiScreen,
                              infoScreen,
                              timeSettingsScreen,
                              samplingSettingsScreen,
-                             nullptr);
+                             lockScreen);
 
     delay(1000);
 

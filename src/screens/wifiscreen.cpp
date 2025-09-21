@@ -146,6 +146,8 @@ void WifiScreen::handleConnectButtonEvent(lv_obj_t *btn, lv_event_t event)
         if (connected) {
             Serial.println("btn_connect -> connected to Wi-Fi! IP: "
                            + networkManager.getIpAddress());
+            rtcManager.syncWithNTP(StringConstants::NTP_SERVER, Constants::GMT_OFFSET_SEC);
+            networkManager.setupServer();
         } else {
             Serial.println(
                 "btn_connect -> can't connect. Probably you have entered wrong credentials.");

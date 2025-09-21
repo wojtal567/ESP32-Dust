@@ -2,11 +2,11 @@
 #include "GlobalVariables.hpp"
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
+#include "api/httpapi.h"
 
 NetworkManager::NetworkManager(MySD *sdCard)
     : sdCard_(sdCard)
     , m_server(80)
-    , m_dateTimeClient(m_ntpUDP, StringConstants::NTP_SERVER, Constants::GMT_OFFSET_SEC)
     , m_wifiTaskHandle(nullptr)
 {}
 
@@ -86,25 +86,16 @@ WebServer &NetworkManager::getServer()
 
 void NetworkManager::setupServer()
 {
-    // This will be implemented when we move server setup from main.cpp
+    HttpApi::setupRouting();
+    m_server.onNotFound(HttpApi::handleNotFound);
+    m_server.begin();
+    Serial.print("[" + String(millis()) + "] ");
+    Serial.println("HTTP server started on port 80");
 }
 
 void NetworkManager::handleServerClient()
 {
     m_server.handleClient();
-}
-
-void NetworkManager::updateDateTime()
-{
-    if (isConnected()) {
-        m_dateTimeClient.begin();
-        m_dateTimeClient.update();
-    }
-}
-
-bool NetworkManager::isNTPConnected() const
-{
-    return isConnected() && m_dateTimeClient.isTimeSet();
 }
 
 void NetworkManager::loadConfig(Types::ConfigData &config, const std::string &configPath)

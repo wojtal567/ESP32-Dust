@@ -1,14 +1,17 @@
 #include "screens/samplingsettingsscreen.h"
 
 #include <managers/stylemanager.h>
+#include <managers/taskmanager.h>
 #include <GlobalVariables.hpp>
 
 // Static instance pointer for LVGL callbacks
 SamplingSettingsScreen *SamplingSettingsScreen::s_activeInstance = nullptr;
 
-SamplingSettingsScreen::SamplingSettingsScreen(const Types::ConfigData &config)
+SamplingSettingsScreen::SamplingSettingsScreen(const Types::ConfigData &config,
+                                               TaskManager *taskManager)
     : BaseScreen(ScreenType::SAMPLING_SETTINGS)
     , m_config(config)
+    , m_taskManager(taskManager)
 {
     s_activeInstance = this;
 }
@@ -313,15 +316,11 @@ void SamplingSettingsScreen::handleSaveButton(lv_obj_t *btn, lv_event_t event)
         config.numberOfSamples = lv_spinbox_get_value(m_samplesNumberSpinbox);
         config.measurePeriod = lv_spinbox_get_value(m_measureAvPeriodSpinbox) * 1000;
         config.turnFanTime = lv_spinbox_get_value(m_turnFanOnTimeSpinbox) * 1000;
-        getSample = lv_task_create(getSampleFunc,
-                                   (config.timeBetweenSavingSamples
-                                    - (config.numberOfSamples - 1) * config.measurePeriod),
-                                   LV_TASK_PRIO_HIGH,
-                                   NULL);
-        turnFanOn = lv_task_create(turnFanOnFunc,
-                                   config.timeBetweenSavingSamples - config.turnFanTime,
-                                   LV_TASK_PRIO_HIGHEST,
-                                   NULL);
+
+        if (m_taskManager) {
+            m_taskManager->recreateSampleTasksFromConfig();
+        }
+
         networkManager.saveConfig(config, StringConstants::CONFIG_FILE_PATH);
         networkManager.printConfig(StringConstants::CONFIG_FILE_PATH);
         screenManager.switchToScreen(BaseScreen::ScreenType::MAIN);

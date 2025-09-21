@@ -3,17 +3,21 @@
 #include <time.h>
 
 #include <managers/stylemanager.h>
-#include <LVGLTasks.hpp>
+#include <managers/taskmanager.h>
+#include "GlobalVariables.hpp"
+// #include <LVGLTasks.hpp> // Commented out - functions moved to TaskManager
 
 // ! --------------------------------------------REST WebServer config
 void setAppIp()
 {
     WebServer &server = networkManager.getServer();
     String postBody = server.arg("plain");
+    Serial.print("[" + String(millis()) + "] ");
     Serial.println(postBody);
     DynamicJsonDocument doc(512);
     DeserializationError error = deserializeJson(doc, postBody);
     if (error) {
+        Serial.print("[" + String(millis()) + "] ");
         Serial.print(F(error.c_str()));
 
         server.send(400,
@@ -22,7 +26,9 @@ void setAppIp()
     } else {
         JsonObject postObj = doc.as<JsonObject>();
 
+        Serial.print("[" + String(millis()) + "] ");
         Serial.print(F("HTTP Method: "));
+        Serial.print("[" + String(millis()) + "] ");
         Serial.println(server.method());
 
         if (server.method() == HTTP_POST) {
@@ -34,7 +40,8 @@ void setAppIp()
                 doc["status"] = "OK";
                 String buf;
                 serializeJson(doc, buf);
-                lv_task_set_prio(getAppLastRecordAndSynchronize, LV_TASK_PRIO_MID);
+
+                taskManager.updateGetAppLastRecordAndSynchronizeTaskPrio(LV_TASK_PRIO_MID);
 
                 server.send(201, F("application/json"), buf);
             } else {
@@ -113,7 +120,7 @@ void setup()
     timeSettingsScreen = new TimeSettingsScreen(config, rtcManager);
     timeSettingsScreen->initialize();
 
-    samplingSettingsScreen = new SamplingSettingsScreen(config);
+    samplingSettingsScreen = new SamplingSettingsScreen(config, &taskManager);
     samplingSettingsScreen->initialize();
 
     lockScreen = new LockScreen();
@@ -129,25 +136,8 @@ void setup()
 
     delay(1000);
 
-    date = lv_task_create(dateTimeFunc, 800, LV_TASK_PRIO_MID, NULL);
-    status = lv_task_create(statusFunc, 5000, LV_TASK_PRIO_LOW, NULL);
+    taskManager.initialize();
 
-    getSample = lv_task_create(getSampleFunc,
-                               (config.timeBetweenSavingSamples
-                                - (config.numberOfSamples - 1) * config.measurePeriod),
-                               LV_TASK_PRIO_HIGH,
-                               NULL);
-    turnFanOn = lv_task_create(turnFanOnFunc,
-                               config.timeBetweenSavingSamples - config.turnFanTime,
-                               LV_TASK_PRIO_HIGHEST,
-                               NULL);
-    inactiveTime = lv_task_create(inactive_screen, 1, LV_TASK_PRIO_HIGH, NULL);
-    getAppLastRecordAndSynchronize = lv_task_create_basic();
-    lv_task_set_cb(getAppLastRecordAndSynchronize, fetchLastRecordAndSynchronize);
-    lv_task_set_period(getAppLastRecordAndSynchronize,
-                       30000); // Fixed period instead of fetchPeriod
-    lv_task_set_prio(getAppLastRecordAndSynchronize, LV_TASK_PRIO_MID);
-    lv_task_handler();
     networkManager.printConfig(StringConstants::CONFIG_FILE_PATH);
 
     if (config.ssid != "") {

@@ -29,6 +29,7 @@
 #include "managers/SensorManager.h"
 #include "managers/displaymanager.h"
 #include "managers/networkmanager.h"
+#include "managers/taskmanager.h"
 
 // ============================================
 // Project Includes - Utilities
@@ -43,7 +44,6 @@
 #include "screens/wifiscreen.h"
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
-
 // ============================================
 // Network Components - Application IP Address
 // ============================================
@@ -63,6 +63,7 @@ extern NetworkManager networkManager;
 extern DisplayManager displayManager;
 extern RTCManager rtcManager;
 extern ScreenManager screenManager;
+extern TaskManager taskManager;
 extern MainScreen *mainScreen;
 extern WifiScreen *wifiScreen;
 extern InfoScreen *infoScreen;
@@ -93,22 +94,7 @@ extern float temp, humi;
 // Runtime sampling state
 extern int currentSampleNumber;
 
-// ============================================
-// LVGL Task Objects (Legacy - should migrate to TaskManager)
-// ============================================
-extern lv_task_t *turnFanOn;
-extern lv_task_t *getSample;
-extern lv_task_t *getAppLastRecordAndSynchronize;
-extern lv_task_t *inactiveTime;
-extern lv_task_t *date;
-extern lv_task_t *status;
-
-// temporarily here - will be moved to TaskManager
-
 // Get single sample and set text
 void getSampleFunc(lv_task_t *task);
 
 bool isLastSampleSaved();
-
-// Function that turns fan on
-void turnFanOnFunc(lv_task_t *task);

@@ -4,10 +4,12 @@
 
 #include "utils/types.h"
 
+class TaskManager;
+
 class SamplingSettingsScreen : public BaseScreen
 {
 public:
-    SamplingSettingsScreen(const Types::ConfigData &config);
+    SamplingSettingsScreen(const Types::ConfigData &config, TaskManager *taskManager);
     ~SamplingSettingsScreen() override;
 
     void initialize() override;
@@ -87,4 +89,5 @@ private:
     lv_obj_t *m_saveButtonLabel{nullptr};
 
     Types::ConfigData m_config;
+    TaskManager *m_taskManager;
 };

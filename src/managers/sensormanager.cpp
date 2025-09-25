@@ -1,4 +1,4 @@
-#include "managers/SensorManager.h"
+#include "managers/sensormanager.h"
 #include <Arduino.h>
 #include "utils/constants.h"
 

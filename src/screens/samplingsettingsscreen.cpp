@@ -1,10 +1,10 @@
 #include "screens/samplingsettingsscreen.h"
 
-#include <managers/networkmanager.h>
-#include <managers/stylemanager.h>
-#include <managers/taskmanager.h>
-#include <utils/constants.h>
-#include <utils/stringConstants.h>
+#include "managers/networkmanager.h"
+#include "managers/stylemanager.h"
+#include "managers/taskmanager.h"
+#include "utils/constants.h"
+#include "utils/stringConstants.h"
 
 // Static instance pointer for LVGL callbacks
 SamplingSettingsScreen *SamplingSettingsScreen::s_activeInstance = nullptr;

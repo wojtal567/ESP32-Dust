@@ -1,9 +1,9 @@
 #include "screens/timesettingsscreen.h"
 
-#include <managers/networkmanager.h>
-#include <managers/stylemanager.h>
-#include <utils/constants.h>
-#include <utils/stringConstants.h>
+#include "managers/networkmanager.h"
+#include "managers/stylemanager.h"
+#include "utils/constants.h"
+#include "utils/stringConstants.h"
 
 // Static instance pointer for LVGL callbacks
 TimeSettingsScreen *TimeSettingsScreen::s_activeInstance = nullptr;

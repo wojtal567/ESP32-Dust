@@ -1,9 +1,9 @@
 #pragma once
 
 #include <SD.h>
-#include <SQLiteDb.hpp>
 #include <string>
-#include "Utils/types.h"
+#include "SQLiteDb.hpp"
+#include "utils/types.h"
 
 // TODO replace by Types::ConfigData
 struct Config

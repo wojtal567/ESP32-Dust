@@ -2,24 +2,24 @@
 #include <HTTPClient.h>
 #include <time.h>
 
-#include <managers/displaymanager.h>
-#include <managers/networkmanager.h>
-#include <managers/rtcmanager.h>
-#include <managers/sensormanager.h>
-#include <managers/stylemanager.h>
-#include <managers/taskmanager.h>
-#include <screens/infoscreen.h>
-#include <screens/lockscreen.h>
-#include <screens/mainscreen.h>
-#include <screens/samplingsettingsscreen.h>
-#include <screens/screenmanager.h>
-#include <screens/settingsscreen.h>
-#include <screens/timesettingsscreen.h>
-#include <screens/wifiscreen.h>
+#include "managers/displaymanager.h"
+#include "managers/networkmanager.h"
+#include "managers/rtcmanager.h"
+#include "managers/sensormanager.h"
+#include "managers/stylemanager.h"
+#include "managers/taskmanager.h"
+#include "screens/infoscreen.h"
+#include "screens/lockscreen.h"
+#include "screens/mainscreen.h"
+#include "screens/samplingsettingsscreen.h"
+#include "screens/screenmanager.h"
+#include "screens/settingsscreen.h"
+#include "screens/timesettingsscreen.h"
+#include "screens/wifiscreen.h"
 
 #include <sqlite3.h>
-#include <utils/constants.h>
-#include <utils/stringConstants.h>
+#include "utils/constants.h"
+#include "utils/stringConstants.h"
 
 NetworkManager *networkManager = nullptr;
 DisplayManager *displayManager = nullptr;

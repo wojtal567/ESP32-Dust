@@ -1,7 +1,7 @@
 #include "screens/lockscreen.h"
 
-#include <managers/stylemanager.h>
-#include <utils/stringConstants.h>
+#include "managers/stylemanager.h"
+#include "utils/stringConstants.h"
 
 LockScreen *LockScreen::s_activeInstance = nullptr;
 

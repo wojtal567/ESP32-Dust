@@ -1,9 +1,9 @@
 #include "screens/wifiscreen.h"
 
-#include <utils/constants.h>
-#include <utils/stringConstants.h>
 #include "managers/networkmanager.h"
 #include "managers/stylemanager.h"
+#include "utils/constants.h"
+#include "utils/stringConstants.h"
 
 // Static instance tracking
 WifiScreen *WifiScreen::s_activeInstance = nullptr;

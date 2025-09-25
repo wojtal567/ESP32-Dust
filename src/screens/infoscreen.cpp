@@ -1,7 +1,7 @@
 #include "screens/infoscreen.h"
 
-#include <managers/networkmanager.h>
-#include <managers/stylemanager.h>
+#include "managers/networkmanager.h"
+#include "managers/stylemanager.h"
 
 InfoScreen *InfoScreen::s_activeInstance = nullptr;
 

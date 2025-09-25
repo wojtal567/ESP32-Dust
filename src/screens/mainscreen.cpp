@@ -1,9 +1,9 @@
 #include "screens/mainscreen.h"
 
-#include <managers/stylemanager.h>
-#include <utils/constants.h>
-#include <utils/stringConstants.h>
-#include <utils/timeUtils.h>
+#include "managers/stylemanager.h"
+#include "utils/constants.h"
+#include "utils/stringConstants.h"
+#include "utils/timeUtils.h"
 
 MainScreen* MainScreen::s_activeInstance = nullptr;
 

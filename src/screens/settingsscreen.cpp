@@ -3,8 +3,8 @@
 #include "screens/samplingsettingsscreen.h"
 #include "screens/timesettingsscreen.h"
 
-#include <managers/stylemanager.h>
-#include <utils/stringConstants.h>
+#include "managers/stylemanager.h"
+#include "utils/stringConstants.h"
 
 SettingsScreen *SettingsScreen::s_activeInstance = nullptr;
 

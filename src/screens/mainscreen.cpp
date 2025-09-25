@@ -5,19 +5,13 @@
 #include "utils/stringConstants.h"
 #include "utils/timeUtils.h"
 
-MainScreen* MainScreen::s_activeInstance = nullptr;
-
 MainScreen::MainScreen(ScreenManager &screenManager)
-    : BaseScreen(ScreenType::MAIN), m_screenManager(screenManager)
+    : BaseScreen<MainScreen>(ScreenType::MAIN), m_screenManager(screenManager)
 {
-    s_activeInstance = this;
 }
 
-MainScreen::~MainScreen() 
+MainScreen::~MainScreen()
 {
-    if (s_activeInstance == this) {
-        s_activeInstance = nullptr;
-    }
 }
 
 void MainScreen::initialize()
@@ -281,28 +275,28 @@ void MainScreen::updateLedStatus(bool isLastSampleSaved)
 
 void MainScreen::settingsButtonCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleSettingsButtonEvent(btn, event);
+    if (auto* instance = getActiveInstance()) {
+        instance->handleSettingsButtonEvent(btn, event);
     }
 }
 
 void MainScreen::lockButtonCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleLockButtonEvent(btn, event);
+    if (auto* instance = getActiveInstance()) {
+        instance->handleLockButtonEvent(btn, event);
     }
 }
 
 void MainScreen::handleSettingsButtonEvent(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
-        m_screenManager.switchToScreen(BaseScreen::ScreenType::SETTINGS);
+        m_screenManager.switchToScreen(ScreenType::SETTINGS);
     }
 }
 
 void MainScreen::handleLockButtonEvent(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
-        m_screenManager.switchToScreen(BaseScreen::ScreenType::LOCK);
+        m_screenManager.switchToScreen(ScreenType::LOCK);
     }
 }

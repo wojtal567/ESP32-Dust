@@ -7,29 +7,29 @@ class ScreenManager
 public:
     ScreenManager();
 
-    void initialize(BaseScreen *mainScreen,
-                    BaseScreen *settingsScreen,
-                    BaseScreen *wifiScreen,
-                    BaseScreen *infoScreen,
-                    BaseScreen *timeSettingsScreen,
-                    BaseScreen *samplingSettingsScreen,
-                    BaseScreen *lockScreen);
+    void initialize(BaseScreenInterface *mainScreen,
+                    BaseScreenInterface *settingsScreen,
+                    BaseScreenInterface *wifiScreen,
+                    BaseScreenInterface *infoScreen,
+                    BaseScreenInterface *timeSettingsScreen,
+                    BaseScreenInterface *samplingSettingsScreen,
+                    BaseScreenInterface *lockScreen);
 
-    bool switchToScreen(BaseScreen::ScreenType type);
+    bool switchToScreen(ScreenType type);
 
-    BaseScreen *getCurrentScreen() { return m_currentScreen; }
+    BaseScreenInterface *getCurrentScreen() { return m_currentScreen; }
 
-    BaseScreen *getScreen(BaseScreen::ScreenType type);
+    BaseScreenInterface *getScreen(ScreenType type);
 
     bool hasActiveScreen() { return m_currentScreen != nullptr; }
 
 private:
-    BaseScreen *m_currentScreen = nullptr;
-    BaseScreen *m_mainScreen = nullptr;
-    BaseScreen *m_settingsScreen = nullptr;
-    BaseScreen *m_wifiScreen = nullptr;
-    BaseScreen *m_infoScreen = nullptr;
-    BaseScreen *m_timeSettingsScreen = nullptr;
-    BaseScreen *m_samplingSettingsScreen = nullptr;
-    BaseScreen *m_lockScreen = nullptr;
+    BaseScreenInterface *m_currentScreen = nullptr;
+    BaseScreenInterface *m_mainScreen = nullptr;
+    BaseScreenInterface *m_settingsScreen = nullptr;
+    BaseScreenInterface *m_wifiScreen = nullptr;
+    BaseScreenInterface *m_infoScreen = nullptr;
+    BaseScreenInterface *m_timeSettingsScreen = nullptr;
+    BaseScreenInterface *m_samplingSettingsScreen = nullptr;
+    BaseScreenInterface *m_lockScreen = nullptr;
 };

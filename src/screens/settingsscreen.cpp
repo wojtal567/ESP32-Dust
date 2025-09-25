@@ -6,14 +6,10 @@
 #include "managers/stylemanager.h"
 #include "utils/stringConstants.h"
 
-SettingsScreen *SettingsScreen::s_activeInstance = nullptr;
-
 SettingsScreen::SettingsScreen(ScreenManager &screenManager)
-    : BaseScreen(ScreenType::SETTINGS)
+    : BaseScreen<SettingsScreen>(ScreenType::SETTINGS)
     , m_screenManager(screenManager)
-{
-    s_activeInstance = this;
-}
+{}
 
 SettingsScreen::~SettingsScreen() {}
 
@@ -85,50 +81,50 @@ void SettingsScreen::initialize()
 
 void SettingsScreen::backButtonCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleBackButtonEvent(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleBackButtonEvent(btn, event);
     }
 }
 
 void SettingsScreen::wifiSettingsButtonCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleWifiSettingsButtonEvent(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleWifiSettingsButtonEvent(btn, event);
     }
 }
 
 void SettingsScreen::infoButtonCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleInfoButtonEvent(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleInfoButtonEvent(btn, event);
     }
 }
 
 void SettingsScreen::timeSettingsButtonCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleTimeSettingsButtonEvent(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleTimeSettingsButtonEvent(btn, event);
     }
 }
 
 void SettingsScreen::samplingSettingsButtonCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleSamplingSettingsButtonEvent(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleSamplingSettingsButtonEvent(btn, event);
     }
 }
 
 void SettingsScreen::handleBackButtonEvent(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
-        m_screenManager.switchToScreen(BaseScreen::ScreenType::MAIN);
+        m_screenManager.switchToScreen(ScreenType::MAIN);
     }
 }
 
 void SettingsScreen::handleWifiSettingsButtonEvent(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
-        m_screenManager.switchToScreen(BaseScreen::ScreenType::WIFI);
+        m_screenManager.switchToScreen(ScreenType::WIFI);
     }
 }
 
@@ -136,12 +132,11 @@ void SettingsScreen::handleInfoButtonEvent(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
         // Update the info screen before switching
-        auto *infoScreen = static_cast<InfoScreen *>(
-            m_screenManager.getScreen(BaseScreen::ScreenType::INFO));
+        auto *infoScreen = static_cast<InfoScreen *>(m_screenManager.getScreen(ScreenType::INFO));
         if (infoScreen) {
             infoScreen->updateConfigLabel();
         }
-        m_screenManager.switchToScreen(BaseScreen::ScreenType::INFO);
+        m_screenManager.switchToScreen(ScreenType::INFO);
     }
 }
 
@@ -150,11 +145,11 @@ void SettingsScreen::handleTimeSettingsButtonEvent(lv_obj_t *btn, lv_event_t eve
     if (event == LV_EVENT_CLICKED) {
         // Update the time settings screen before switching
         auto *timeSettingsScreen = static_cast<TimeSettingsScreen *>(
-            m_screenManager.getScreen(BaseScreen::ScreenType::TIME_SETTINGS));
+            m_screenManager.getScreen(ScreenType::TIME_SETTINGS));
         if (timeSettingsScreen) {
             timeSettingsScreen->updateData();
         }
-        m_screenManager.switchToScreen(BaseScreen::ScreenType::TIME_SETTINGS);
+        m_screenManager.switchToScreen(ScreenType::TIME_SETTINGS);
     }
 }
 
@@ -163,10 +158,10 @@ void SettingsScreen::handleSamplingSettingsButtonEvent(lv_obj_t *btn, lv_event_t
     if (event == LV_EVENT_CLICKED) {
         // Update the sampling settings screen before switching
         auto *samplingSettingsScreen = static_cast<SamplingSettingsScreen *>(
-            m_screenManager.getScreen(BaseScreen::ScreenType::SAMPLING_SETTINGS));
+            m_screenManager.getScreen(ScreenType::SAMPLING_SETTINGS));
         if (samplingSettingsScreen) {
             samplingSettingsScreen->updateData();
         }
-        m_screenManager.switchToScreen(BaseScreen::ScreenType::SAMPLING_SETTINGS);
+        m_screenManager.switchToScreen(ScreenType::SAMPLING_SETTINGS);
     }
 }

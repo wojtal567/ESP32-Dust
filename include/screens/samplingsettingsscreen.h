@@ -8,7 +8,7 @@
 class TaskManager;
 class NetworkManager;
 
-class SamplingSettingsScreen : public BaseScreen
+class SamplingSettingsScreen : public BaseScreen<SamplingSettingsScreen>
 {
 public:
     SamplingSettingsScreen(const Types::ConfigData &config,
@@ -53,9 +53,6 @@ private:
     static void measureAvPeriodDecrementCallback(lv_obj_t *btn, lv_event_t event);
     static void turnFanOnTimeIncrementCallback(lv_obj_t *btn, lv_event_t event);
     static void turnFanOnTimeDecrementCallback(lv_obj_t *btn, lv_event_t event);
-
-    // Instance tracking for callbacks
-    static SamplingSettingsScreen *s_activeInstance;
 
     lv_obj_t *m_backButton{nullptr};
     lv_obj_t *m_backButtonLabel{nullptr};

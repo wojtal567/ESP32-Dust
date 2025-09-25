@@ -5,21 +5,16 @@
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
 
-// Static instance pointer for LVGL callbacks
-TimeSettingsScreen *TimeSettingsScreen::s_activeInstance = nullptr;
-
 TimeSettingsScreen::TimeSettingsScreen(const Types::ConfigData &config,
                                        RTCManager &rtc,
                                        NetworkManager *networkManager,
                                        ScreenManager &screenManager)
-    : BaseScreen(ScreenType::TIME_SETTINGS)
+    : BaseScreen<TimeSettingsScreen>(ScreenType::TIME_SETTINGS)
     , m_config(config)
     , m_rtcManager(rtc)
     , m_networkManager(networkManager)
     , m_screenManager(screenManager)
-{
-    s_activeInstance = this;
-}
+{}
 
 TimeSettingsScreen::~TimeSettingsScreen() {}
 
@@ -353,77 +348,77 @@ void TimeSettingsScreen::handleSaveButton(lv_obj_t *btn, lv_event_t event)
                 m_rtcManager.setDateTime(*dt);
                 m_rtcManager.setIsRunning(true);
             }
-            m_screenManager.switchToScreen(BaseScreen::ScreenType::MAIN);
+            m_screenManager.switchToScreen(ScreenType::MAIN);
     }
 }
 
 // Static wrappers for LVGL callbacks
 void TimeSettingsScreen::hourIncrementCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleHourIncrement(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleHourIncrement(btn, event);
     }
 }
 
 void TimeSettingsScreen::hourDecrementCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleHourDecrement(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleHourDecrement(btn, event);
     }
 }
 
 void TimeSettingsScreen::minuteIncrementCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleMinuteIncrement(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleMinuteIncrement(btn, event);
     }
 }
 
 void TimeSettingsScreen::minuteDecrementCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleMinuteDecrement(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleMinuteDecrement(btn, event);
     }
 }
 
 void TimeSettingsScreen::dateButtonCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleDateButton(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleDateButton(btn, event);
     }
 }
 
 void TimeSettingsScreen::calendarEventCallback(lv_obj_t *calendar, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleCalendarEvent(calendar, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleCalendarEvent(calendar, event);
     }
 }
 
 void TimeSettingsScreen::syncNtpButtonCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleSyncNtpButton(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleSyncNtpButton(btn, event);
     }
 }
 
 void TimeSettingsScreen::saveButtonCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleSaveButton(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleSaveButton(btn, event);
     }
 }
 
 void TimeSettingsScreen::backButtonCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleBackButton(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleBackButton(btn, event);
     }
 }
 
 void TimeSettingsScreen::handleBackButton(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
-        m_screenManager.switchToScreen(BaseScreen::ScreenType::SETTINGS);
+        m_screenManager.switchToScreen(ScreenType::SETTINGS);
     }
 }

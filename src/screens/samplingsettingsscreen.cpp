@@ -6,21 +6,16 @@
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
 
-// Static instance pointer for LVGL callbacks
-SamplingSettingsScreen *SamplingSettingsScreen::s_activeInstance = nullptr;
-
 SamplingSettingsScreen::SamplingSettingsScreen(const Types::ConfigData &config,
                                                TaskManager *taskManager,
                                                NetworkManager *networkManager,
                                                ScreenManager &screenManager)
-    : BaseScreen(ScreenType::SAMPLING_SETTINGS)
+    : BaseScreen<SamplingSettingsScreen>(ScreenType::SAMPLING_SETTINGS)
     , m_config(config)
     , m_taskManager(taskManager)
     , m_networkManager(networkManager)
     , m_screenManager(screenManager)
-{
-    s_activeInstance = this;
-}
+{}
 
 SamplingSettingsScreen::~SamplingSettingsScreen() {}
 
@@ -318,7 +313,7 @@ void SamplingSettingsScreen::handleSaveButton(lv_obj_t *btn, lv_event_t event)
 
         m_networkManager->saveConfig(m_config, StringConstants::CONFIG_FILE_PATH);
         m_networkManager->printConfig(StringConstants::CONFIG_FILE_PATH);
-        m_screenManager.switchToScreen(BaseScreen::ScreenType::MAIN);
+        m_screenManager.switchToScreen(ScreenType::MAIN);
     }
 }
 
@@ -533,105 +528,105 @@ void SamplingSettingsScreen::handleTurnFanOnTimeDecrement(lv_obj_t *btn, lv_even
 // Static wrappers for LVGL callbacks
 void SamplingSettingsScreen::saveButtonCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleSaveButton(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleSaveButton(btn, event);
     }
 }
 
 void SamplingSettingsScreen::hourIncrementCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleHourIncrement(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleHourIncrement(btn, event);
     }
 }
 
 void SamplingSettingsScreen::hourDecrementCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleHourDecrement(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleHourDecrement(btn, event);
     }
 }
 
 void SamplingSettingsScreen::minuteIncrementCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleMinuteIncrement(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleMinuteIncrement(btn, event);
     }
 }
 
 void SamplingSettingsScreen::minuteDecrementCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleMinuteDecrement(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleMinuteDecrement(btn, event);
     }
 }
 
 void SamplingSettingsScreen::secondIncrementCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleSecondIncrement(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleSecondIncrement(btn, event);
     }
 }
 
 void SamplingSettingsScreen::secondDecrementCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleSecondDecrement(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleSecondDecrement(btn, event);
     }
 }
 
 void SamplingSettingsScreen::sampleNumberIncrementCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleSampleNumberIncrement(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleSampleNumberIncrement(btn, event);
     }
 }
 
 void SamplingSettingsScreen::sampleNumberDecrementCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleSampleNumberDecrement(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleSampleNumberDecrement(btn, event);
     }
 }
 
 void SamplingSettingsScreen::measureAvPeriodIncrementCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleMeasureAvPeriodIncrement(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleMeasureAvPeriodIncrement(btn, event);
     }
 }
 
 void SamplingSettingsScreen::measureAvPeriodDecrementCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleMeasureAvPeriodDecrement(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleMeasureAvPeriodDecrement(btn, event);
     }
 }
 
 void SamplingSettingsScreen::turnFanOnTimeIncrementCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleTurnFanOnTimeIncrement(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleTurnFanOnTimeIncrement(btn, event);
     }
 }
 
 void SamplingSettingsScreen::turnFanOnTimeDecrementCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleTurnFanOnTimeDecrement(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleTurnFanOnTimeDecrement(btn, event);
     }
 }
 
 void SamplingSettingsScreen::backButtonCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleBackButtonEvent(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleBackButtonEvent(btn, event);
     }
 }
 
 void SamplingSettingsScreen::handleBackButtonEvent(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
-        m_screenManager.switchToScreen(BaseScreen::ScreenType::SETTINGS);
+        m_screenManager.switchToScreen(ScreenType::SETTINGS);
     }
 }

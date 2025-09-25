@@ -3,21 +3,12 @@
 #include "managers/stylemanager.h"
 #include "utils/stringConstants.h"
 
-LockScreen *LockScreen::s_activeInstance = nullptr;
-
 LockScreen::LockScreen(ScreenManager &screenManager)
-    : BaseScreen(ScreenType::LOCK)
+    : BaseScreen<LockScreen>(ScreenType::LOCK)
     , m_screenManager(screenManager)
-{
-    s_activeInstance = this;
-}
+{}
 
-LockScreen::~LockScreen()
-{
-    if (s_activeInstance == this) {
-        s_activeInstance = nullptr;
-    }
-}
+LockScreen::~LockScreen() {}
 
 void LockScreen::initialize()
 {
@@ -106,14 +97,14 @@ void LockScreen::updateLedStatus(bool lastSampleSaved)
 
 void LockScreen::unlockButtonCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleUnlockButtonEvent(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleUnlockButtonEvent(btn, event);
     }
 }
 
 void LockScreen::handleUnlockButtonEvent(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
-        m_screenManager.switchToScreen(BaseScreen::ScreenType::MAIN);
+        m_screenManager.switchToScreen(ScreenType::MAIN);
     }
 }

@@ -5,21 +5,16 @@
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
 
-// Static instance tracking
-WifiScreen *WifiScreen::s_activeInstance = nullptr;
-
 WifiScreen::WifiScreen(const Types::ConfigData &config,
                        NetworkManager *networkManager,
                        RTCManager &rtc,
                        ScreenManager &screenManager)
-    : BaseScreen(ScreenType::WIFI)
+    : BaseScreen<WifiScreen>(ScreenType::WIFI)
     , m_config(config)
     , m_networkManager(networkManager)
     , m_rtcManager(rtc)
     , m_screenManager(screenManager)
-{
-    s_activeInstance = this;
-}
+{}
 
 WifiScreen::~WifiScreen() {}
 
@@ -108,7 +103,7 @@ void WifiScreen::handleKeyboardEvent(lv_obj_t *kb, lv_event_t event)
 void WifiScreen::handleCancelButtonEvent(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
-        m_screenManager.switchToScreen(BaseScreen::ScreenType::SETTINGS);
+        m_screenManager.switchToScreen(ScreenType::SETTINGS);
         lv_textarea_set_text(m_ssidTextArea, "");
         lv_textarea_set_text(m_passwordTextArea, "");
     }
@@ -160,7 +155,7 @@ void WifiScreen::handleConnectButtonEvent(lv_obj_t *btn, lv_event_t event)
             Serial.println(
                 "btn_connect -> can't connect. Probably you have entered wrong credentials.");
         }
-        m_screenManager.switchToScreen(BaseScreen::ScreenType::MAIN);
+        m_screenManager.switchToScreen(ScreenType::MAIN);
         lv_textarea_set_text(m_ssidTextArea, "");
         lv_textarea_set_text(m_passwordTextArea, "");
     }
@@ -169,35 +164,35 @@ void WifiScreen::handleConnectButtonEvent(lv_obj_t *btn, lv_event_t event)
 // Static callback wrappers
 void WifiScreen::textAreaCallback(lv_obj_t *ta, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleTextAreaEvent(ta, event);
+    if (auto instance = getActiveInstance()) {
+        instance->handleTextAreaEvent(ta, event);
     }
 }
 
 void WifiScreen::keyboardCallback(lv_obj_t *kb, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleKeyboardEvent(kb, event);
+    if (auto instance = getActiveInstance()) {
+        instance->handleKeyboardEvent(kb, event);
     }
 }
 
 void WifiScreen::cancelButtonCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleCancelButtonEvent(btn, event);
+    if (auto instance = getActiveInstance()) {
+        instance->handleCancelButtonEvent(btn, event);
     }
 }
 
 void WifiScreen::showPasswordButtonCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleShowPasswordButtonEvent(btn, event);
+    if (auto instance = getActiveInstance()) {
+        instance->handleShowPasswordButtonEvent(btn, event);
     }
 }
 
 void WifiScreen::connectButtonCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleConnectButtonEvent(btn, event);
+    if (auto instance = getActiveInstance()) {
+        instance->handleConnectButtonEvent(btn, event);
     }
 }

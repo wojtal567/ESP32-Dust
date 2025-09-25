@@ -8,7 +8,7 @@
 
 class NetworkManager;
 
-class InfoScreen : public BaseScreen
+class InfoScreen : public BaseScreen<InfoScreen>
 {
 public:
     InfoScreen(NetworkManager *networkManager,
@@ -34,6 +34,4 @@ private:
     // Static callbacks
     static void backButtonCallback(lv_obj_t *btn, lv_event_t event);
     void handleBackButtonEvent(lv_obj_t *btn, lv_event_t event);
-    
-    static InfoScreen* s_activeInstance;
 };

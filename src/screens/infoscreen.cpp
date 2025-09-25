@@ -3,18 +3,14 @@
 #include "managers/networkmanager.h"
 #include "managers/stylemanager.h"
 
-InfoScreen *InfoScreen::s_activeInstance = nullptr;
-
 InfoScreen::InfoScreen(NetworkManager *networkManager,
                        const Types::ConfigData &config,
                        ScreenManager &screenManager)
-    : BaseScreen(ScreenType::INFO)
+    : BaseScreen<InfoScreen>(ScreenType::INFO)
     , m_networkManager(networkManager)
     , m_config(config)
     , m_screenManager(screenManager)
-{
-    s_activeInstance = this;
-}
+{}
 
 InfoScreen::~InfoScreen() {}
 
@@ -73,14 +69,14 @@ void InfoScreen::updateConfigLabel()
 
 void InfoScreen::backButtonCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (s_activeInstance) {
-        s_activeInstance->handleBackButtonEvent(btn, event);
+    if (auto *instance = getActiveInstance()) {
+        instance->handleBackButtonEvent(btn, event);
     }
 }
 
 void InfoScreen::handleBackButtonEvent(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
-        m_screenManager.switchToScreen(BaseScreen::ScreenType::SETTINGS);
+        m_screenManager.switchToScreen(ScreenType::SETTINGS);
     }
 }

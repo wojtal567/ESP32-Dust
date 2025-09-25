@@ -8,7 +8,7 @@
 
 class NetworkManager;
 
-class TimeSettingsScreen : public BaseScreen
+class TimeSettingsScreen : public BaseScreen<TimeSettingsScreen>
 {
 public:
     TimeSettingsScreen(const Types::ConfigData &config,
@@ -44,9 +44,6 @@ private:
     static void calendarEventCallback(lv_obj_t *calendar, lv_event_t event);
     static void syncNtpButtonCallback(lv_obj_t *btn, lv_event_t event);
     static void saveButtonCallback(lv_obj_t *btn, lv_event_t event);
-
-    // Instance tracking for callbacks
-    static TimeSettingsScreen *s_activeInstance;
 
     lv_obj_t *m_backButton{nullptr};
     lv_obj_t *m_backButtonLabel{nullptr};

@@ -286,7 +286,7 @@ void TaskManager::inactiveScreenFunc(lv_task_t *task)
     if (m_config.lcdLockTime != -1) {
         if (lv_disp_get_inactive_time(NULL) > m_config.lcdLockTime) {
             if (m_screenManager.getCurrentScreen() != m_lockScreen) {
-                m_screenManager.switchToScreen(BaseScreen::ScreenType::LOCK);
+                m_screenManager.switchToScreen(ScreenType::LOCK);
             }
         }
     }

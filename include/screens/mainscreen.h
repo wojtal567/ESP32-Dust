@@ -12,11 +12,10 @@ constexpr lv_color_t AIR_QUALITY_COLORS[6] = {LV_COLOR_GREEN,
                                               LV_COLOR_RED,
                                               LV_COLOR_RED};
 
-class MainScreen : public BaseScreen
+class MainScreen : public BaseScreen<MainScreen>
 {
 public:
     MainScreen(ScreenManager &screenManager);
-
     ~MainScreen();
 
     void initialize() override;
@@ -88,6 +87,4 @@ private:
     static void lockButtonCallback(lv_obj_t *btn, lv_event_t event);
     void handleSettingsButtonEvent(lv_obj_t *btn, lv_event_t event);
     void handleLockButtonEvent(lv_obj_t *btn, lv_event_t event);
-
-    static MainScreen *s_activeInstance;
 };

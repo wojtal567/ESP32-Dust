@@ -8,7 +8,7 @@
 
 class NetworkManager;
 
-class WifiScreen : public BaseScreen
+class WifiScreen : public BaseScreen<WifiScreen>
 {
 public:
     WifiScreen(const Types::ConfigData &config,
@@ -32,8 +32,6 @@ private:
     static void cancelButtonCallback(lv_obj_t *btn, lv_event_t event);
     static void showPasswordButtonCallback(lv_obj_t *btn, lv_event_t event);
     static void connectButtonCallback(lv_obj_t *btn, lv_event_t event);
-    // Instance tracking for callbacks
-    static WifiScreen* s_activeInstance;
 
     lv_obj_t *m_cancelButton{nullptr};
     lv_obj_t *m_cancelButtonLabel{nullptr};

@@ -122,7 +122,7 @@ void setup()
                 "setup -> can't connect to Wi-Fi - probably no data or corrupted or wrong!");
     }
 
-    screenManager.switchToScreen(BaseScreen::ScreenType::MAIN);
+    screenManager.switchToScreen(ScreenType::MAIN);
 
     delay(500);
 }

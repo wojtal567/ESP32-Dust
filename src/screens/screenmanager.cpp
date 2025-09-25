@@ -11,13 +11,13 @@ ScreenManager::ScreenManager()
     , m_lockScreen(nullptr)
 {}
 
-void ScreenManager::initialize(BaseScreen *mainScreen,
-                               BaseScreen *settingsScreen,
-                               BaseScreen *wifiScreen,
-                               BaseScreen *infoScreen,
-                               BaseScreen *timeSettingsScreen,
-                               BaseScreen *samplingSettingsScreen,
-                               BaseScreen *lockScreen)
+void ScreenManager::initialize(BaseScreenInterface *mainScreen,
+                               BaseScreenInterface *settingsScreen,
+                               BaseScreenInterface *wifiScreen,
+                               BaseScreenInterface *infoScreen,
+                               BaseScreenInterface *timeSettingsScreen,
+                               BaseScreenInterface *samplingSettingsScreen,
+                               BaseScreenInterface *lockScreen)
 {
     m_mainScreen = mainScreen;
     m_settingsScreen = settingsScreen;
@@ -28,9 +28,9 @@ void ScreenManager::initialize(BaseScreen *mainScreen,
     m_lockScreen = lockScreen;
 }
 
-bool ScreenManager::switchToScreen(BaseScreen::ScreenType type)
+bool ScreenManager::switchToScreen(ScreenType type)
 {
-    BaseScreen *targetScreen = getScreen(type);
+    BaseScreenInterface *targetScreen = getScreen(type);
     if (!targetScreen) {
         return false; // Screen not found
     }
@@ -46,22 +46,22 @@ bool ScreenManager::switchToScreen(BaseScreen::ScreenType type)
     return true;
 }
 
-BaseScreen *ScreenManager::getScreen(BaseScreen::ScreenType type)
+BaseScreenInterface *ScreenManager::getScreen(ScreenType type)
 {
     switch (type) {
-    case BaseScreen::ScreenType::MAIN:
+    case ScreenType::MAIN:
         return m_mainScreen;
-    case BaseScreen::ScreenType::SETTINGS:
+    case ScreenType::SETTINGS:
         return m_settingsScreen;
-    case BaseScreen::ScreenType::WIFI:
+    case ScreenType::WIFI:
         return m_wifiScreen;
-    case BaseScreen::ScreenType::INFO:
+    case ScreenType::INFO:
         return m_infoScreen;
-    case BaseScreen::ScreenType::TIME_SETTINGS:
+    case ScreenType::TIME_SETTINGS:
         return m_timeSettingsScreen;
-    case BaseScreen::ScreenType::SAMPLING_SETTINGS:
+    case ScreenType::SAMPLING_SETTINGS:
         return m_samplingSettingsScreen;
-    case BaseScreen::ScreenType::LOCK:
+    case ScreenType::LOCK:
         return m_lockScreen;
     default:
         return nullptr;

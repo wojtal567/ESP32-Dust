@@ -3,7 +3,7 @@
 #include "screens/basescreen.h"
 #include "screens/screenmanager.h"
 
-class SettingsScreen : public BaseScreen
+class SettingsScreen : public BaseScreen<SettingsScreen>
 {
 public:
     SettingsScreen(ScreenManager &screenManager);
@@ -41,6 +41,4 @@ private:
     void handleInfoButtonEvent(lv_obj_t *btn, lv_event_t event);
     void handleTimeSettingsButtonEvent(lv_obj_t *btn, lv_event_t event);
     void handleSamplingSettingsButtonEvent(lv_obj_t *btn, lv_event_t event);
-    
-    static SettingsScreen* s_activeInstance;
 };

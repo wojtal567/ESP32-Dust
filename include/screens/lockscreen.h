@@ -6,7 +6,7 @@
 
 #include <Arduino.h>
 
-class LockScreen : public BaseScreen
+class LockScreen : public BaseScreen<LockScreen>
 {
 public:
     LockScreen(ScreenManager &screenManager);
@@ -34,6 +34,4 @@ private:
     // Static callbacks
     static void unlockButtonCallback(lv_obj_t *btn, lv_event_t event);
     void handleUnlockButtonEvent(lv_obj_t *btn, lv_event_t event);
-
-    static LockScreen *s_activeInstance;
 };

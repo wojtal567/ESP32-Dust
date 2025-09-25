@@ -1,13 +1,23 @@
 #include "screens/lockscreen.h"
 
 #include <managers/stylemanager.h>
-#include <GlobalVariables.hpp>
+#include <utils/stringConstants.h>
 
-LockScreen::LockScreen()
+LockScreen *LockScreen::s_activeInstance = nullptr;
+
+LockScreen::LockScreen(ScreenManager &screenManager)
     : BaseScreen(ScreenType::LOCK)
-{}
+    , m_screenManager(screenManager)
+{
+    s_activeInstance = this;
+}
 
-LockScreen::~LockScreen() {}
+LockScreen::~LockScreen()
+{
+    if (s_activeInstance == this) {
+        s_activeInstance = nullptr;
+    }
+}
 
 void LockScreen::initialize()
 {
@@ -31,11 +41,7 @@ void LockScreen::initialize()
     lv_obj_align(m_unlockButton, NULL, LV_ALIGN_IN_BOTTOM_MID, 0, -25);
     lv_label_set_text(m_unlockButtonLabel, StringConstants::UNLOCK_SYMBOL);
     lv_btn_set_fit(m_unlockButton, LV_FIT_TIGHT);
-    lv_obj_set_event_cb(m_unlockButton, [](lv_obj_t *obj, lv_event_t event) {
-        if (event == LV_EVENT_CLICKED) {
-            screenManager.switchToScreen(BaseScreen::ScreenType::MAIN);
-        }
-    });
+    lv_obj_set_event_cb(m_unlockButton, unlockButtonCallback);
 
     m_labelTime = lv_label_create(m_dateTimeContainer, NULL);
     lv_label_set_align(m_labelTime, LV_LABEL_ALIGN_CENTER);
@@ -96,4 +102,18 @@ void LockScreen::updateLedStatus(bool lastSampleSaved)
                                         LV_LED_PART_MAIN,
                                         LV_STATE_DEFAULT,
                                         lastSampleSaved ? LV_COLOR_GREEN : LV_COLOR_RED);
+}
+
+void LockScreen::unlockButtonCallback(lv_obj_t *btn, lv_event_t event)
+{
+    if (s_activeInstance) {
+        s_activeInstance->handleUnlockButtonEvent(btn, event);
+    }
+}
+
+void LockScreen::handleUnlockButtonEvent(lv_obj_t *btn, lv_event_t event)
+{
+    if (event == LV_EVENT_CLICKED) {
+        m_screenManager.switchToScreen(BaseScreen::ScreenType::MAIN);
+    }
 }

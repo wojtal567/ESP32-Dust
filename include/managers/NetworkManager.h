@@ -4,10 +4,14 @@
 #include <Arduino.h>
 #include <MySD.hpp>
 #include <WebServer.h>
+#include <ArduinoJson.h>
 #include <string>
 #include "utils/types.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+
+// Forward declaration
+class TaskManager;
 
 class NetworkManager {
 public:
@@ -24,13 +28,21 @@ public:
     void setupServer();
     void handleServerClient();
     
+    // API endpoint handlers
+    void handleSetAppIp();
+    void handleNotFound();
+    
     // Configuration management (delegated to SD card)
     void loadConfig(Types::ConfigData& config, const std::string& configPath);
     void saveConfig(const Types::ConfigData& config, const std::string& configPath);
     void printConfig(const std::string& configPath);
+    
+    // Dependency injection
+    void setTaskManager(TaskManager* taskManager);
 
 private:
     MySD* sdCard_;
+    TaskManager* m_taskManager;
     String m_ssid, m_password;
     WebServer m_server;
     

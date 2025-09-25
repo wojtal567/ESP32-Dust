@@ -5,23 +5,25 @@
 #include <utils/stringConstants.h>
 #include <utils/timeUtils.h>
 
-#include <GlobalVariables.hpp>
+MainScreen* MainScreen::s_activeInstance = nullptr;
 
-MainScreen::MainScreen()
-    : BaseScreen(ScreenType::MAIN)
-{}
+MainScreen::MainScreen(ScreenManager &screenManager)
+    : BaseScreen(ScreenType::MAIN), m_screenManager(screenManager)
+{
+    s_activeInstance = this;
+}
 
-MainScreen::~MainScreen() {}
+MainScreen::~MainScreen() 
+{
+    if (s_activeInstance == this) {
+        s_activeInstance = nullptr;
+    }
+}
 
 void MainScreen::initialize()
 {
     // settings button
-    m_setButton
-        = createButton(m_screenContainer, NULL, 16, 18, 32, 7, [](lv_obj_t *obj, lv_event_t event) {
-              if (event == LV_EVENT_CLICKED) {
-                  screenManager.switchToScreen(BaseScreen::ScreenType::SETTINGS);
-              }
-          });
+    m_setButton = createButton(m_screenContainer, NULL, 16, 18, 32, 7, settingsButtonCallback);
     m_setButtonLabel = lv_label_create(m_setButton, NULL);
     lv_label_set_text(m_setButtonLabel, LV_SYMBOL_SETTINGS);
     StyleManager::applyTransparentButton(m_setButton);
@@ -33,11 +35,7 @@ void MainScreen::initialize()
                                 18,
                                 95,
                                 7,
-                                [](lv_obj_t *obj, lv_event_t event) {
-                                    if (event == LV_EVENT_CLICKED) {
-                                        screenManager.switchToScreen(BaseScreen::ScreenType::LOCK);
-                                    }
-                                });
+                                lockButtonCallback);
     m_lockButtonLabel = lv_label_create(m_lockButton, NULL);
     lv_obj_set_style_local_text_font(m_lockButton,
                                      LV_OBJ_PART_MAIN,
@@ -279,4 +277,32 @@ void MainScreen::updateLedStatus(bool isLastSampleSaved)
                                         LV_LED_PART_MAIN,
                                         LV_STATE_DEFAULT,
                                         isLastSampleSaved ? LV_COLOR_GREEN : LV_COLOR_RED);
+}
+
+void MainScreen::settingsButtonCallback(lv_obj_t *btn, lv_event_t event)
+{
+    if (s_activeInstance) {
+        s_activeInstance->handleSettingsButtonEvent(btn, event);
+    }
+}
+
+void MainScreen::lockButtonCallback(lv_obj_t *btn, lv_event_t event)
+{
+    if (s_activeInstance) {
+        s_activeInstance->handleLockButtonEvent(btn, event);
+    }
+}
+
+void MainScreen::handleSettingsButtonEvent(lv_obj_t *btn, lv_event_t event)
+{
+    if (event == LV_EVENT_CLICKED) {
+        m_screenManager.switchToScreen(BaseScreen::ScreenType::SETTINGS);
+    }
+}
+
+void MainScreen::handleLockButtonEvent(lv_obj_t *btn, lv_event_t event)
+{
+    if (event == LV_EVENT_CLICKED) {
+        m_screenManager.switchToScreen(BaseScreen::ScreenType::LOCK);
+    }
 }

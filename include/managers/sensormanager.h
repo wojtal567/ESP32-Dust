@@ -54,6 +54,3 @@ private:
     bool m_temperatureSensorWorking;
     bool m_isFanOn;
 };
-
-// Global instance
-extern SensorManager sensorManager;

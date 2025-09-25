@@ -2,14 +2,19 @@
 
 #include "screens/basescreen.h"
 
+#include "screens/screenmanager.h"
 #include "utils/types.h"
 
 class TaskManager;
+class NetworkManager;
 
 class SamplingSettingsScreen : public BaseScreen
 {
 public:
-    SamplingSettingsScreen(const Types::ConfigData &config, TaskManager *taskManager);
+    SamplingSettingsScreen(const Types::ConfigData &config,
+                           TaskManager *taskManager,
+                           NetworkManager *networkManager,
+                           ScreenManager &screenManager);
     ~SamplingSettingsScreen() override;
 
     void initialize() override;
@@ -31,8 +36,10 @@ private:
     void handleMeasureAvPeriodDecrement(lv_obj_t *btn, lv_event_t event);
     void handleTurnFanOnTimeIncrement(lv_obj_t *btn, lv_event_t event);
     void handleTurnFanOnTimeDecrement(lv_obj_t *btn, lv_event_t event);
+    void handleBackButtonEvent(lv_obj_t *btn, lv_event_t event);
 
     // Static wrappers for LVGL callbacks
+    static void backButtonCallback(lv_obj_t *btn, lv_event_t event);
     static void saveButtonCallback(lv_obj_t *btn, lv_event_t event);
     static void hourIncrementCallback(lv_obj_t *btn, lv_event_t event);
     static void hourDecrementCallback(lv_obj_t *btn, lv_event_t event);
@@ -90,4 +97,6 @@ private:
 
     Types::ConfigData m_config;
     TaskManager *m_taskManager;
+    NetworkManager *m_networkManager;
+    ScreenManager &m_screenManager;
 };

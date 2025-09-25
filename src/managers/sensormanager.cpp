@@ -2,9 +2,6 @@
 #include <Arduino.h>
 #include "utils/constants.h"
 
-// Initialize the global instance
-SensorManager sensorManager;
-
 SensorManager::SensorManager()
     : m_pmsSensor(nullptr)
     , m_temperature(0)

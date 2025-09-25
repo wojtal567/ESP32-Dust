@@ -1,15 +1,19 @@
 #pragma once
 
-#include "managers/networkmanager.h"
 #include "screens/basescreen.h"
-#include "utils/types.h"
 
 #include <Arduino.h>
+#include "screens/screenmanager.h"
+#include "utils/types.h"
+
+class NetworkManager;
 
 class InfoScreen : public BaseScreen
 {
 public:
-    InfoScreen(const NetworkManager &networkManager, const Types::ConfigData &config);
+    InfoScreen(NetworkManager *networkManager,
+               const Types::ConfigData &config,
+               ScreenManager &screenManager);
     ~InfoScreen();
 
     void initialize() override;
@@ -23,6 +27,13 @@ private:
     lv_obj_t *m_wifiAddressLabel{nullptr};
     lv_obj_t *m_configLabel{nullptr};
 
-    const NetworkManager& m_networkManager;
+    NetworkManager *m_networkManager;
     const Types::ConfigData &m_config;
+    ScreenManager &m_screenManager;
+    
+    // Static callbacks
+    static void backButtonCallback(lv_obj_t *btn, lv_event_t event);
+    void handleBackButtonEvent(lv_obj_t *btn, lv_event_t event);
+    
+    static InfoScreen* s_activeInstance;
 };

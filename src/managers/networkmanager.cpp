@@ -1,11 +1,12 @@
 #include "managers/networkmanager.h"
-#include "GlobalVariables.hpp"
+
+#include "managers/taskmanager.h"
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
-#include "api/httpapi.h"
 
 NetworkManager::NetworkManager(MySD *sdCard)
     : sdCard_(sdCard)
+    , m_taskManager(nullptr)
     , m_server(80)
     , m_wifiTaskHandle(nullptr)
 {}
@@ -86,8 +87,15 @@ WebServer &NetworkManager::getServer()
 
 void NetworkManager::setupServer()
 {
-    HttpApi::setupRouting();
-    m_server.onNotFound(HttpApi::handleNotFound);
+    // Setup API routes
+    m_server.on("/", HTTP_GET, [this]() {
+        m_server.send(200, F("text/html"), F("You have entered the wrong neighbourhood"));
+    });
+    m_server.on(F("/setAppIp"), HTTP_POST, [this]() { this->handleSetAppIp(); });
+
+    // Setup 404 handler
+    m_server.onNotFound([this]() { this->handleNotFound(); });
+
     m_server.begin();
     Serial.print("[" + String(millis()) + "] ");
     Serial.println("HTTP server started on port 80");
@@ -127,7 +135,6 @@ void NetworkManager::saveConfig(const Types::ConfigData &config, const std::stri
         tempConfig.timeBetweenSavingSamples = config.timeBetweenSavingSamples;
         tempConfig.measurePeriod = config.measurePeriod;
         tempConfig.numberOfSamples = config.numberOfSamples;
-        tempConfig.currentSampleNumber = currentSampleNumber; // Use global variable
         tempConfig.turnFanTime = config.turnFanTime;
 
         sdCard_->saveConfig(tempConfig, configPath);
@@ -139,4 +146,73 @@ void NetworkManager::printConfig(const std::string &configPath)
     if (sdCard_) {
         sdCard_->printConfig(configPath);
     }
+}
+
+void NetworkManager::setTaskManager(TaskManager *taskManager)
+{
+    m_taskManager = taskManager;
+}
+
+void NetworkManager::handleSetAppIp()
+{
+    String postBody = m_server.arg("plain");
+    Serial.print("[" + String(millis()) + "] ");
+    Serial.println(postBody);
+    DynamicJsonDocument doc(512);
+    DeserializationError error = deserializeJson(doc, postBody);
+    if (error) {
+        Serial.print("[" + String(millis()) + "] ");
+        Serial.print(F(error.c_str()));
+
+        m_server.send(400,
+                      F("text/html"),
+                      "Error while parsing json body! <br>" + (String)error.c_str());
+    } else {
+        JsonObject postObj = doc.as<JsonObject>();
+
+        Serial.print("[" + String(millis()) + "] ");
+        Serial.print(F("HTTP Method: "));
+        Serial.print("[" + String(millis()) + "] ");
+        Serial.println(m_server.method());
+
+        if (m_server.method() == HTTP_POST) {
+            if (postObj.containsKey("ip")) {
+                String appIpAddress = postObj["ip"].as<String>();
+
+                DynamicJsonDocument doc(512);
+                doc["status"] = "OK";
+                String buf;
+                serializeJson(doc, buf);
+
+                if (m_taskManager) {
+                    m_taskManager->updateGetAppLastRecordAndSynchronizeTaskPrio(LV_TASK_PRIO_MID);
+                    m_taskManager->setAppIpAddress(appIpAddress);
+                }
+
+                m_server.send(201, F("application/json"), buf);
+            } else {
+                DynamicJsonDocument doc(512);
+                doc["status"] = "OK";
+                doc["message"] = F("No data found or incorrect!");
+
+                String buf;
+                serializeJson(doc, buf);
+
+                m_server.send(400, F("application/json"), buf);
+            }
+        }
+    }
+}
+
+void NetworkManager::handleNotFound()
+{
+    String message = "File Not Found \n\n" + (String) "URI: " + m_server.uri()
+                             + "\n Method: " + (m_server.method() == HTTP_GET)
+                         ? "GET"
+                         : "POST" + (String) "\n Arguments: " + m_server.args() + "\n";
+
+    for (uint8_t i = 0; i < m_server.args(); i++)
+        message += " " + m_server.argName(i) + ": " + m_server.arg(i) + "\n";
+
+    m_server.send(404, "text/plain", message);
 }

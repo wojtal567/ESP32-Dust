@@ -1,14 +1,22 @@
 #include "screens/wifiscreen.h"
 
+#include <utils/constants.h>
+#include <utils/stringConstants.h>
+#include "managers/networkmanager.h"
 #include "managers/stylemanager.h"
-
-#include <GlobalVariables.hpp>
 
 // Static instance tracking
 WifiScreen *WifiScreen::s_activeInstance = nullptr;
 
-WifiScreen::WifiScreen()
+WifiScreen::WifiScreen(const Types::ConfigData &config,
+                       NetworkManager *networkManager,
+                       RTCManager &rtc,
+                       ScreenManager &screenManager)
     : BaseScreen(ScreenType::WIFI)
+    , m_config(config)
+    , m_networkManager(networkManager)
+    , m_rtcManager(rtc)
+    , m_screenManager(screenManager)
 {
     s_activeInstance = this;
 }
@@ -100,7 +108,7 @@ void WifiScreen::handleKeyboardEvent(lv_obj_t *kb, lv_event_t event)
 void WifiScreen::handleCancelButtonEvent(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
-        screenManager.switchToScreen(BaseScreen::ScreenType::SETTINGS);
+        m_screenManager.switchToScreen(BaseScreen::ScreenType::SETTINGS);
         lv_textarea_set_text(m_ssidTextArea, "");
         lv_textarea_set_text(m_passwordTextArea, "");
     }
@@ -133,26 +141,26 @@ void WifiScreen::handleConnectButtonEvent(lv_obj_t *btn, lv_event_t event)
         const String ssid = lv_textarea_get_text(m_ssidTextArea);
         const String pwd = lv_textarea_get_text(m_passwordTextArea);
 
-        config.ssid = ssid.c_str();
-        config.password = pwd.c_str();
+        m_config.ssid = ssid.c_str();
+        m_config.password = pwd.c_str();
 
-        Serial.println(config.ssid.c_str());
-        networkManager.connectAsync(config.ssid.c_str(), config.password.c_str());
+        Serial.println(m_config.ssid.c_str());
+        m_networkManager->connectAsync(m_config.ssid.c_str(), m_config.password.c_str());
 
-        networkManager.saveConfig(config, StringConstants::CONFIG_FILE_PATH);
+        m_networkManager->saveConfig(m_config, StringConstants::CONFIG_FILE_PATH);
 
-        networkManager.printConfig(StringConstants::CONFIG_FILE_PATH);
-        bool connected = networkManager.connect();
+        m_networkManager->printConfig(StringConstants::CONFIG_FILE_PATH);
+        bool connected = m_networkManager->connect();
         if (connected) {
             Serial.println("btn_connect -> connected to Wi-Fi! IP: "
-                           + networkManager.getIpAddress());
-            rtcManager.syncWithNTP(StringConstants::NTP_SERVER, Constants::GMT_OFFSET_SEC);
-            networkManager.setupServer();
+                           + m_networkManager->getIpAddress());
+            m_rtcManager.syncWithNTP(StringConstants::NTP_SERVER, Constants::GMT_OFFSET_SEC);
+            m_networkManager->setupServer();
         } else {
             Serial.println(
                 "btn_connect -> can't connect. Probably you have entered wrong credentials.");
         }
-        screenManager.switchToScreen(BaseScreen::ScreenType::MAIN);
+        m_screenManager.switchToScreen(BaseScreen::ScreenType::MAIN);
         lv_textarea_set_text(m_ssidTextArea, "");
         lv_textarea_set_text(m_passwordTextArea, "");
     }

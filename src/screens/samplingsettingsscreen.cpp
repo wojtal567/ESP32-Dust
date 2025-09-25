@@ -1,17 +1,23 @@
 #include "screens/samplingsettingsscreen.h"
 
+#include <managers/networkmanager.h>
 #include <managers/stylemanager.h>
 #include <managers/taskmanager.h>
-#include <GlobalVariables.hpp>
+#include <utils/constants.h>
+#include <utils/stringConstants.h>
 
 // Static instance pointer for LVGL callbacks
 SamplingSettingsScreen *SamplingSettingsScreen::s_activeInstance = nullptr;
 
 SamplingSettingsScreen::SamplingSettingsScreen(const Types::ConfigData &config,
-                                               TaskManager *taskManager)
+                                               TaskManager *taskManager,
+                                               NetworkManager *networkManager,
+                                               ScreenManager &screenManager)
     : BaseScreen(ScreenType::SAMPLING_SETTINGS)
     , m_config(config)
     , m_taskManager(taskManager)
+    , m_networkManager(networkManager)
+    , m_screenManager(screenManager)
 {
     s_activeInstance = this;
 }
@@ -20,18 +26,7 @@ SamplingSettingsScreen::~SamplingSettingsScreen() {}
 
 void SamplingSettingsScreen::initialize()
 {
-    m_backButton = createButton(m_screenContainer,
-                                nullptr,
-                                30,
-                                15,
-                                14,
-                                10,
-                                [](lv_obj_t *obj, lv_event_t event) {
-                                    if (event == LV_EVENT_CLICKED) {
-                                        screenManager.switchToScreen(
-                                            BaseScreen::ScreenType::SETTINGS);
-                                    }
-                                });
+    m_backButton = createButton(m_screenContainer, nullptr, 30, 15, 14, 10, backButtonCallback);
 
     StyleManager::applyTransparentButton(m_backButton);
 
@@ -287,7 +282,7 @@ void SamplingSettingsScreen::updateData()
 
     setSpinboxDigitFormat(m_measureAvPeriodSpinbox, Constants::MIN_RANGE, Constants::MAX_RANGE, -1);
 
-    lv_spinbox_set_value(m_turnFanOnTimeSpinbox, (config.turnFanTime / 1000));
+    lv_spinbox_set_value(m_turnFanOnTimeSpinbox, (m_config.turnFanTime / 1000));
     setSpinboxDigitFormat(m_turnFanOnTimeSpinbox, Constants::MIN_RANGE, Constants::MAX_RANGE, 0);
 }
 
@@ -312,18 +307,18 @@ void SamplingSettingsScreen::handleSaveButton(lv_obj_t *btn, lv_event_t event)
         int get_value = lv_spinbox_get_value(m_measurePeriodHourSpinbox) * 60 * 60000
                         + lv_spinbox_get_value(m_measurePeriodMinuteSpinbox) * 60000
                         + lv_spinbox_get_value(m_measurePeriodSecondSpinbox) * 1000;
-        config.timeBetweenSavingSamples = get_value;
-        config.numberOfSamples = lv_spinbox_get_value(m_samplesNumberSpinbox);
-        config.measurePeriod = lv_spinbox_get_value(m_measureAvPeriodSpinbox) * 1000;
-        config.turnFanTime = lv_spinbox_get_value(m_turnFanOnTimeSpinbox) * 1000;
+        m_config.timeBetweenSavingSamples = get_value;
+        m_config.numberOfSamples = lv_spinbox_get_value(m_samplesNumberSpinbox);
+        m_config.measurePeriod = lv_spinbox_get_value(m_measureAvPeriodSpinbox) * 1000;
+        m_config.turnFanTime = lv_spinbox_get_value(m_turnFanOnTimeSpinbox) * 1000;
 
         if (m_taskManager) {
             m_taskManager->recreateSampleTasksFromConfig();
         }
 
-        networkManager.saveConfig(config, StringConstants::CONFIG_FILE_PATH);
-        networkManager.printConfig(StringConstants::CONFIG_FILE_PATH);
-        screenManager.switchToScreen(BaseScreen::ScreenType::MAIN);
+        m_networkManager->saveConfig(m_config, StringConstants::CONFIG_FILE_PATH);
+        m_networkManager->printConfig(StringConstants::CONFIG_FILE_PATH);
+        m_screenManager.switchToScreen(BaseScreen::ScreenType::MAIN);
     }
 }
 
@@ -624,5 +619,19 @@ void SamplingSettingsScreen::turnFanOnTimeDecrementCallback(lv_obj_t *btn, lv_ev
 {
     if (s_activeInstance) {
         s_activeInstance->handleTurnFanOnTimeDecrement(btn, event);
+    }
+}
+
+void SamplingSettingsScreen::backButtonCallback(lv_obj_t *btn, lv_event_t event)
+{
+    if (s_activeInstance) {
+        s_activeInstance->handleBackButtonEvent(btn, event);
+    }
+}
+
+void SamplingSettingsScreen::handleBackButtonEvent(lv_obj_t *btn, lv_event_t event)
+{
+    if (event == LV_EVENT_CLICKED) {
+        m_screenManager.switchToScreen(BaseScreen::ScreenType::SETTINGS);
     }
 }

@@ -2,10 +2,19 @@
 
 #include "screens/basescreen.h"
 
+#include "managers/rtcmanager.h"
+#include "screens/screenmanager.h"
+#include "utils/types.h"
+
+class NetworkManager;
+
 class WifiScreen : public BaseScreen
 {
 public:
-    WifiScreen();
+    WifiScreen(const Types::ConfigData &config,
+               NetworkManager *networkManager,
+               RTCManager &rtc,
+               ScreenManager &screenManager);
     ~WifiScreen();
 
     void initialize() override;
@@ -38,4 +47,9 @@ private:
     lv_obj_t *m_connectButton{nullptr};
     lv_obj_t *m_connectButtonLabel{nullptr};
     lv_obj_t *m_keyboard{nullptr};
+
+    Types::ConfigData m_config;
+    NetworkManager *m_networkManager;
+    RTCManager &m_rtcManager;
+    ScreenManager &m_screenManager;
 };

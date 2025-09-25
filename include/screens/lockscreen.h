@@ -2,12 +2,14 @@
 
 #include "screens/basescreen.h"
 
+#include "screens/screenmanager.h"
+
 #include <Arduino.h>
 
 class LockScreen : public BaseScreen
 {
 public:
-    LockScreen();
+    LockScreen(ScreenManager &screenManager);
     ~LockScreen() override;
 
     void initialize() override;
@@ -26,4 +28,12 @@ private:
     lv_obj_t *m_wifiStatusWarning{nullptr};
     lv_obj_t *m_sdStatusWarning{nullptr};
     lv_obj_t *m_led{nullptr};
+
+    ScreenManager &m_screenManager;
+
+    // Static callbacks
+    static void unlockButtonCallback(lv_obj_t *btn, lv_event_t event);
+    void handleUnlockButtonEvent(lv_obj_t *btn, lv_event_t event);
+
+    static LockScreen *s_activeInstance;
 };

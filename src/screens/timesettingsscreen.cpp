@@ -1,15 +1,22 @@
 #include "screens/timesettingsscreen.h"
 
+#include <managers/networkmanager.h>
 #include <managers/stylemanager.h>
-#include "GlobalVariables.hpp"
+#include <utils/constants.h>
+#include <utils/stringConstants.h>
 
 // Static instance pointer for LVGL callbacks
 TimeSettingsScreen *TimeSettingsScreen::s_activeInstance = nullptr;
 
-TimeSettingsScreen::TimeSettingsScreen(const Types::ConfigData &config, const RTCManager &rtc)
+TimeSettingsScreen::TimeSettingsScreen(const Types::ConfigData &config,
+                                       RTCManager &rtc,
+                                       NetworkManager *networkManager,
+                                       ScreenManager &screenManager)
     : BaseScreen(ScreenType::TIME_SETTINGS)
-    , m_configData(config)
+    , m_config(config)
     , m_rtcManager(rtc)
+    , m_networkManager(networkManager)
+    , m_screenManager(screenManager)
 {
     s_activeInstance = this;
 }
@@ -19,18 +26,7 @@ TimeSettingsScreen::~TimeSettingsScreen() {}
 void TimeSettingsScreen::initialize()
 {
 
-    m_backButton = createButton(m_screenContainer,
-                                nullptr,
-                                30,
-                                15,
-                                14,
-                                10,
-                                [](lv_obj_t *obj, lv_event_t event) {
-                                    if (event == LV_EVENT_CLICKED) {
-                                        screenManager.switchToScreen(
-                                            BaseScreen::ScreenType::SETTINGS);
-                                    }
-                                });
+    m_backButton = createButton(m_screenContainer, nullptr, 30, 15, 14, 10, backButtonCallback);
 
     StyleManager::applyTransparentButton(m_backButton);
 
@@ -169,7 +165,7 @@ void TimeSettingsScreen::updateData()
 
 int TimeSettingsScreen::getDropdownIndex() const
 {
-    switch (m_configData.lcdLockTime) {
+    switch (m_config.lcdLockTime) {
     case -1: {
         return 4;
         break;
@@ -298,8 +294,8 @@ void TimeSettingsScreen::handleCalendarEvent(lv_obj_t *calendar, lv_event_t even
 void TimeSettingsScreen::handleSyncNtpButton(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
-        bool success = rtcManager.syncWithNTP(StringConstants::NTP_SERVER,
-                                              Constants::GMT_OFFSET_SEC);
+        bool success = m_rtcManager.syncWithNTP(StringConstants::NTP_SERVER,
+                                                Constants::GMT_OFFSET_SEC);
         if (!success) {
             Serial.println("Time synchronization failed.");
         }
@@ -312,26 +308,26 @@ void TimeSettingsScreen::handleSaveButton(lv_obj_t *btn, lv_event_t event)
             switch (lv_dropdown_get_selected(m_lockScreenDropdown))
             {
             case 0:
-                config.lcdLockTime = 60000;
+                m_config.lcdLockTime = 60000;
                 break;
             case 1:
-                config.lcdLockTime = 300000;
+                m_config.lcdLockTime = 300000;
                 break;
             case 2:
-                config.lcdLockTime = 600000;
+                m_config.lcdLockTime = 600000;
                 break;
             case 3:
-                config.lcdLockTime = 3600000;
+                m_config.lcdLockTime = 3600000;
                 break;
             case 4:
-                config.lcdLockTime = -1;
+                m_config.lcdLockTime = -1;
                 break;
             default:
-                config.lcdLockTime = 60000;
+                m_config.lcdLockTime = 60000;
                 break;
             }
-            networkManager.saveConfig(config, StringConstants::CONFIG_FILE_PATH);
-            networkManager.printConfig(StringConstants::CONFIG_FILE_PATH);
+            m_networkManager->saveConfig(m_config, StringConstants::CONFIG_FILE_PATH);
+            m_networkManager->printConfig(StringConstants::CONFIG_FILE_PATH);
             if (m_timeChanged == true) {
                 String date = lv_label_get_text(m_dateButtonLabel)
                               + (String)lv_textarea_get_text(m_hourSpinbox) + ":"
@@ -342,11 +338,11 @@ void TimeSettingsScreen::handleSaveButton(lv_obj_t *btn, lv_event_t event)
                                                   date.substring(10, 12).toDouble(),
                                                   date.substring(13, 15).toDouble(),
                                                   0);
-                rtcManager.setDateTime(*dt);
-                rtcManager.setIsRunning(true);
+                m_rtcManager.setDateTime(*dt);
+                m_rtcManager.setIsRunning(true);
             }
             if (m_dateChanged == true) {
-                RtcDateTime ori = rtcManager.getCurrentDateTime();
+                RtcDateTime ori = m_rtcManager.getCurrentDateTime();
                 String date = lv_label_get_text(m_dateButtonLabel);
                 RtcDateTime *dt = new RtcDateTime(atoi(date.substring(6).c_str()),
                                                   atoi(date.substring(3, 6).c_str()),
@@ -354,10 +350,10 @@ void TimeSettingsScreen::handleSaveButton(lv_obj_t *btn, lv_event_t event)
                                                   ori.Hour(),
                                                   ori.Minute(),
                                                   ori.Second());
-                rtcManager.setDateTime(*dt);
-                rtcManager.setIsRunning(true);
+                m_rtcManager.setDateTime(*dt);
+                m_rtcManager.setIsRunning(true);
             }
-            screenManager.switchToScreen(BaseScreen::ScreenType::MAIN);
+            m_screenManager.switchToScreen(BaseScreen::ScreenType::MAIN);
     }
 }
 
@@ -415,5 +411,19 @@ void TimeSettingsScreen::saveButtonCallback(lv_obj_t *btn, lv_event_t event)
 {
     if (s_activeInstance) {
         s_activeInstance->handleSaveButton(btn, event);
+    }
+}
+
+void TimeSettingsScreen::backButtonCallback(lv_obj_t *btn, lv_event_t event)
+{
+    if (s_activeInstance) {
+        s_activeInstance->handleBackButton(btn, event);
+    }
+}
+
+void TimeSettingsScreen::handleBackButton(lv_obj_t *btn, lv_event_t event)
+{
+    if (event == LV_EVENT_CLICKED) {
+        m_screenManager.switchToScreen(BaseScreen::ScreenType::SETTINGS);
     }
 }

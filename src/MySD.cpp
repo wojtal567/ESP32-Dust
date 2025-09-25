@@ -1,6 +1,7 @@
 #include <MySD.hpp>
 
 MySD::MySD(int port)
+    : m_sampleDB("/sd/database.db", "/database.db", "samples")
 {
     _port = port;
 }
@@ -15,18 +16,18 @@ void MySD::end()
     SD.end();
 }
 
-bool MySD::start(SQLiteDb *object, Stream *debugger)
+bool MySD::start(Stream *debugger)
 {
     bool result = begin();
 
     if (result)
     {
         Serial.println("MySD::start -> Initializing.");
-        object->init();
-        object->open();
-        object->createTable(debugger);
-        object->close();
-        object->kill();
+        m_sampleDB.init();
+        m_sampleDB.open();
+        m_sampleDB.createTable(debugger);
+        m_sampleDB.close();
+        m_sampleDB.kill();
     }
     else
         Serial.println("MySD::start -> Can't initilize - no access to SD card.");
@@ -34,32 +35,34 @@ bool MySD::start(SQLiteDb *object, Stream *debugger)
     return result;
 }
 
-void MySD::save(std::map<std::string, float> data, float temperature, float humidity, String timestamp, SQLiteDb *object, Stream *debugger)
+void MySD::save(std::map<std::string, float> data,
+                float temperature,
+                float humidity,
+                String timestamp,
+                Stream *debugger)
 {
     debugger->println("MySD::save");
     if (begin())
     {
         debugger->println("SD Card detected");
-        if (SD.exists(object->getRelativePath()))
-        {
+        if (SD.exists(m_sampleDB.getRelativePath())) {
             Serial.println("MySD::save -> File exists. Trying to save data.");
-            debugger->println("Database " + object->getLocalPath() + " exists. Saving data...");
-            object->init();
-            object->open();
-            object->save(data, temperature, humidity, timestamp, debugger);
-            object->close();
-            object->kill();
-        }
-        else
-        {
+            debugger->println("Database " + m_sampleDB.getLocalPath() + " exists. Saving data...");
+            m_sampleDB.init();
+            m_sampleDB.open();
+            m_sampleDB.save(data, temperature, humidity, timestamp, debugger);
+            m_sampleDB.close();
+            m_sampleDB.kill();
+        } else {
             Serial.println("MySD::save -> No database file. Trying to create one and saving data.");
-            debugger->println("Database " + object->getLocalPath() + " don't exist. Saving data...");
-            object->init();
-            object->open();
-            object->createTable(debugger);
-            object->save(data, temperature, humidity, timestamp, debugger);
-            object->close();
-            object->kill();
+            debugger->println("Database " + m_sampleDB.getLocalPath()
+                              + " don't exist. Saving data...");
+            m_sampleDB.init();
+            m_sampleDB.open();
+            m_sampleDB.createTable(debugger);
+            m_sampleDB.save(data, temperature, humidity, timestamp, debugger);
+            m_sampleDB.close();
+            m_sampleDB.kill();
         }
     }
     else
@@ -67,23 +70,21 @@ void MySD::save(std::map<std::string, float> data, float temperature, float humi
     end();
 }
 
-void MySD::select(SQLiteDb *object, Stream *debugger, String datetime, JsonArray *array)
+void MySD::select(Stream *debugger, String datetime, JsonArray *array)
 {
     debugger->println("MySD::select");
     if (begin())
     {
         debugger->println("SD Card detected");
-        if (SD.exists(object->getRelativePath()))
-        {
+        if (SD.exists(m_sampleDB.getRelativePath())) {
             Serial.println("MySD::select -> File exists. Trying to select data.");
-            debugger->println("Database " + object->getLocalPath() + " exists.");
-            object->init();
-            object->open();
-            object->select(debugger, datetime, array);
-            object->close();
-            object->kill();
-        }
-        else
+            debugger->println("Database " + m_sampleDB.getLocalPath() + " exists.");
+            m_sampleDB.init();
+            m_sampleDB.open();
+            m_sampleDB.select(debugger, datetime, array);
+            m_sampleDB.close();
+            m_sampleDB.kill();
+        } else
             Serial.println("MySD::select -> File don't exist.");
     }
     else
@@ -91,23 +92,21 @@ void MySD::select(SQLiteDb *object, Stream *debugger, String datetime, JsonArray
     end();
 }
 
-void MySD::getLastRecord(SQLiteDb *object, Stream *debugger, JsonArray *array)
+void MySD::getLastRecord(Stream *debugger, JsonArray *array)
 {
     debugger->println("MySD::getLastRecord");
     if (begin())
     {
         debugger->println("SD Card detected");
-        if (SD.exists(object->getRelativePath()))
-        {
+        if (SD.exists(m_sampleDB.getRelativePath())) {
             Serial.println("MySD::getLastRecord -> File exists. Trying to get last saved sample record.");
-            debugger->println("Database " + object->getLocalPath() + " exists.");
-            object->init();
-            object->open();
-            object->getLastRecord(debugger, array);
-            object->close();
-            object->kill();
-        }
-        else
+            debugger->println("Database " + m_sampleDB.getLocalPath() + " exists.");
+            m_sampleDB.init();
+            m_sampleDB.open();
+            m_sampleDB.getLastRecord(debugger, array);
+            m_sampleDB.close();
+            m_sampleDB.kill();
+        } else
             Serial.println("MySD::getLastRecord -> File don't exist.");
     }
     else
@@ -135,7 +134,6 @@ void MySD::saveConfig(Config config, std::string filePath)
         doc["timeBetweenSavingSamples"] = config.timeBetweenSavingSamples;
         doc["measurePeriod"] = config.measurePeriod;
         doc["numberOfSamples"] = config.numberOfSamples;
-        doc["currentSampleNumber"] = config.currentSampleNumber;
         doc["turnFanTime"] = config.turnFanTime;
         if (serializeJson(doc, configurationFile) == 0)
         {
@@ -180,7 +178,6 @@ void MySD::loadConfig(Config &config, std::string filePath)
         config.timeBetweenSavingSamples = doc["timeBetweenSavingSamples"];
         config.measurePeriod = doc["measurePeriod"];
         config.numberOfSamples = doc["numberOfSamples"];
-        config.currentSampleNumber = doc["currentSampleNumber"];
         config.turnFanTime = doc["turnFanTime"];
         configurationFile.close();
         Serial.println("Reading config and making changes.");

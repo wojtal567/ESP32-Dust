@@ -1,31 +1,26 @@
 #include "screens/infoscreen.h"
 
-#include "globalvariables.hpp"
-
+#include <managers/networkmanager.h>
 #include <managers/stylemanager.h>
 
-InfoScreen::InfoScreen(const NetworkManager &networkManager, const Types::ConfigData &config)
+InfoScreen *InfoScreen::s_activeInstance = nullptr;
+
+InfoScreen::InfoScreen(NetworkManager *networkManager,
+                       const Types::ConfigData &config,
+                       ScreenManager &screenManager)
     : BaseScreen(ScreenType::INFO)
     , m_networkManager(networkManager)
     , m_config(config)
-{}
+    , m_screenManager(screenManager)
+{
+    s_activeInstance = this;
+}
 
 InfoScreen::~InfoScreen() {}
 
 void InfoScreen::initialize()
 {
-    m_backButton = createButton(m_screenContainer,
-                                nullptr,
-                                30,
-                                15,
-                                14,
-                                10,
-                                [](lv_obj_t *obj, lv_event_t event) {
-                                    if (event == LV_EVENT_CLICKED) {
-                                        screenManager.switchToScreen(
-                                            BaseScreen::ScreenType::SETTINGS);
-                                    }
-                                });
+    m_backButton = createButton(m_screenContainer, nullptr, 30, 15, 14, 10, backButtonCallback);
     StyleManager::applyTransparentButton(m_backButton);
 
     m_backButtonLabel = lv_label_create(m_backButton, NULL);
@@ -71,7 +66,21 @@ void InfoScreen::updateConfigLabel()
 
     lv_label_set_text(m_configLabel, current_config.c_str());
 
-    const bool isConnected = m_networkManager.isConnected();
+    const bool isConnected = m_networkManager->isConnected();
     lv_label_set_text(m_wifiAddressLabel,
-                      isConnected ? m_networkManager.getIpAddress().c_str() : "No WiFi connection");
+                      isConnected ? m_networkManager->getIpAddress().c_str() : "No WiFi connection");
+}
+
+void InfoScreen::backButtonCallback(lv_obj_t *btn, lv_event_t event)
+{
+    if (s_activeInstance) {
+        s_activeInstance->handleBackButtonEvent(btn, event);
+    }
+}
+
+void InfoScreen::handleBackButtonEvent(lv_obj_t *btn, lv_event_t event)
+{
+    if (event == LV_EVENT_CLICKED) {
+        m_screenManager.switchToScreen(BaseScreen::ScreenType::SETTINGS);
+    }
 }

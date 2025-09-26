@@ -7,6 +7,7 @@
 #include "utils/types.h"
 
 class NetworkManager;
+class MySD;
 
 class WifiScreen : public BaseScreen<WifiScreen>
 {
@@ -14,7 +15,8 @@ public:
     WifiScreen(const Types::ConfigData &config,
                NetworkManager *networkManager,
                RTCManager &rtc,
-               ScreenManager &screenManager);
+               ScreenManager &screenManager,
+               MySD *sdCard);
     ~WifiScreen();
 
     void initialize() override;
@@ -50,4 +52,5 @@ private:
     NetworkManager *m_networkManager;
     RTCManager &m_rtcManager;
     ScreenManager &m_screenManager;
+    MySD *m_sdCard{nullptr};
 };

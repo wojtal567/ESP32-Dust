@@ -2,6 +2,7 @@
 #include <HTTPClient.h>
 #include <time.h>
 
+#include "managers/MySD.hpp"
 #include "managers/displaymanager.h"
 #include "managers/networkmanager.h"
 #include "managers/rtcmanager.h"
@@ -60,7 +61,11 @@ void setup()
     SettingsScreen *settingsScreen = new SettingsScreen(screenManager);
     settingsScreen->initialize();
 
-    WifiScreen *wifiScreen = new WifiScreen(config, networkManager, rtcManager, screenManager);
+    WifiScreen *wifiScreen = new WifiScreen(config,
+                                            networkManager,
+                                            rtcManager,
+                                            screenManager,
+                                            sdCard);
 
     InfoScreen *infoScreen = new InfoScreen(networkManager, config, screenManager);
     infoScreen->initialize();
@@ -71,7 +76,8 @@ void setup()
     TimeSettingsScreen *timeSettingsScreen = new TimeSettingsScreen(config,
                                                                     rtcManager,
                                                                     networkManager,
-                                                                    screenManager);
+                                                                    screenManager,
+                                                                    sdCard);
     timeSettingsScreen->initialize();
 
     TaskManager *taskManager = new TaskManager(config,
@@ -87,7 +93,8 @@ void setup()
     SamplingSettingsScreen *samplingSettingsScreen = new SamplingSettingsScreen(config,
                                                                                 taskManager,
                                                                                 networkManager,
-                                                                                screenManager);
+                                                                                screenManager,
+                                                                                sdCard);
     samplingSettingsScreen->initialize();
 
     screenManager.initialize(mainScreen,
@@ -105,8 +112,8 @@ void setup()
                                Constants::SCREEN_HEIGHT,
                                Constants::TOUCH_CALIBRATION);
 
-    networkManager->loadConfig(config, StringConstants::CONFIG_FILE_PATH);
-    networkManager->printConfig(StringConstants::CONFIG_FILE_PATH);
+    sdCard->loadConfig(config, StringConstants::CONFIG_FILE_PATH);
+    sdCard->printConfig(StringConstants::CONFIG_FILE_PATH);
 
     if (config.ssid != "") {
         networkManager->setCredentials(config.ssid.c_str(), config.password.c_str());

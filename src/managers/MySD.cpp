@@ -1,4 +1,4 @@
-#include <MySD.hpp>
+#include "managers/MySD.hpp"
 
 MySD::MySD(int port)
     : m_sampleDB("/sd/database.db", "/database.db", "samples")
@@ -114,7 +114,7 @@ void MySD::getLastRecord(Stream *debugger, JsonArray *array)
     end();
 }
 
-void MySD::saveConfig(Config config, std::string filePath)
+void MySD::saveConfig(const Types::ConfigData &config, const std::string &filePath)
 {
     if (begin())
     {
@@ -144,7 +144,7 @@ void MySD::saveConfig(Config config, std::string filePath)
     end();
 }
 
-void MySD::loadConfig(Config &config, std::string filePath)
+void MySD::loadConfig(Types::ConfigData &config, const std::string &filePath)
 {
     if (begin())
     {
@@ -169,11 +169,10 @@ void MySD::loadConfig(Config &config, std::string filePath)
             return;
         }
 
-        char tmp[64];
-        strlcpy(tmp, doc["ssid"], sizeof(tmp));
-        config.ssid = tmp;
-        strlcpy(tmp, doc["password"], sizeof(tmp));
-        config.password = tmp;
+        const char *ssid = doc["ssid"];
+        const char *password = doc["password"];
+        config.ssid = ssid ? String(ssid) : "";
+        config.password = password ? String(password) : "";
         config.lcdLockTime = doc["lcdLockTime"];
         config.timeBetweenSavingSamples = doc["timeBetweenSavingSamples"];
         config.measurePeriod = doc["measurePeriod"];
@@ -185,7 +184,7 @@ void MySD::loadConfig(Config &config, std::string filePath)
     end();
 }
 
-void MySD::printConfig(std::string filePath)
+void MySD::printConfig(const std::string &filePath)
 {
     if (begin())
     {
@@ -202,42 +201,6 @@ void MySD::printConfig(std::string filePath)
             Serial.print((char)configurationFile.read());
         Serial.println();
         configurationFile.close();
-    }
-    end();
-}
-
-void MySD::loadWiFi(Config &config, std::string filePath)
-{
-    if (begin())
-    {
-        File configurationFile = SD.open(filePath.c_str(), FILE_READ);
-        if (!configurationFile)
-        {
-            Serial.print("Failed to read configuration file. Creating file...");
-            configurationFile.close();
-            end();
-            saveConfig(config, filePath);
-            return;
-        }
-        else
-            Serial.println("Configuration file exists. Reading...");
-
-        StaticJsonDocument<512> doc;
-        DeserializationError error = deserializeJson(doc, configurationFile);
-
-        if (error)
-        {
-            Serial.println("Failed to read file, using default Configuration");
-            return;
-        }
-
-        char tmp[64];
-        strlcpy(tmp, doc["ssid"], sizeof(tmp));
-        config.ssid = tmp;
-        strlcpy(tmp, doc["password"], sizeof(tmp));
-        config.password = tmp;
-        configurationFile.close();
-        Serial.println("Succesfully loaded Wi-Fi credentials.");
     }
     end();
 }

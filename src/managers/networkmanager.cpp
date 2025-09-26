@@ -106,48 +106,6 @@ void NetworkManager::handleServerClient()
     m_server.handleClient();
 }
 
-void NetworkManager::loadConfig(Types::ConfigData &config, const std::string &configPath)
-{
-    if (sdCard_) {
-        // Convert Types::ConfigData to MySD's Config format for loading
-        Config tempConfig;
-        sdCard_->loadConfig(tempConfig, configPath);
-
-        // Convert back to Types::ConfigData
-        config.ssid = String(tempConfig.ssid.c_str());
-        config.password = String(tempConfig.password.c_str());
-        config.lcdLockTime = tempConfig.lcdLockTime;
-        config.timeBetweenSavingSamples = tempConfig.timeBetweenSavingSamples;
-        config.measurePeriod = tempConfig.measurePeriod;
-        config.numberOfSamples = tempConfig.numberOfSamples;
-        config.turnFanTime = tempConfig.turnFanTime;
-    }
-}
-
-void NetworkManager::saveConfig(const Types::ConfigData &config, const std::string &configPath)
-{
-    if (sdCard_) {
-        // Convert Types::ConfigData to MySD's Config format for saving
-        Config tempConfig;
-        tempConfig.ssid = config.ssid.c_str();
-        tempConfig.password = config.password.c_str();
-        tempConfig.lcdLockTime = config.lcdLockTime;
-        tempConfig.timeBetweenSavingSamples = config.timeBetweenSavingSamples;
-        tempConfig.measurePeriod = config.measurePeriod;
-        tempConfig.numberOfSamples = config.numberOfSamples;
-        tempConfig.turnFanTime = config.turnFanTime;
-
-        sdCard_->saveConfig(tempConfig, configPath);
-    }
-}
-
-void NetworkManager::printConfig(const std::string &configPath)
-{
-    if (sdCard_) {
-        sdCard_->printConfig(configPath);
-    }
-}
-
 void NetworkManager::setTaskManager(TaskManager *taskManager)
 {
     m_taskManager = taskManager;

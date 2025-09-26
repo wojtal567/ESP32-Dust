@@ -9,12 +9,14 @@
 SamplingSettingsScreen::SamplingSettingsScreen(const Types::ConfigData &config,
                                                TaskManager *taskManager,
                                                NetworkManager *networkManager,
-                                               ScreenManager &screenManager)
+                                               ScreenManager &screenManager,
+                                               MySD *sdCard)
     : BaseScreen<SamplingSettingsScreen>(ScreenType::SAMPLING_SETTINGS)
     , m_config(config)
     , m_taskManager(taskManager)
     , m_networkManager(networkManager)
     , m_screenManager(screenManager)
+    , m_sdCard(sdCard)
 {}
 
 SamplingSettingsScreen::~SamplingSettingsScreen() {}
@@ -311,8 +313,8 @@ void SamplingSettingsScreen::handleSaveButton(lv_obj_t *btn, lv_event_t event)
             m_taskManager->recreateSampleTasksFromConfig();
         }
 
-        m_networkManager->saveConfig(m_config, StringConstants::CONFIG_FILE_PATH);
-        m_networkManager->printConfig(StringConstants::CONFIG_FILE_PATH);
+        m_sdCard->saveConfig(m_config, StringConstants::CONFIG_FILE_PATH);
+        m_sdCard->printConfig(StringConstants::CONFIG_FILE_PATH);
         m_screenManager.switchToScreen(ScreenType::MAIN);
     }
 }

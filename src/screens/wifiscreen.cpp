@@ -8,12 +8,14 @@
 WifiScreen::WifiScreen(const Types::ConfigData &config,
                        NetworkManager *networkManager,
                        RTCManager &rtc,
-                       ScreenManager &screenManager)
+                       ScreenManager &screenManager,
+                       MySD *sdCard)
     : BaseScreen<WifiScreen>(ScreenType::WIFI)
     , m_config(config)
     , m_networkManager(networkManager)
     , m_rtcManager(rtc)
     , m_screenManager(screenManager)
+    , m_sdCard(sdCard)
 {}
 
 WifiScreen::~WifiScreen() {}
@@ -142,9 +144,9 @@ void WifiScreen::handleConnectButtonEvent(lv_obj_t *btn, lv_event_t event)
         Serial.println(m_config.ssid.c_str());
         m_networkManager->connectAsync(m_config.ssid.c_str(), m_config.password.c_str());
 
-        m_networkManager->saveConfig(m_config, StringConstants::CONFIG_FILE_PATH);
+        m_sdCard->saveConfig(m_config, StringConstants::CONFIG_FILE_PATH);
+        m_sdCard->printConfig(StringConstants::CONFIG_FILE_PATH);
 
-        m_networkManager->printConfig(StringConstants::CONFIG_FILE_PATH);
         bool connected = m_networkManager->connect();
         if (connected) {
             Serial.println("btn_connect -> connected to Wi-Fi! IP: "

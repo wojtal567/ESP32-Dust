@@ -8,12 +8,14 @@
 TimeSettingsScreen::TimeSettingsScreen(const Types::ConfigData &config,
                                        RTCManager &rtc,
                                        NetworkManager *networkManager,
-                                       ScreenManager &screenManager)
+                                       ScreenManager &screenManager,
+                                       MySD *sdCard)
     : BaseScreen<TimeSettingsScreen>(ScreenType::TIME_SETTINGS)
     , m_config(config)
     , m_rtcManager(rtc)
     , m_networkManager(networkManager)
     , m_screenManager(screenManager)
+    , m_sdCard(sdCard)
 {}
 
 TimeSettingsScreen::~TimeSettingsScreen() {}
@@ -321,8 +323,8 @@ void TimeSettingsScreen::handleSaveButton(lv_obj_t *btn, lv_event_t event)
                 m_config.lcdLockTime = 60000;
                 break;
             }
-            m_networkManager->saveConfig(m_config, StringConstants::CONFIG_FILE_PATH);
-            m_networkManager->printConfig(StringConstants::CONFIG_FILE_PATH);
+            m_sdCard->saveConfig(m_config, StringConstants::CONFIG_FILE_PATH);
+            m_sdCard->printConfig(StringConstants::CONFIG_FILE_PATH);
             if (m_timeChanged == true) {
                 String date = lv_label_get_text(m_dateButtonLabel)
                               + (String)lv_textarea_get_text(m_hourSpinbox) + ":"

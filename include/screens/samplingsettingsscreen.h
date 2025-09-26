@@ -7,6 +7,7 @@
 
 class TaskManager;
 class NetworkManager;
+class MySD;
 
 class SamplingSettingsScreen : public BaseScreen<SamplingSettingsScreen>
 {
@@ -14,7 +15,8 @@ public:
     SamplingSettingsScreen(const Types::ConfigData &config,
                            TaskManager *taskManager,
                            NetworkManager *networkManager,
-                           ScreenManager &screenManager);
+                           ScreenManager &screenManager,
+                           MySD *sdCard);
     ~SamplingSettingsScreen() override;
 
     void initialize() override;
@@ -96,4 +98,5 @@ private:
     TaskManager *m_taskManager;
     NetworkManager *m_networkManager;
     ScreenManager &m_screenManager;
+    MySD *m_sdCard{nullptr};
 };

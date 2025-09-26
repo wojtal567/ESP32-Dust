@@ -7,6 +7,7 @@
 #include "utils/types.h"
 
 class NetworkManager;
+class MySD;
 
 class TimeSettingsScreen : public BaseScreen<TimeSettingsScreen>
 {
@@ -14,7 +15,8 @@ public:
     TimeSettingsScreen(const Types::ConfigData &config,
                        RTCManager &rtc,
                        NetworkManager *networkManager,
-                       ScreenManager &screenManager);
+                       ScreenManager &screenManager,
+                       MySD *sdCard);
     ~TimeSettingsScreen() override;
 
     void initialize() override;
@@ -77,6 +79,7 @@ private:
     RTCManager &m_rtcManager;
     NetworkManager *m_networkManager;
     ScreenManager &m_screenManager;
+    MySD *m_sdCard{nullptr};
 
     bool m_timeChanged{false}, m_dateChanged{false};
 };

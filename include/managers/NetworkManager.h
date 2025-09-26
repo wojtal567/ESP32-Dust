@@ -33,14 +33,9 @@ public:
     void handleSetAppIp();
     void handleNotFound();
     
-    // Configuration management (delegated to SD card)
-    void loadConfig(Types::ConfigData& config, const std::string& configPath);
-    void saveConfig(const Types::ConfigData& config, const std::string& configPath);
-    void printConfig(const std::string& configPath);
-    
     // Dependency injection
     void setTaskManager(TaskManager* taskManager);
-
+    
 private:
     MySD* sdCard_;
     TaskManager* m_taskManager;

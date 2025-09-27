@@ -4,8 +4,8 @@
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
 
-NetworkManager::NetworkManager(MySD *sdCard)
-    : sdCard_(sdCard)
+NetworkManager::NetworkManager(MySD &sdCard)
+    : m_sdCard(sdCard)
     , m_taskManager(nullptr)
     , m_server(80)
     , m_wifiTaskHandle(nullptr)

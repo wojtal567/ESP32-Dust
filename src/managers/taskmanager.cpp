@@ -8,9 +8,11 @@
 #include <string>
 
 #include "managers/networkmanager.h"
+#include "managers/rtcmanager.h"
 #include "managers/sensormanager.h"
 #include "screens/lockscreen.h"
 #include "screens/mainscreen.h"
+#include "screens/screenmanager.h"
 #include "utils/timeUtils.h"
 
 TaskManager *TaskManager::s_instance = nullptr;
@@ -18,9 +20,9 @@ TaskManager *TaskManager::s_instance = nullptr;
 TaskManager::TaskManager(const Types::ConfigData &config,
                          NetworkManager *networkManager,
                          SensorManager *sensorManager,
-                         MySD *sdCard,
-                         RTCManager &rtcManager,
-                         ScreenManager &screenManager,
+                         MySD &sdCard,
+                         RTCManager *rtcManager,
+                         ScreenManager *screenManager,
                          MainScreen *mainScreen,
                          LockScreen *lockScreen)
     : m_config(config)
@@ -176,11 +178,11 @@ void TaskManager::getSampleFunc(lv_task_t *task)
         lv_task_set_period(m_getSample, newPeriod);
         m_mainScreen->updateSensorData(temp, humi, averagedData);
 
-        if (m_rtcManager.isRunning()) {
-            m_lastSampleTimestamp = Utils::formatMainTimestamp(m_rtcManager.getCurrentDateTime());
+        if (m_rtcManager->isRunning()) {
+            m_lastSampleTimestamp = Utils::formatMainTimestamp(m_rtcManager->getCurrentDateTime());
             Serial.println("lastSampleTimestamp before saving to database: "
                            + m_lastSampleTimestamp);
-            m_sdCard->save(averagedData, temp, humi, m_lastSampleTimestamp, &Serial);
+            m_sdCard.save(averagedData, temp, humi, m_lastSampleTimestamp, &Serial);
         } else {
             Serial.println("RTC is not running, not saving");
         }
@@ -204,10 +206,11 @@ void TaskManager::turnFanOnFunc(lv_task_t *task)
 
 void TaskManager::dateTimeFunc(lv_task_t *task)
 {
-    if (m_rtcManager.isRunning()) {
+    if (m_rtcManager->isRunning()) {
         m_mainScreen->updateDateTimeLabel(
-            Utils::formatMainTimestamp(m_rtcManager.getCurrentDateTime()).c_str());
-        m_lockScreen->updateDateTime(m_rtcManager.getDate().c_str(), m_rtcManager.getTime().c_str());
+            Utils::formatMainTimestamp(m_rtcManager->getCurrentDateTime()).c_str());
+        m_lockScreen->updateDateTime(m_rtcManager->getDate().c_str(),
+                                     m_rtcManager->getTime().c_str());
     } else {
         m_mainScreen->updateDateTimeLabel("\0");
         m_lockScreen->updateDateTime("", "");
@@ -219,7 +222,7 @@ void TaskManager::statusFunc(lv_task_t *task)
     const bool isNetworkConnected = m_networkManager->isConnected();
     m_mainScreen->updateWiFiStatus(isNetworkConnected);
 
-    const bool isSDCardConnected = m_sdCard->start(&Serial2);
+    const bool isSDCardConnected = m_sdCard.start(&Serial2);
 
     if (isSDCardConnected) {
         if (!m_networkManager->isConnected() && (m_config.ssid != "" && m_config.password != "")) {
@@ -251,7 +254,7 @@ void TaskManager::fetchLastRecordAndSynchronize(lv_task_t *task)
                 Serial.println("Deserialization error: " + (String)err.c_str());
                 JsonArray lastRecord = doc1.to<JsonArray>();
 
-                m_sdCard->getLastRecord(&Serial, &lastRecord);
+                m_sdCard.getLastRecord(&Serial, &lastRecord);
                 DynamicJsonDocument doc(33000);
                 if ((response[0]["timestamp"].as<String>()
                      != lastRecord[0]["timestamp"].as<String>())
@@ -259,7 +262,7 @@ void TaskManager::fetchLastRecordAndSynchronize(lv_task_t *task)
                     Serial.println("Got last record that looks good. Parsing and sending data to "
                                    "Server App...");
                     JsonArray records = doc.to<JsonArray>();
-                    m_sdCard->select(&Serial, response[0]["timestamp"].as<String>(), &records);
+                    m_sdCard.select(&Serial, response[0]["timestamp"].as<String>(), &records);
                     String json = "";
 
                     serializeJson(doc, json);
@@ -285,8 +288,8 @@ void TaskManager::inactiveScreenFunc(lv_task_t *task)
 {
     if (m_config.lcdLockTime != -1) {
         if (lv_disp_get_inactive_time(NULL) > m_config.lcdLockTime) {
-            if (m_screenManager.getCurrentScreen() != m_lockScreen) {
-                m_screenManager.switchToScreen(ScreenType::LOCK);
+            if (m_screenManager->getCurrentScreen() != m_lockScreen) {
+                m_screenManager->switchToScreen(ScreenType::LOCK);
             }
         }
     }
@@ -303,7 +306,7 @@ bool TaskManager::isLastSampleSaved() const
 {
     StaticJsonDocument<600> docA;
     JsonArray lastRecordToCheck = docA.to<JsonArray>();
-    m_sdCard->getLastRecord(&Serial, &lastRecordToCheck);
+    m_sdCard.getLastRecord(&Serial, &lastRecordToCheck);
     Serial.print("Global: ");
     Serial.print(m_lastSampleTimestamp);
     Serial.print(" Baza: ");

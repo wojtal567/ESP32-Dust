@@ -16,7 +16,7 @@ class TaskManager;
 
 class NetworkManager {
 public:
-    NetworkManager(MySD* sdCard);
+    NetworkManager(MySD& sdCard);
     bool connect();
     bool isConnected() const;
     String getIpAddress() const;
@@ -37,7 +37,7 @@ public:
     void setTaskManager(TaskManager* taskManager);
     
 private:
-    MySD* sdCard_;
+    MySD& m_sdCard;
     TaskManager* m_taskManager;
     String m_ssid, m_password;
     WebServer m_server;

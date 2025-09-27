@@ -2,7 +2,6 @@
 
 #include <map>
 #include "screens/basescreen.h"
-#include "screens/screenmanager.h"
 
 constexpr int PARTICLE_SIZE_COUNT = 7;
 constexpr lv_color_t AIR_QUALITY_COLORS[6] = {LV_COLOR_GREEN,
@@ -12,10 +11,12 @@ constexpr lv_color_t AIR_QUALITY_COLORS[6] = {LV_COLOR_GREEN,
                                               LV_COLOR_RED,
                                               LV_COLOR_RED};
 
+class ScreenManager;
+
 class MainScreen : public BaseScreen<MainScreen>
 {
 public:
-    MainScreen(ScreenManager &screenManager);
+    MainScreen(ScreenManager *screenManager);
     ~MainScreen();
 
     void initialize() override;
@@ -80,7 +81,7 @@ private:
     lv_obj_t *m_particlesNumberLabel[PARTICLE_SIZE_COUNT - 1] = {nullptr};
 
     bool m_defaultTimeOnDisplay{false};
-    ScreenManager &m_screenManager;
+    ScreenManager *m_screenManager;
 
     // Static callbacks
     static void settingsButtonCallback(lv_obj_t *btn, lv_event_t event);

@@ -3,17 +3,17 @@
 #include "screens/basescreen.h"
 
 #include <Arduino.h>
-#include "screens/screenmanager.h"
 #include "utils/types.h"
 
 class NetworkManager;
+class ScreenManager;
 
 class InfoScreen : public BaseScreen<InfoScreen>
 {
 public:
     InfoScreen(NetworkManager *networkManager,
                const Types::ConfigData &config,
-               ScreenManager &screenManager);
+               ScreenManager *screenManager);
     ~InfoScreen();
 
     void initialize() override;
@@ -29,8 +29,8 @@ private:
 
     NetworkManager *m_networkManager;
     const Types::ConfigData &m_config;
-    ScreenManager &m_screenManager;
-    
+    ScreenManager *m_screenManager;
+
     // Static callbacks
     static void backButtonCallback(lv_obj_t *btn, lv_event_t event);
     void handleBackButtonEvent(lv_obj_t *btn, lv_event_t event);

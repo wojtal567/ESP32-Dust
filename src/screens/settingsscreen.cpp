@@ -4,9 +4,10 @@
 #include "screens/timesettingsscreen.h"
 
 #include "managers/stylemanager.h"
+#include "screens/screenmanager.h"
 #include "utils/stringConstants.h"
 
-SettingsScreen::SettingsScreen(ScreenManager &screenManager)
+SettingsScreen::SettingsScreen(ScreenManager *screenManager)
     : BaseScreen<SettingsScreen>(ScreenType::SETTINGS)
     , m_screenManager(screenManager)
 {}
@@ -117,14 +118,14 @@ void SettingsScreen::samplingSettingsButtonCallback(lv_obj_t *btn, lv_event_t ev
 void SettingsScreen::handleBackButtonEvent(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
-        m_screenManager.switchToScreen(ScreenType::MAIN);
+        m_screenManager->switchToScreen(ScreenType::MAIN);
     }
 }
 
 void SettingsScreen::handleWifiSettingsButtonEvent(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
-        m_screenManager.switchToScreen(ScreenType::WIFI);
+        m_screenManager->switchToScreen(ScreenType::WIFI);
     }
 }
 
@@ -132,11 +133,11 @@ void SettingsScreen::handleInfoButtonEvent(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
         // Update the info screen before switching
-        auto *infoScreen = static_cast<InfoScreen *>(m_screenManager.getScreen(ScreenType::INFO));
+        auto *infoScreen = static_cast<InfoScreen *>(m_screenManager->getScreen(ScreenType::INFO));
         if (infoScreen) {
             infoScreen->updateConfigLabel();
         }
-        m_screenManager.switchToScreen(ScreenType::INFO);
+        m_screenManager->switchToScreen(ScreenType::INFO);
     }
 }
 
@@ -145,11 +146,11 @@ void SettingsScreen::handleTimeSettingsButtonEvent(lv_obj_t *btn, lv_event_t eve
     if (event == LV_EVENT_CLICKED) {
         // Update the time settings screen before switching
         auto *timeSettingsScreen = static_cast<TimeSettingsScreen *>(
-            m_screenManager.getScreen(ScreenType::TIME_SETTINGS));
+            m_screenManager->getScreen(ScreenType::TIME_SETTINGS));
         if (timeSettingsScreen) {
             timeSettingsScreen->updateData();
         }
-        m_screenManager.switchToScreen(ScreenType::TIME_SETTINGS);
+        m_screenManager->switchToScreen(ScreenType::TIME_SETTINGS);
     }
 }
 
@@ -158,10 +159,10 @@ void SettingsScreen::handleSamplingSettingsButtonEvent(lv_obj_t *btn, lv_event_t
     if (event == LV_EVENT_CLICKED) {
         // Update the sampling settings screen before switching
         auto *samplingSettingsScreen = static_cast<SamplingSettingsScreen *>(
-            m_screenManager.getScreen(ScreenType::SAMPLING_SETTINGS));
+            m_screenManager->getScreen(ScreenType::SAMPLING_SETTINGS));
         if (samplingSettingsScreen) {
             samplingSettingsScreen->updateData();
         }
-        m_screenManager.switchToScreen(ScreenType::SAMPLING_SETTINGS);
+        m_screenManager->switchToScreen(ScreenType::SAMPLING_SETTINGS);
     }
 }

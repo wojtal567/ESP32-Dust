@@ -1,15 +1,17 @@
 #include "screens/timesettingsscreen.h"
 
 #include "managers/networkmanager.h"
+#include "managers/rtcmanager.h"
 #include "managers/stylemanager.h"
+#include "screens/screenmanager.h"
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
 
 TimeSettingsScreen::TimeSettingsScreen(const Types::ConfigData &config,
-                                       RTCManager &rtc,
+                                       RTCManager *rtc,
                                        NetworkManager *networkManager,
-                                       ScreenManager &screenManager,
-                                       MySD *sdCard)
+                                       ScreenManager *screenManager,
+                                       MySD &sdCard)
     : BaseScreen<TimeSettingsScreen>(ScreenType::TIME_SETTINGS)
     , m_config(config)
     , m_rtcManager(rtc)
@@ -144,8 +146,8 @@ void TimeSettingsScreen::updateData()
     m_timeChanged = false;
     lv_dropdown_set_selected(m_lockScreenDropdown, getDropdownIndex());
 
-    if (m_rtcManager.isRunning()) {
-        RtcDateTime now = m_rtcManager.getCurrentDateTime();
+    if (m_rtcManager->isRunning()) {
+        RtcDateTime now = m_rtcManager->getCurrentDateTime();
         lv_label_set_text_fmt(m_dateButtonLabel,
                              "%02d.%02d.%d",
                              now.Day(),
@@ -236,9 +238,9 @@ void TimeSettingsScreen::handleDateButton(lv_obj_t *btn, lv_event_t event)
                                          LV_CALENDAR_PART_DATE,
                                          LV_STATE_DEFAULT,
                                          lv_theme_get_font_small());
-        if (m_rtcManager.isRunning()) {
+        if (m_rtcManager->isRunning()) {
             lv_calendar_date_t today;
-            RtcDateTime now = m_rtcManager.getCurrentDateTime();
+            RtcDateTime now = m_rtcManager->getCurrentDateTime();
             today.year = now.Year();
             today.month = now.Month();
             today.day = now.Day();
@@ -291,8 +293,8 @@ void TimeSettingsScreen::handleCalendarEvent(lv_obj_t *calendar, lv_event_t even
 void TimeSettingsScreen::handleSyncNtpButton(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
-        bool success = m_rtcManager.syncWithNTP(StringConstants::NTP_SERVER,
-                                                Constants::GMT_OFFSET_SEC);
+        bool success = m_rtcManager->syncWithNTP(StringConstants::NTP_SERVER,
+                                                 Constants::GMT_OFFSET_SEC);
         if (!success) {
             Serial.println("Time synchronization failed.");
         }
@@ -323,8 +325,8 @@ void TimeSettingsScreen::handleSaveButton(lv_obj_t *btn, lv_event_t event)
                 m_config.lcdLockTime = 60000;
                 break;
             }
-            m_sdCard->saveConfig(m_config, StringConstants::CONFIG_FILE_PATH);
-            m_sdCard->printConfig(StringConstants::CONFIG_FILE_PATH);
+            m_sdCard.saveConfig(m_config, StringConstants::CONFIG_FILE_PATH);
+            m_sdCard.printConfig(StringConstants::CONFIG_FILE_PATH);
             if (m_timeChanged == true) {
                 String date = lv_label_get_text(m_dateButtonLabel)
                               + (String)lv_textarea_get_text(m_hourSpinbox) + ":"
@@ -335,11 +337,11 @@ void TimeSettingsScreen::handleSaveButton(lv_obj_t *btn, lv_event_t event)
                                                   date.substring(10, 12).toDouble(),
                                                   date.substring(13, 15).toDouble(),
                                                   0);
-                m_rtcManager.setDateTime(*dt);
-                m_rtcManager.setIsRunning(true);
+                m_rtcManager->setDateTime(*dt);
+                m_rtcManager->setIsRunning(true);
             }
             if (m_dateChanged == true) {
-                RtcDateTime ori = m_rtcManager.getCurrentDateTime();
+                RtcDateTime ori = m_rtcManager->getCurrentDateTime();
                 String date = lv_label_get_text(m_dateButtonLabel);
                 RtcDateTime *dt = new RtcDateTime(atoi(date.substring(6).c_str()),
                                                   atoi(date.substring(3, 6).c_str()),
@@ -347,10 +349,10 @@ void TimeSettingsScreen::handleSaveButton(lv_obj_t *btn, lv_event_t event)
                                                   ori.Hour(),
                                                   ori.Minute(),
                                                   ori.Second());
-                m_rtcManager.setDateTime(*dt);
-                m_rtcManager.setIsRunning(true);
+                m_rtcManager->setDateTime(*dt);
+                m_rtcManager->setIsRunning(true);
             }
-            m_screenManager.switchToScreen(ScreenType::MAIN);
+            m_screenManager->switchToScreen(ScreenType::MAIN);
     }
 }
 
@@ -421,6 +423,6 @@ void TimeSettingsScreen::backButtonCallback(lv_obj_t *btn, lv_event_t event)
 void TimeSettingsScreen::handleBackButton(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
-        m_screenManager.switchToScreen(ScreenType::SETTINGS);
+        m_screenManager->switchToScreen(ScreenType::SETTINGS);
     }
 }

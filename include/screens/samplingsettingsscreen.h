@@ -2,12 +2,12 @@
 
 #include "screens/basescreen.h"
 
-#include "screens/screenmanager.h"
 #include "utils/types.h"
 
 class TaskManager;
 class NetworkManager;
 class MySD;
+class ScreenManager;
 
 class SamplingSettingsScreen : public BaseScreen<SamplingSettingsScreen>
 {
@@ -15,8 +15,8 @@ public:
     SamplingSettingsScreen(const Types::ConfigData &config,
                            TaskManager *taskManager,
                            NetworkManager *networkManager,
-                           ScreenManager &screenManager,
-                           MySD *sdCard);
+                           ScreenManager *screenManager,
+                           MySD &sdCard);
     ~SamplingSettingsScreen() override;
 
     void initialize() override;
@@ -97,6 +97,6 @@ private:
     Types::ConfigData m_config;
     TaskManager *m_taskManager;
     NetworkManager *m_networkManager;
-    ScreenManager &m_screenManager;
-    MySD *m_sdCard{nullptr};
+    ScreenManager *m_screenManager;
+    MySD &m_sdCard;
 };

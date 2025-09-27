@@ -3,14 +3,15 @@
 #include "managers/networkmanager.h"
 #include "managers/stylemanager.h"
 #include "managers/taskmanager.h"
+#include "screens/screenmanager.h"
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
 
 SamplingSettingsScreen::SamplingSettingsScreen(const Types::ConfigData &config,
                                                TaskManager *taskManager,
                                                NetworkManager *networkManager,
-                                               ScreenManager &screenManager,
-                                               MySD *sdCard)
+                                               ScreenManager *screenManager,
+                                               MySD &sdCard)
     : BaseScreen<SamplingSettingsScreen>(ScreenType::SAMPLING_SETTINGS)
     , m_config(config)
     , m_taskManager(taskManager)
@@ -313,9 +314,9 @@ void SamplingSettingsScreen::handleSaveButton(lv_obj_t *btn, lv_event_t event)
             m_taskManager->recreateSampleTasksFromConfig();
         }
 
-        m_sdCard->saveConfig(m_config, StringConstants::CONFIG_FILE_PATH);
-        m_sdCard->printConfig(StringConstants::CONFIG_FILE_PATH);
-        m_screenManager.switchToScreen(ScreenType::MAIN);
+        m_sdCard.saveConfig(m_config, StringConstants::CONFIG_FILE_PATH);
+        m_sdCard.printConfig(StringConstants::CONFIG_FILE_PATH);
+        m_screenManager->switchToScreen(ScreenType::MAIN);
     }
 }
 
@@ -629,6 +630,6 @@ void SamplingSettingsScreen::backButtonCallback(lv_obj_t *btn, lv_event_t event)
 void SamplingSettingsScreen::handleBackButtonEvent(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
-        m_screenManager.switchToScreen(ScreenType::SETTINGS);
+        m_screenManager->switchToScreen(ScreenType::SETTINGS);
     }
 }

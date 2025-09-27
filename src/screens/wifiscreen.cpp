@@ -1,15 +1,17 @@
 #include "screens/wifiscreen.h"
 
 #include "managers/networkmanager.h"
+#include "managers/rtcmanager.h"
 #include "managers/stylemanager.h"
+#include "screens/screenmanager.h"
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
 
 WifiScreen::WifiScreen(const Types::ConfigData &config,
                        NetworkManager *networkManager,
-                       RTCManager &rtc,
-                       ScreenManager &screenManager,
-                       MySD *sdCard)
+                       RTCManager *rtc,
+                       ScreenManager *screenManager,
+                       MySD &sdCard)
     : BaseScreen<WifiScreen>(ScreenType::WIFI)
     , m_config(config)
     , m_networkManager(networkManager)
@@ -105,7 +107,7 @@ void WifiScreen::handleKeyboardEvent(lv_obj_t *kb, lv_event_t event)
 void WifiScreen::handleCancelButtonEvent(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
-        m_screenManager.switchToScreen(ScreenType::SETTINGS);
+        m_screenManager->switchToScreen(ScreenType::SETTINGS);
         lv_textarea_set_text(m_ssidTextArea, "");
         lv_textarea_set_text(m_passwordTextArea, "");
     }
@@ -144,20 +146,20 @@ void WifiScreen::handleConnectButtonEvent(lv_obj_t *btn, lv_event_t event)
         Serial.println(m_config.ssid.c_str());
         m_networkManager->connectAsync(m_config.ssid.c_str(), m_config.password.c_str());
 
-        m_sdCard->saveConfig(m_config, StringConstants::CONFIG_FILE_PATH);
-        m_sdCard->printConfig(StringConstants::CONFIG_FILE_PATH);
+        m_sdCard.saveConfig(m_config, StringConstants::CONFIG_FILE_PATH);
+        m_sdCard.printConfig(StringConstants::CONFIG_FILE_PATH);
 
         bool connected = m_networkManager->connect();
         if (connected) {
             Serial.println("btn_connect -> connected to Wi-Fi! IP: "
                            + m_networkManager->getIpAddress());
-            m_rtcManager.syncWithNTP(StringConstants::NTP_SERVER, Constants::GMT_OFFSET_SEC);
+            m_rtcManager->syncWithNTP(StringConstants::NTP_SERVER, Constants::GMT_OFFSET_SEC);
             m_networkManager->setupServer();
         } else {
             Serial.println(
                 "btn_connect -> can't connect. Probably you have entered wrong credentials.");
         }
-        m_screenManager.switchToScreen(ScreenType::MAIN);
+        m_screenManager->switchToScreen(ScreenType::MAIN);
         lv_textarea_set_text(m_ssidTextArea, "");
         lv_textarea_set_text(m_passwordTextArea, "");
     }

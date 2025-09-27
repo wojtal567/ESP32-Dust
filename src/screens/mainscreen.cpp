@@ -4,8 +4,9 @@
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
 #include "utils/timeUtils.h"
+#include "screens/screenmanager.h"
 
-MainScreen::MainScreen(ScreenManager &screenManager)
+MainScreen::MainScreen(ScreenManager *screenManager)
     : BaseScreen<MainScreen>(ScreenType::MAIN), m_screenManager(screenManager)
 {
 }
@@ -290,13 +291,13 @@ void MainScreen::lockButtonCallback(lv_obj_t *btn, lv_event_t event)
 void MainScreen::handleSettingsButtonEvent(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
-        m_screenManager.switchToScreen(ScreenType::SETTINGS);
+        m_screenManager->switchToScreen(ScreenType::SETTINGS);
     }
 }
 
 void MainScreen::handleLockButtonEvent(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
-        m_screenManager.switchToScreen(ScreenType::LOCK);
+        m_screenManager->switchToScreen(ScreenType::LOCK);
     }
 }

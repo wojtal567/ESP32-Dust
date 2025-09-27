@@ -2,8 +2,6 @@
 
 #include <lvgl.h>
 
-#include "managers/rtcmanager.h"
-#include "screens/screenmanager.h"
 #include "utils/types.h"
 
 class NetworkManager;
@@ -11,6 +9,8 @@ class SensorManager;
 class MySD;
 class MainScreen;
 class LockScreen;
+class ScreenManager;
+class RTCManager;
 
 class TaskManager
 {
@@ -18,9 +18,9 @@ public:
     TaskManager(const Types::ConfigData &config,
                 NetworkManager *networkManager,
                 SensorManager *sensorManager,
-                MySD *sdCard,
-                RTCManager &rtcManager,
-                ScreenManager &screenManager,
+                MySD &sdCard,
+                RTCManager *rtcManager,
+                ScreenManager *screenManager,
                 MainScreen *mainScreen,
                 LockScreen *lockScreen);
     void initialize();
@@ -48,9 +48,9 @@ private:
     Types::ConfigData m_config;
     NetworkManager *m_networkManager;
     SensorManager *m_sensorManager;
-    MySD *m_sdCard;
-    RTCManager &m_rtcManager;
-    ScreenManager &m_screenManager;
+    MySD &m_sdCard;
+    RTCManager *m_rtcManager;
+    ScreenManager *m_screenManager;
     MainScreen *m_mainScreen;
     LockScreen *m_lockScreen;
 

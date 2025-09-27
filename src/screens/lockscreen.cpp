@@ -1,9 +1,10 @@
 #include "screens/lockscreen.h"
 
 #include "managers/stylemanager.h"
+#include "screens/screenmanager.h"
 #include "utils/stringConstants.h"
 
-LockScreen::LockScreen(ScreenManager &screenManager)
+LockScreen::LockScreen(ScreenManager *screenManager)
     : BaseScreen<LockScreen>(ScreenType::LOCK)
     , m_screenManager(screenManager)
 {}
@@ -105,6 +106,6 @@ void LockScreen::unlockButtonCallback(lv_obj_t *btn, lv_event_t event)
 void LockScreen::handleUnlockButtonEvent(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
-        m_screenManager.switchToScreen(ScreenType::MAIN);
+        m_screenManager->switchToScreen(ScreenType::MAIN);
     }
 }

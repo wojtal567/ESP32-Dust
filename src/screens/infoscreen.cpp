@@ -2,10 +2,11 @@
 
 #include "managers/networkmanager.h"
 #include "managers/stylemanager.h"
+#include "screens/screenmanager.h"
 
 InfoScreen::InfoScreen(NetworkManager *networkManager,
                        const Types::ConfigData &config,
-                       ScreenManager &screenManager)
+                       ScreenManager *screenManager)
     : BaseScreen<InfoScreen>(ScreenType::INFO)
     , m_networkManager(networkManager)
     , m_config(config)
@@ -77,6 +78,6 @@ void InfoScreen::backButtonCallback(lv_obj_t *btn, lv_event_t event)
 void InfoScreen::handleBackButtonEvent(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
-        m_screenManager.switchToScreen(ScreenType::SETTINGS);
+        m_screenManager->switchToScreen(ScreenType::SETTINGS);
     }
 }

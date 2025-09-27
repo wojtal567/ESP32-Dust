@@ -2,21 +2,21 @@
 
 #include "screens/basescreen.h"
 
-#include "managers/rtcmanager.h"
-#include "screens/screenmanager.h"
 #include "utils/types.h"
 
-class NetworkManager;
 class MySD;
+class NetworkManager;
+class RTCManager;
+class ScreenManager;
 
 class TimeSettingsScreen : public BaseScreen<TimeSettingsScreen>
 {
 public:
     TimeSettingsScreen(const Types::ConfigData &config,
-                       RTCManager &rtc,
+                       RTCManager *rtc,
                        NetworkManager *networkManager,
-                       ScreenManager &screenManager,
-                       MySD *sdCard);
+                       ScreenManager *screenManager,
+                       MySD &sdCard);
     ~TimeSettingsScreen() override;
 
     void initialize() override;
@@ -76,10 +76,10 @@ private:
     lv_obj_t *m_saveButtonLabel{nullptr};
 
     Types::ConfigData m_config;
-    RTCManager &m_rtcManager;
+    RTCManager *m_rtcManager;
     NetworkManager *m_networkManager;
-    ScreenManager &m_screenManager;
-    MySD *m_sdCard{nullptr};
+    ScreenManager *m_screenManager;
+    MySD &m_sdCard;
 
     bool m_timeChanged{false}, m_dateChanged{false};
 };

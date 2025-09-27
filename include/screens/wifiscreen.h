@@ -2,21 +2,21 @@
 
 #include "screens/basescreen.h"
 
-#include "managers/rtcmanager.h"
-#include "screens/screenmanager.h"
 #include "utils/types.h"
 
-class NetworkManager;
 class MySD;
+class NetworkManager;
+class RTCManager;
+class ScreenManager;
 
 class WifiScreen : public BaseScreen<WifiScreen>
 {
 public:
     WifiScreen(const Types::ConfigData &config,
                NetworkManager *networkManager,
-               RTCManager &rtc,
-               ScreenManager &screenManager,
-               MySD *sdCard);
+               RTCManager *rtc,
+               ScreenManager *screenManager,
+               MySD &sdCard);
     ~WifiScreen();
 
     void initialize() override;
@@ -50,7 +50,7 @@ private:
 
     Types::ConfigData m_config;
     NetworkManager *m_networkManager;
-    RTCManager &m_rtcManager;
-    ScreenManager &m_screenManager;
-    MySD *m_sdCard{nullptr};
+    RTCManager *m_rtcManager;
+    ScreenManager *m_screenManager;
+    MySD &m_sdCard;
 };

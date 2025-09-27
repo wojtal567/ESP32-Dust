@@ -1,12 +1,12 @@
 #pragma once
 
 #include "screens/basescreen.h"
-#include "screens/screenmanager.h"
 
+class ScreenManager;
 class SettingsScreen : public BaseScreen<SettingsScreen>
 {
 public:
-    SettingsScreen(ScreenManager &screenManager);
+    SettingsScreen(ScreenManager *screenManager);
     ~SettingsScreen() override;
 
     void initialize() override;
@@ -27,8 +27,8 @@ private:
     lv_obj_t *m_samplingSettingsButtonIcon{nullptr};
     lv_obj_t *m_samplingSettingsButtonLabel{nullptr};
 
-    ScreenManager &m_screenManager;
-    
+    ScreenManager *m_screenManager;
+
     // Static callbacks
     static void backButtonCallback(lv_obj_t *btn, lv_event_t event);
     static void wifiSettingsButtonCallback(lv_obj_t *btn, lv_event_t event);

@@ -288,9 +288,9 @@ void TaskManager::sensorDataCollectionTask(void *parameters)
             if (taskManager->m_sensorManager->readDustSensor()) {
                 Serial.println("Successfully read data from dust sensor.");
                 accumulatedData = taskManager->m_sensorManager->getDustData();
-                currentSampleNumber++;
                 accumulatedTemp = taskManager->m_sensorManager->getTemperature();
                 accumulatedHumi = taskManager->m_sensorManager->getHumidity();
+                currentSampleNumber++;
             } else {
                 Serial.println("Failed to read data from dust sensor.");
             }
@@ -302,9 +302,9 @@ void TaskManager::sensorDataCollectionTask(void *parameters)
                 for (const auto &pair : tmpData) {
                     accumulatedData[pair.first] += pair.second;
                 }
-                currentSampleNumber++;
                 accumulatedTemp += taskManager->m_sensorManager->getTemperature();
                 accumulatedHumi += taskManager->m_sensorManager->getHumidity();
+                currentSampleNumber++;
             } else {
                 Serial.println("Failed to read data from dust sensor.");
             }

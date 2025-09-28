@@ -14,13 +14,8 @@ public:
 
     void initialize(HardwareSerial *debugger = &Serial, HardwareSerial *reader = &Serial2);
 
-    bool readSensors();
     bool readDustSensor();
     bool readTemperatureHumiditySensor();
-
-    bool isDustSensorWorking() const;
-    bool isTemperatureHumiditySensorWorking() const;
-    bool isFanOn() const;
 
     float getTemperature() const;
     float getHumidity() const;

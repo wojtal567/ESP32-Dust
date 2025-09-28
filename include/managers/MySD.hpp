@@ -2,19 +2,13 @@
 
 #include <SD.h>
 #include <string>
-#include "SQLiteDb.hpp"
 #include "../utils/types.h"
+#include "SQLiteDb.hpp"
 
 class MySD
 {
-private:
-    int _port;
-    SQLiteDb m_sampleDB;
-
 public:
     MySD(int port);
-    bool begin();
-    void end();
     bool start(Stream *debugger);
     void save(std::map<std::string, float> data,
               float temperature,
@@ -26,4 +20,11 @@ public:
     void saveConfig(const Types::ConfigData &config, const std::string &filePath);
     void loadConfig(Types::ConfigData &config, const std::string &filePath);
     void printConfig(const std::string &filePath);
+
+private:
+    bool begin();
+    void end();
+
+    int _port;
+    SQLiteDb m_sampleDB;
 };

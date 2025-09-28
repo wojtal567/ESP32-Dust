@@ -45,13 +45,6 @@ void SensorManager::initialize(HardwareSerial *debugger, HardwareSerial *reader)
     m_temperatureSensorWorking = m_sht30.get();
 }
 
-bool SensorManager::readSensors()
-{
-    bool dustResult = readDustSensor();
-    bool tempResult = readTemperatureHumiditySensor();
-    return dustResult && tempResult;
-}
-
 bool SensorManager::readDustSensor()
 {
     if (m_pmsSensor == nullptr) {
@@ -161,19 +154,4 @@ void SensorManager::wakeDustSensor()
     digitalWrite(Constants::FAN_PIN, HIGH);
     m_isFanOn = true;
     Serial.println("Dust sensor fan turned ON.");
-}
-
-bool SensorManager::isDustSensorWorking() const
-{
-    return m_dustSensorWorking;
-}
-
-bool SensorManager::isTemperatureHumiditySensorWorking() const
-{
-    return m_temperatureSensorWorking;
-}
-
-bool SensorManager::isFanOn() const
-{
-    return m_isFanOn;
 }

@@ -35,6 +35,11 @@ TaskManager::TaskManager(const Types::ConfigData &config,
     , m_lockScreen(lockScreen)
 {
     s_instance = this;
+
+    m_sensorUIQueue = xQueueCreate(5, sizeof(SensorUIUpdateMessage));
+    if (m_sensorUIQueue == nullptr) {
+        Serial.println("Failed to create sensor UI queue.");
+    }
 }
 
 void TaskManager::initialize()
@@ -45,9 +50,8 @@ void TaskManager::initialize()
 
     uint32_t getSamplePeriod = (m_config.timeBetweenSavingSamples
                                 - (m_config.numberOfSamples - 1) * m_config.measurePeriod);
-    m_getSample = lv_task_create(getSampleFuncWrapper, getSamplePeriod, LV_TASK_PRIO_HIGH, this);
-
     uint32_t turnFanOnPeriod = getSamplePeriod - m_config.turnFanTime;
+
     m_turnFanOn = lv_task_create(turnFanOnFuncWrapper, turnFanOnPeriod, LV_TASK_PRIO_HIGHEST, this);
 
     m_inactiveTime = lv_task_create(inactiveScreenFuncWrapper, 1, LV_TASK_PRIO_HIGH, this);
@@ -56,15 +60,31 @@ void TaskManager::initialize()
                                                       30000,
                                                       LV_TASK_PRIO_MID,
                                                       this);
+
+    m_sensorUIProcessor = lv_task_create(sensorUIUpdateWrapper, 100, LV_TASK_PRIO_MID, this);
+
+    BaseType_t sensorTaskResult
+        = xTaskCreate(sensorDataCollectionTask, "SensorTask", 8192, this, 2, &m_sensorTaskHandle);
+
+    if (sensorTaskResult != pdPASS) {
+        Serial.println("Failed to create sensor data collection task.");
+    }
 }
 
 void TaskManager::recreateSampleTasksFromConfig()
 {
-    // delete old tasks if they exist
-    if (m_getSample) {
-        lv_task_del(m_getSample);
-        m_getSample = nullptr;
+    if (m_sensorTaskHandle != nullptr) {
+        vTaskDelete(m_sensorTaskHandle);
+        m_sensorTaskHandle = nullptr;
     }
+
+    BaseType_t sensorTaskResult
+        = xTaskCreate(sensorDataCollectionTask, "SensorTask", 8192, this, 2, &m_sensorTaskHandle);
+
+    if (sensorTaskResult != pdPASS) {
+        Serial.println("Failed to create sensor data collection task.");
+    }
+
     if (m_turnFanOn) {
         lv_task_del(m_turnFanOn);
         m_turnFanOn = nullptr;
@@ -73,17 +93,9 @@ void TaskManager::recreateSampleTasksFromConfig()
     // create new tasks with updated config
     uint32_t getSamplePeriod = (m_config.timeBetweenSavingSamples
                                 - (m_config.numberOfSamples - 1) * m_config.measurePeriod);
-    m_getSample = lv_task_create(getSampleFuncWrapper, getSamplePeriod, LV_TASK_PRIO_HIGH, this);
 
     uint32_t turnFanOnPeriod = getSamplePeriod - m_config.turnFanTime;
     m_turnFanOn = lv_task_create(turnFanOnFuncWrapper, turnFanOnPeriod, LV_TASK_PRIO_HIGHEST, this);
-}
-
-void TaskManager::getSampleFuncWrapper(lv_task_t *task)
-{
-    if (task && task->user_data) {
-        static_cast<TaskManager *>(task->user_data)->getSampleFunc(task);
-    }
 }
 
 void TaskManager::turnFanOnFuncWrapper(lv_task_t *task)
@@ -118,83 +130,6 @@ void TaskManager::inactiveScreenFuncWrapper(lv_task_t *task)
 {
     if (task && task->user_data) {
         static_cast<TaskManager *>(task->user_data)->inactiveScreenFunc(task);
-    }
-}
-
-void TaskManager::getSampleFunc(lv_task_t *task)
-{
-    static std::map<std::string, float> accumulatedData;
-    static float accumulatedTemp = 0.0f;
-    static float accumulatedHumi = 0.0f;
-    static int currentSampleNumber = 0;
-
-    m_sensorManager->readTemperatureHumiditySensor();
-    if (currentSampleNumber != 0 && currentSampleNumber < m_config.numberOfSamples) {
-        if (m_sensorManager->readDustSensor()) {
-            Serial.println("Successfully read data from dust sensor.");
-            const std::map<std::string, float> &tmpData = m_sensorManager->getDustData();
-            for (const auto &pair : tmpData) {
-                accumulatedData[pair.first] += pair.second;
-            }
-            currentSampleNumber++;
-            accumulatedTemp += m_sensorManager->getTemperature();
-            accumulatedHumi += m_sensorManager->getHumidity();
-        } else {
-            Serial.println("Failed to read data from dust sensor.");
-        }
-    }
-    if (currentSampleNumber == 0) {
-        lv_task_set_period(m_getSample, m_config.measurePeriod);
-        if (m_sensorManager->readDustSensor()) {
-            Serial.println("Successfully read data from dust sensor.");
-            accumulatedData = m_sensorManager->getDustData();
-            currentSampleNumber++;
-            accumulatedTemp = m_sensorManager->getTemperature();
-            accumulatedHumi = m_sensorManager->getHumidity();
-        } else {
-            Serial.println("Failed to read data from dust sensor.");
-        }
-    }
-    if (currentSampleNumber == m_config.numberOfSamples) {
-        Serial.println("TaskManager: All samples collected (" + String(m_config.numberOfSamples)
-                       + "), calculating averages...");
-
-        // calculate averages
-        std::map<std::string, float> averagedData;
-        for (const auto &pair : accumulatedData) {
-            averagedData[pair.first] = pair.second / m_config.numberOfSamples;
-        }
-        currentSampleNumber = 0;
-        float temp = accumulatedTemp / m_config.numberOfSamples;
-        float humi = accumulatedHumi / m_config.numberOfSamples;
-
-        // reset accumulators
-        accumulatedData.clear();
-        accumulatedTemp = 0.0f;
-        accumulatedHumi = 0.0f;
-
-        uint32_t newPeriod = (m_config.timeBetweenSavingSamples
-                              - (m_config.numberOfSamples - 1) * m_config.measurePeriod);
-        lv_task_set_period(m_getSample, newPeriod);
-        m_mainScreen->updateSensorData(temp, humi, averagedData);
-
-        if (m_rtcManager->isRunning()) {
-            m_lastSampleTimestamp = Utils::formatMainTimestamp(m_rtcManager->getCurrentDateTime());
-            Serial.println("lastSampleTimestamp before saving to database: "
-                           + m_lastSampleTimestamp);
-            m_sdCard.save(averagedData, temp, humi, m_lastSampleTimestamp, &Serial);
-        } else {
-            Serial.println("RTC is not running, not saving");
-        }
-        lv_task_reset(m_turnFanOn);
-        lv_task_set_prio(m_turnFanOn, LV_TASK_PRIO_HIGHEST);
-
-        m_sensorManager->sleepDustSensor();
-
-        bool lastSampleSaved = isLastSampleSaved();
-
-        m_mainScreen->updateLedStatus(lastSampleSaved);
-        m_lockScreen->updateLedStatus(lastSampleSaved);
     }
 }
 
@@ -323,4 +258,142 @@ bool TaskManager::isLastSampleSaved() const
 void TaskManager::setAppIpAddress(const String &ipAddress)
 {
     m_appIpAddress = ipAddress;
+}
+
+void TaskManager::sensorDataCollectionTask(void *parameters)
+{
+    TaskManager *taskManager = static_cast<TaskManager *>(parameters);
+
+    uint32_t fullCyclePeriod = (taskManager->m_config.timeBetweenSavingSamples
+                                - (taskManager->m_config.numberOfSamples - 1)
+                                      * taskManager->m_config.measurePeriod);
+    vTaskDelay(pdMS_TO_TICKS(fullCyclePeriod));
+
+    TickType_t xLastWakeTime = xTaskGetTickCount();
+    std::map<std::string, float> accumulatedData;
+    float accumulatedTemp = 0.0f;
+    float accumulatedHumi = 0.0f;
+    int currentSampleNumber = 0;
+
+    uint32_t measurePeriod = taskManager->m_config.measurePeriod;
+
+    while (true) {
+        Serial.printf("Sensor task: Reading sample %d/%d\n",
+                      currentSampleNumber + 1,
+                      taskManager->m_config.numberOfSamples);
+
+        taskManager->m_sensorManager->readTemperatureHumiditySensor();
+        // Read dust sensor and accumulate data
+        if (currentSampleNumber == 0) {
+            if (taskManager->m_sensorManager->readDustSensor()) {
+                Serial.println("Successfully read data from dust sensor.");
+                accumulatedData = taskManager->m_sensorManager->getDustData();
+                currentSampleNumber++;
+                accumulatedTemp = taskManager->m_sensorManager->getTemperature();
+                accumulatedHumi = taskManager->m_sensorManager->getHumidity();
+            } else {
+                Serial.println("Failed to read data from dust sensor.");
+            }
+        } else if (currentSampleNumber < taskManager->m_config.numberOfSamples) {
+            if (taskManager->m_sensorManager->readDustSensor()) {
+                Serial.println("Successfully read data from dust sensor.");
+                const std::map<std::string, float> &tmpData = taskManager->m_sensorManager
+                                                                  ->getDustData();
+                for (const auto &pair : tmpData) {
+                    accumulatedData[pair.first] += pair.second;
+                }
+                currentSampleNumber++;
+                accumulatedTemp += taskManager->m_sensorManager->getTemperature();
+                accumulatedHumi += taskManager->m_sensorManager->getHumidity();
+            } else {
+                Serial.println("Failed to read data from dust sensor.");
+            }
+        }
+
+        // Check if we have all samples
+        if (currentSampleNumber == taskManager->m_config.numberOfSamples) {
+            Serial.println("TaskManager: All samples collected ("
+                           + String(taskManager->m_config.numberOfSamples)
+                           + "), calculating averages...");
+
+            // calculate averages
+            std::map<std::string, float> averagedData;
+            for (const auto &pair : accumulatedData) {
+                averagedData[pair.first] = pair.second / taskManager->m_config.numberOfSamples;
+            }
+            currentSampleNumber = 0;
+            float temp = accumulatedTemp / taskManager->m_config.numberOfSamples;
+            float humi = accumulatedHumi / taskManager->m_config.numberOfSamples;
+
+            // reset accumulators
+            accumulatedData.clear();
+            accumulatedTemp = 0.0f;
+            accumulatedHumi = 0.0f;
+
+            bool saveSuccess = false;
+            if (taskManager->m_rtcManager->isRunning()) {
+                taskManager->m_lastSampleTimestamp = Utils::formatMainTimestamp(
+                    taskManager->m_rtcManager->getCurrentDateTime());
+                Serial.println("lastSampleTimestamp before saving to database: "
+                               + taskManager->m_lastSampleTimestamp);
+                taskManager->m_sdCard.save(averagedData,
+                                           temp,
+                                           humi,
+                                           taskManager->m_lastSampleTimestamp,
+                                           &Serial);
+                saveSuccess = taskManager->isLastSampleSaved();
+            } else {
+                Serial.println("RTC is not running, not saving");
+            }
+
+            // Send UI update message
+            SensorUIUpdateMessage msg;
+            msg.temperature = temp;
+            msg.humidity = humi;
+            msg.averagedData = averagedData;
+            msg.isLastSampleSaved = saveSuccess;
+
+            if (xQueueSend(taskManager->m_sensorUIQueue, &msg, 0) != pdTRUE) {
+                Serial.println("Sensor task: Failed to send UI update");
+            }
+
+            // Turn off fan after all samples collected
+            taskManager->m_sensorManager->sleepDustSensor();
+            lv_task_set_prio(taskManager->m_turnFanOn, LV_TASK_PRIO_HIGHEST);
+
+            // Wait for the full period before next cycle
+            uint32_t fullCyclePeriod = taskManager->m_config.timeBetweenSavingSamples
+                                       - (taskManager->m_config.numberOfSamples - 1)
+                                             * taskManager->m_config.measurePeriod;
+            vTaskDelay(pdMS_TO_TICKS(fullCyclePeriod));
+            xLastWakeTime = xTaskGetTickCount(); // Reset timing base
+        } else {
+            // Wait for next measurement in the averaging cycle
+            vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(measurePeriod));
+        }
+    }
+}
+
+void TaskManager::sensorUIUpdateWrapper(lv_task_t *task)
+{
+    if (task && task->user_data) {
+        static_cast<TaskManager *>(task->user_data)->processSensorUIUpdates();
+    }
+}
+
+void TaskManager::processSensorUIUpdates()
+{
+    if (m_sensorUIQueue == nullptr) {
+        return;
+    }
+
+    SensorUIUpdateMessage msg;
+    while (xQueueReceive(m_sensorUIQueue, &msg, 0) == pdTRUE) {
+        // Update the main screen with new sensor data
+        m_mainScreen->updateSensorData(msg.temperature, msg.humidity, msg.averagedData);
+
+        // Update LED status based on whether the last sample was saved successfully
+        m_mainScreen->updateLedStatus(msg.isLastSampleSaved);
+        m_lockScreen->updateLedStatus(msg.isLastSampleSaved);
+    }
 }

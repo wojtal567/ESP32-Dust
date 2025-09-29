@@ -31,7 +31,12 @@ bool PMS::readData()
         return false;
     }*/
     if (m_reader->peek() != Constants::PMS_START_BYTE) {
-        m_reader->read();
+        // Clear multiple bytes if needed to find sync
+        uint8_t attempts = 0;
+        while (m_reader->available() > 0 && m_reader->peek() != Constants::PMS_START_BYTE && attempts < 50) {
+            m_reader->read();
+            attempts++;
+        }
         m_debugger->println("PMS5003 -> Reading bytes...");
         return false;
     }
@@ -61,6 +66,12 @@ bool PMS::readData()
 
     if (checkSum != m_data["checksum"]) {
         m_debugger->println("PMS5003 -> Checksum failure. False.");
+        
+        // Clear buffer after checksum failure to prevent cascading failures
+        while (m_reader->available() > 0) {
+            m_reader->read();
+        }
+        
         return false;
     }
     return true;

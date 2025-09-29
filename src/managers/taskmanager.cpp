@@ -334,11 +334,12 @@ void TaskManager::sensorDataCollectionTask(void *parameters)
                 Serial.println("RTC is not running, not saving");
             }
 
+            auto averagedDataCopy = new std::map<std::string, float>(averagedData);
             // Send UI update message
             SensorUIUpdateMessage msg;
             msg.temperature = temp;
             msg.humidity = humi;
-            msg.averagedData = averagedData;
+            msg.averagedData = averagedDataCopy;
             msg.isLastSampleSaved = saveSuccess;
 
             if (xQueueSend(taskManager->m_sensorUIQueue, &msg, 0) != pdTRUE) {
@@ -378,11 +379,12 @@ void TaskManager::processSensorUIUpdates()
     SensorUIUpdateMessage msg;
     while (xQueueReceive(m_sensorUIQueue, &msg, 0) == pdTRUE) {
         // Update the main screen with new sensor data
-        m_mainScreen->updateSensorData(msg.temperature, msg.humidity, msg.averagedData);
+        m_mainScreen->updateSensorData(msg.temperature, msg.humidity, *msg.averagedData);
 
         // Update LED status based on whether the last sample was saved successfully
         m_mainScreen->updateLedStatus(msg.isLastSampleSaved);
         m_lockScreen->updateLedStatus(msg.isLastSampleSaved);
+        delete msg.averagedData;
     }
 }
 

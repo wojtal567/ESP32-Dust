@@ -15,7 +15,7 @@ struct SensorUIUpdateMessage
 {
     float temperature;
     float humidity;
-    std::map<std::string, float> averagedData;
+    std::map<std::string, float> *averagedData;
     bool isLastSampleSaved;
 };
 

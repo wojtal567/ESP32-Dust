@@ -40,13 +40,16 @@ TaskManager::TaskManager(const Types::ConfigData &config,
     if (m_sensorUIQueue == nullptr) {
         Serial.println("Failed to create sensor UI queue.");
     }
+
+    m_statusQueue = xQueueCreate(5, sizeof(StatusUpdateMessage));
+    if (m_statusQueue == nullptr) {
+        Serial.println("Failed to create status queue.");
+    }
 }
 
 void TaskManager::initialize()
 {
-    m_dateTime = lv_task_create(dateTimeFuncWrapper, 800, LV_TASK_PRIO_MID, this);
-
-    m_status = lv_task_create(statusFuncWrapper, 5000, LV_TASK_PRIO_LOW, this);
+    m_dateTime = lv_task_create(dateTimeFuncWrapper, 100, LV_TASK_PRIO_HIGH, this);
 
     uint32_t getSamplePeriod = (m_config.timeBetweenSavingSamples
                                 - (m_config.numberOfSamples - 1) * m_config.measurePeriod);
@@ -68,6 +71,15 @@ void TaskManager::initialize()
 
     if (sensorTaskResult != pdPASS) {
         Serial.println("Failed to create sensor data collection task.");
+    }
+
+    m_statusProcessor = lv_task_create(statusUIUpdateWrapper, 1000, LV_TASK_PRIO_LOW, this);
+
+    BaseType_t statusTaskResult
+        = xTaskCreate(statusDataCollectionTask, "StatusTask", 8192, this, 1, &m_statusTaskHandle);
+
+    if (statusTaskResult != pdPASS) {
+        Serial.println("Failed to create status data collection task.");
     }
 }
 
@@ -112,13 +124,6 @@ void TaskManager::dateTimeFuncWrapper(lv_task_t *task)
     }
 }
 
-void TaskManager::statusFuncWrapper(lv_task_t *task)
-{
-    if (task && task->user_data) {
-        static_cast<TaskManager *>(task->user_data)->statusFunc(task);
-    }
-}
-
 void TaskManager::fetchLastRecordAndSynchronizeWrapper(lv_task_t *task)
 {
     if (task && task->user_data) {
@@ -150,23 +155,6 @@ void TaskManager::dateTimeFunc(lv_task_t *task)
         m_mainScreen->updateDateTimeLabel("\0");
         m_lockScreen->updateDateTime("", "");
     }
-}
-
-void TaskManager::statusFunc(lv_task_t *task)
-{
-    const bool isNetworkConnected = m_networkManager->isConnected();
-    m_mainScreen->updateWiFiStatus(isNetworkConnected);
-
-    const bool isSDCardConnected = m_sdCard.start(&Serial2);
-
-    if (isSDCardConnected) {
-        if (!m_networkManager->isConnected() && (m_config.ssid != "" && m_config.password != "")) {
-            m_networkManager->connectAsync(m_config.ssid.c_str(), m_config.password.c_str());
-        }
-    }
-
-    m_mainScreen->updateSDStatus(isSDCardConnected);
-    m_lockScreen->updateWifiSdStatus(isNetworkConnected, isSDCardConnected);
 }
 
 void TaskManager::fetchLastRecordAndSynchronize(lv_task_t *task)
@@ -395,5 +383,47 @@ void TaskManager::processSensorUIUpdates()
         // Update LED status based on whether the last sample was saved successfully
         m_mainScreen->updateLedStatus(msg.isLastSampleSaved);
         m_lockScreen->updateLedStatus(msg.isLastSampleSaved);
+    }
+}
+
+void TaskManager::statusDataCollectionTask(void *parameters)
+{
+    TaskManager *taskManager = static_cast<TaskManager *>(parameters);
+
+    const TickType_t xDelay = pdMS_TO_TICKS(5000);
+    TickType_t xLastWakeTime = xTaskGetTickCount();
+
+    while (true) {
+        StatusUpdateMessage msg;
+        msg.wifiConnected = taskManager->m_networkManager->isConnected();
+        msg.sdCardConnected = taskManager->m_sdCard.start(&Serial2);
+
+        if (xQueueSend(taskManager->m_statusQueue, &msg, 0) != pdTRUE) {
+            Serial.println("Status task: Failed to send UI update");
+        }
+
+        vTaskDelayUntil(&xLastWakeTime, xDelay);
+    }
+}
+
+void TaskManager::statusUIUpdateWrapper(lv_task_t *task)
+{
+    if (task && task->user_data) {
+        static_cast<TaskManager *>(task->user_data)->processStatusUIUpdates();
+    }
+}
+
+void TaskManager::processStatusUIUpdates()
+{
+    if (m_statusQueue == nullptr) {
+        return;
+    }
+
+    StatusUpdateMessage msg;
+    while (xQueueReceive(m_statusQueue, &msg, 0) == pdTRUE) {
+        // Update the screens with new status data
+        m_mainScreen->updateWiFiStatus(msg.wifiConnected);
+        m_mainScreen->updateSDStatus(msg.sdCardConnected);
+        m_lockScreen->updateWifiSdStatus(msg.wifiConnected, msg.sdCardConnected);
     }
 }

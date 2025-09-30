@@ -3,8 +3,8 @@
 #include "screens/samplingsettingsscreen.h"
 #include "screens/timesettingsscreen.h"
 
+#include "managers/screenmanager.h"
 #include "managers/stylemanager.h"
-#include "screens/screenmanager.h"
 #include "utils/stringConstants.h"
 
 SettingsScreen::SettingsScreen(ScreenManager *screenManager)

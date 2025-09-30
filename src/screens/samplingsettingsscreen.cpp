@@ -1,9 +1,9 @@
 #include "screens/samplingsettingsscreen.h"
 
 #include "managers/networkmanager.h"
+#include "managers/screenmanager.h"
 #include "managers/stylemanager.h"
 #include "managers/taskmanager.h"
-#include "screens/screenmanager.h"
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
 

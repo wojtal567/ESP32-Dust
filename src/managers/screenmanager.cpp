@@ -1,4 +1,4 @@
-#include "screens/screenmanager.h"
+#include "managers/screenmanager.h"
 
 ScreenManager::ScreenManager()
     : m_currentScreen(nullptr)

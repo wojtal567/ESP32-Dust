@@ -9,10 +9,10 @@
 
 #include "managers/networkmanager.h"
 #include "managers/rtcmanager.h"
+#include "managers/screenmanager.h"
 #include "managers/sensormanager.h"
 #include "screens/lockscreen.h"
 #include "screens/mainscreen.h"
-#include "screens/screenmanager.h"
 #include "utils/timeUtils.h"
 
 TaskManager *TaskManager::s_instance = nullptr;

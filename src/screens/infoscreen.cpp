@@ -1,8 +1,8 @@
 #include "screens/infoscreen.h"
 
 #include "managers/networkmanager.h"
+#include "managers/screenmanager.h"
 #include "managers/stylemanager.h"
-#include "screens/screenmanager.h"
 
 InfoScreen::InfoScreen(NetworkManager *networkManager,
                        const Types::ConfigData &config,

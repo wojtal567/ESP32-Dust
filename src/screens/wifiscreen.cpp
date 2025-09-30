@@ -2,8 +2,8 @@
 
 #include "managers/networkmanager.h"
 #include "managers/rtcmanager.h"
+#include "managers/screenmanager.h"
 #include "managers/stylemanager.h"
-#include "screens/screenmanager.h"
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
 

@@ -4,7 +4,7 @@
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
 #include "utils/timeUtils.h"
-#include "screens/screenmanager.h"
+#include "managers/screenmanager.h"
 
 MainScreen::MainScreen(ScreenManager *screenManager)
     : BaseScreen<MainScreen>(ScreenType::MAIN), m_screenManager(screenManager)

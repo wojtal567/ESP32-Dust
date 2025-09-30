@@ -3,6 +3,8 @@
 #include <RtcDS1307.h>
 #include <Wire.h>
 #include <NTPClient.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
 
 class RTCManager {
 public:
@@ -24,6 +26,7 @@ public:
 private:
 
     RtcDS1307<TwoWire> m_rtcDevice{RtcDS1307<TwoWire>(Wire)};
+    SemaphoreHandle_t m_i2cMutex{nullptr};
 
     long m_gmtOffsetInSeconds;
     int m_daylightOffsetInSeconds;

@@ -9,7 +9,9 @@ NetworkManager::NetworkManager(MySD &sdCard)
     , m_taskManager(nullptr)
     , m_server(80)
     , m_wifiTaskHandle(nullptr)
-{}
+    , m_wifiTaskMutex(xSemaphoreCreateMutex())
+{
+}
 
 bool NetworkManager::connect()
 {
@@ -47,9 +49,12 @@ void NetworkManager::connectAsync(const String &ssid, const String &password)
     m_password = password;
 
     // If already connecting, stop the previous task
-    if (m_wifiTaskHandle != nullptr) {
-        vTaskDelete(m_wifiTaskHandle);
-        m_wifiTaskHandle = nullptr;
+    if (m_wifiTaskMutex && xSemaphoreTake(m_wifiTaskMutex, portMAX_DELAY)) {
+        if (m_wifiTaskHandle != nullptr) {
+            vTaskDelete(m_wifiTaskHandle);
+            m_wifiTaskHandle = nullptr;
+        }
+        xSemaphoreGive(m_wifiTaskMutex);
     }
 
     // Create FreeRTOS task for WiFi connection
@@ -73,8 +78,14 @@ void NetworkManager::wifiConnectionTask(void *parameter)
         attempts++;
     }
 
-    // Clean up task handle
-    networkManager->m_wifiTaskHandle = nullptr;
+    // Clean up task handle under mutex
+    if (networkManager->m_wifiTaskMutex
+        && xSemaphoreTake(networkManager->m_wifiTaskMutex, portMAX_DELAY)) {
+        networkManager->m_wifiTaskHandle = nullptr;
+        xSemaphoreGive(networkManager->m_wifiTaskMutex);
+    } else {
+        networkManager->m_wifiTaskHandle = nullptr;
+    }
 
     // Delete this task
     vTaskDelete(NULL);

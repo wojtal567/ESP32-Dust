@@ -1,11 +1,13 @@
 #include "managers/sensormanager.h"
+
 #include <Arduino.h>
 #include "utils/constants.h"
+#include "utils/hardwareConfig.h"
 
 SensorManager::SensorManager()
     : m_pmsSensor(nullptr)
     , m_temperature(0)
-    , m_sht30(0x44) // TODO extract address to config
+    , m_sht30(HardwareConfig::SHT30_I2C_ADDRESS)
     , m_humidity(0)
     , m_dustSensorWorking(false)
     , m_temperatureSensorWorking(false)
@@ -34,8 +36,8 @@ void SensorManager::initialize(HardwareSerial *debugger, HardwareSerial *reader)
     }
 
     // Set up fan control pin
-    pinMode(Constants::FAN_PIN, OUTPUT);
-    digitalWrite(Constants::FAN_PIN, LOW);
+    pinMode(HardwareConfig::FAN_PIN, OUTPUT);
+    digitalWrite(HardwareConfig::FAN_PIN, LOW);
     m_isFanOn = false;
 
     // Try reading from the PMS sensor to see if it's working
@@ -140,7 +142,7 @@ void SensorManager::sleepDustSensor()
         return;
     }
 
-    digitalWrite(Constants::FAN_PIN, LOW);
+    digitalWrite(HardwareConfig::FAN_PIN, LOW);
     m_isFanOn = false;
 }
 
@@ -151,7 +153,7 @@ void SensorManager::wakeDustSensor()
         return;
     }
 
-    digitalWrite(Constants::FAN_PIN, HIGH);
+    digitalWrite(HardwareConfig::FAN_PIN, HIGH);
     m_isFanOn = true;
     Serial.println("Dust sensor fan turned ON.");
 }

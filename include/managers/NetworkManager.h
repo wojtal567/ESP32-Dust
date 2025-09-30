@@ -7,6 +7,7 @@
 #include <string>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include <freertos/semphr.h>
 
 #include "MySD.hpp"
 #include "utils/types.h"
@@ -44,6 +45,7 @@ private:
     
     // WiFi connection state management
     TaskHandle_t m_wifiTaskHandle;
+    SemaphoreHandle_t m_wifiTaskMutex;
     
     // Static task function for FreeRTOS
     static void wifiConnectionTask(void* parameter);

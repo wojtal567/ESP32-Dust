@@ -13,6 +13,7 @@
 #include "managers/sensormanager.h"
 #include "screens/lockscreen.h"
 #include "screens/mainscreen.h"
+#include "utils/hardwareConfig.h"
 #include "utils/timeUtils.h"
 
 TaskManager *TaskManager::s_instance = nullptr;
@@ -44,6 +45,11 @@ TaskManager::TaskManager(const Types::ConfigData &config,
     m_statusQueue = xQueueCreate(5, sizeof(StatusUpdateMessage));
     if (m_statusQueue == nullptr) {
         Serial.println("Failed to create status queue.");
+    }
+
+    m_sdMutex = xSemaphoreCreateMutex();
+    if (m_sdMutex == nullptr) {
+        LOG_ERROR("Failed to create SD mutex.");
     }
 }
 
@@ -227,20 +233,26 @@ void TaskManager::updateGetAppLastRecordAndSynchronizeTaskPrio(lv_task_prio_t pr
 
 bool TaskManager::isLastSampleSaved() const
 {
-    StaticJsonDocument<600> docA;
-    JsonArray lastRecordToCheck = docA.to<JsonArray>();
-    m_sdCard.getLastRecord(&Serial, &lastRecordToCheck);
-    Serial.print("Global: ");
-    Serial.print(m_lastSampleTimestamp);
-    Serial.print(" Baza: ");
-    Serial.print(lastRecordToCheck[0]["timestamp"].as<String>());
-    if (m_lastSampleTimestamp == lastRecordToCheck[0]["timestamp"].as<String>()) {
-        Serial.println("Last sample has been saved correctly - return true.");
-        return true;
-    } else {
-        Serial.println("Something went wrong saving last sample - return false");
-        return false;
+    if (xSemaphoreTake(m_sdMutex, portMAX_DELAY)) {
+        StaticJsonDocument<600> docA;
+        JsonArray lastRecordToCheck = docA.to<JsonArray>();
+        m_sdCard.getLastRecord(&Serial, &lastRecordToCheck);
+        Serial.print("Global: ");
+        Serial.print(m_lastSampleTimestamp);
+        Serial.print(" Baza: ");
+        Serial.print(lastRecordToCheck[0]["timestamp"].as<String>());
+
+        xSemaphoreGive(m_sdMutex);
+
+        if (m_lastSampleTimestamp == lastRecordToCheck[0]["timestamp"].as<String>()) {
+            Serial.println("Last sample has been saved correctly - return true.");
+            return true;
+        } else {
+            Serial.println("Something went wrong saving last sample - return false");
+            return false;
+        }
     }
+    return false;
 }
 
 void TaskManager::setAppIpAddress(const String &ipAddress)
@@ -324,11 +336,15 @@ void TaskManager::sensorDataCollectionTask(void *parameters)
                     taskManager->m_rtcManager->getCurrentDateTime());
                 Serial.println("lastSampleTimestamp before saving to database: "
                                + taskManager->m_lastSampleTimestamp);
-                taskManager->m_sdCard.save(averagedData,
-                                           temp,
-                                           humi,
-                                           taskManager->m_lastSampleTimestamp,
-                                           &Serial);
+                if (xSemaphoreTake(taskManager->m_sdMutex, portMAX_DELAY)) {
+
+                    taskManager->m_sdCard.save(averagedData,
+                                               temp,
+                                               humi,
+                                               taskManager->m_lastSampleTimestamp,
+                                               &Serial);
+                    xSemaphoreGive(taskManager->m_sdMutex);
+                }
                 saveSuccess = taskManager->isLastSampleSaved();
             } else {
                 Serial.println("RTC is not running, not saving");
@@ -348,7 +364,7 @@ void TaskManager::sensorDataCollectionTask(void *parameters)
 
             // Turn off fan after all samples collected
             taskManager->m_sensorManager->sleepDustSensor();
-            lv_task_set_prio(taskManager->m_turnFanOn, LV_TASK_PRIO_HIGHEST);
+            lv_async_call(TaskManager::lvglEnableFanTaskAsync, taskManager);
 
             // Wait for the full period before next cycle
             uint32_t fullCyclePeriod = taskManager->m_config.timeBetweenSavingSamples
@@ -396,15 +412,30 @@ void TaskManager::statusDataCollectionTask(void *parameters)
     TickType_t xLastWakeTime = xTaskGetTickCount();
 
     while (true) {
-        StatusUpdateMessage msg;
-        msg.wifiConnected = taskManager->m_networkManager->isConnected();
-        msg.sdCardConnected = taskManager->m_sdCard.start(&Serial2);
 
-        if (xQueueSend(taskManager->m_statusQueue, &msg, 0) != pdTRUE) {
-            Serial.println("Status task: Failed to send UI update");
+        if (xSemaphoreTake(taskManager->m_sdMutex, portMAX_DELAY)) {
+            StatusUpdateMessage msg;
+            msg.wifiConnected = taskManager->m_networkManager->isConnected();
+
+            msg.sdCardConnected = taskManager->m_sdCard.start(&Serial);
+
+            if (xQueueSend(taskManager->m_statusQueue, &msg, 0) != pdTRUE) {
+                Serial.println("Status task: Failed to send UI update");
+            }
+
+            xSemaphoreGive(taskManager->m_sdMutex);
         }
 
         vTaskDelayUntil(&xLastWakeTime, xDelay);
+    }
+}
+
+// Async LVGL callback to safely modify LVGL task priority from RTOS tasks
+void TaskManager::lvglEnableFanTaskAsync(void *user_data)
+{
+    TaskManager *self = static_cast<TaskManager *>(user_data);
+    if (self && self->m_turnFanOn) {
+        lv_task_set_prio(self->m_turnFanOn, LV_TASK_PRIO_HIGHEST);
     }
 }
 

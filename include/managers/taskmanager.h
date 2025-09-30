@@ -62,6 +62,8 @@ private:
     void processStatusUIUpdates();
     static void statusDataCollectionTask(void *parameters);
 
+    static void lvglEnableFanTaskAsync(void *user_data);
+
     TaskHandle_t m_sensorTaskHandle = nullptr, m_statusTaskHandle = nullptr;
     QueueHandle_t m_sensorUIQueue = nullptr, m_statusQueue = nullptr;
     lv_task_t *m_sensorUIProcessor = nullptr, *m_statusProcessor = nullptr;
@@ -81,6 +83,7 @@ private:
     lv_task_t *m_inactiveTime = nullptr;
     String m_appIpAddress{""};
     String m_lastSampleTimestamp{""};
+    SemaphoreHandle_t m_sdMutex;
 
     static TaskManager *s_instance;
 };

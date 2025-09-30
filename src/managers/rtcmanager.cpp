@@ -7,6 +7,7 @@ RTCManager::RTCManager(long gmtOffsetInSeconds, int daylightOffsetInSeconds, cha
     , m_daylightOffsetInSeconds(daylightOffsetInSeconds)
     , m_ntpServer(ntpServer)
 {
+    m_i2cMutex = xSemaphoreCreateMutex();
     m_rtcDevice.Begin();
 
     // Check if RTC is already running and has a reasonable date
@@ -49,8 +50,14 @@ bool RTCManager::syncWithNTP(const char *ntpServer, long gmtOffset)
         uint8_t seconds = ti->tm_sec;
 
         RtcDateTime date = RtcDateTime(year, month, day, hours, minutes, seconds);
-        m_rtcDevice.SetDateTime(date);
-        m_rtcDevice.SetIsRunning(true);
+        if (m_i2cMutex && xSemaphoreTake(m_i2cMutex, portMAX_DELAY)) {
+            m_rtcDevice.SetDateTime(date);
+            m_rtcDevice.SetIsRunning(true);
+            xSemaphoreGive(m_i2cMutex);
+        } else {
+            m_rtcDevice.SetDateTime(date);
+            m_rtcDevice.SetIsRunning(true);
+        }
         Serial.println("Successfully updated time on RTC from NTP server.");
         Serial.printf("Timezone offset applied: %ld seconds (%ld hours)\n",
                       gmtOffset,
@@ -67,7 +74,13 @@ bool RTCManager::syncWithNTP(const char *ntpServer, long gmtOffset)
 
 String RTCManager::getDate()
 {
-    RtcDateTime dt = m_rtcDevice.GetDateTime();
+    RtcDateTime dt;
+    if (m_i2cMutex && xSemaphoreTake(m_i2cMutex, portMAX_DELAY)) {
+        dt = m_rtcDevice.GetDateTime();
+        xSemaphoreGive(m_i2cMutex);
+    } else {
+        dt = m_rtcDevice.GetDateTime();
+    }
     char datestring[20];
     snprintf_P(datestring, 20, PSTR("%02u.%02u.%04u"), dt.Day(), dt.Month(), dt.Year());
     return String(datestring);
@@ -75,7 +88,13 @@ String RTCManager::getDate()
 
 String RTCManager::getTime()
 {
-    RtcDateTime dt = m_rtcDevice.GetDateTime();
+    RtcDateTime dt;
+    if (m_i2cMutex && xSemaphoreTake(m_i2cMutex, portMAX_DELAY)) {
+        dt = m_rtcDevice.GetDateTime();
+        xSemaphoreGive(m_i2cMutex);
+    } else {
+        dt = m_rtcDevice.GetDateTime();
+    }
     char timestring[20];
     snprintf_P(timestring, 20, PSTR("%02u:%02u:%02u"), dt.Hour(), dt.Minute(), dt.Second());
     return String(timestring);
@@ -84,20 +103,44 @@ String RTCManager::getTime()
 
 RtcDateTime RTCManager::getCurrentDateTime()
 {
-    return m_rtcDevice.GetDateTime();
+    RtcDateTime dt;
+    if (m_i2cMutex && xSemaphoreTake(m_i2cMutex, portMAX_DELAY)) {
+        dt = m_rtcDevice.GetDateTime();
+        xSemaphoreGive(m_i2cMutex);
+    } else {
+        dt = m_rtcDevice.GetDateTime();
+    }
+    return dt;
 }
 
 void RTCManager::setDateTime(const RtcDateTime &dateTime)
 {
-    m_rtcDevice.SetDateTime(dateTime);
+    if (m_i2cMutex && xSemaphoreTake(m_i2cMutex, portMAX_DELAY)) {
+        m_rtcDevice.SetDateTime(dateTime);
+        xSemaphoreGive(m_i2cMutex);
+    } else {
+        m_rtcDevice.SetDateTime(dateTime);
+    }
 }
 
 bool RTCManager::isRunning()
 {
-    return m_rtcDevice.GetIsRunning();
+    bool running = false;
+    if (m_i2cMutex && xSemaphoreTake(m_i2cMutex, portMAX_DELAY)) {
+        running = m_rtcDevice.GetIsRunning();
+        xSemaphoreGive(m_i2cMutex);
+    } else {
+        running = m_rtcDevice.GetIsRunning();
+    }
+    return running;
 }
 
 void RTCManager::setIsRunning(bool running)
 {
-    m_rtcDevice.SetIsRunning(running);
+    if (m_i2cMutex && xSemaphoreTake(m_i2cMutex, portMAX_DELAY)) {
+        m_rtcDevice.SetIsRunning(running);
+        xSemaphoreGive(m_i2cMutex);
+    } else {
+        m_rtcDevice.SetIsRunning(running);
+    }
 }

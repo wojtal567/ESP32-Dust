@@ -20,6 +20,7 @@
 
 #include <sqlite3.h>
 #include "utils/constants.h"
+#include "utils/hardwareConfig.h"
 #include "utils/stringConstants.h"
 
 NetworkManager *networkManager = nullptr;
@@ -43,7 +44,7 @@ void setup()
                   Constants::PMS_RX_PIN,
                   Constants::PMS_TX_PIN);
 
-    static MySD sdCard(Constants::SD_CARD_PIN);
+    static MySD sdCard(HardwareConfig::SD_CARD_PIN);
 
     networkManager = new NetworkManager(sdCard);
 

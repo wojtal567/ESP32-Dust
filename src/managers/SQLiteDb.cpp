@@ -35,8 +35,10 @@ void SQLiteDb::createTable(Stream *serial)
     if (object == NULL)
         serial->println("No database open");
 
-    open();
-        String sql = "CREATE table if not exists " + _tableName + " (timestamp datetime NOT NULL PRIMARY KEY, Temperature float, Humidity FLOAT, Pm10 FLOAT, Pm25 FLOAT, Pm100 float, Particles03 FLOAT, Particles05 FLOAT, Particles10 FLOAT, Particles25 FLOAT, Particles50 FLOAT, Particles100 FLOAT)";
+    String sql = "CREATE table if not exists " + _tableName
+                 + " (timestamp datetime NOT NULL PRIMARY KEY, Temperature float, Humidity FLOAT, "
+                   "Pm10 FLOAT, Pm25 FLOAT, Pm100 float, Particles03 FLOAT, Particles05 FLOAT, "
+                   "Particles10 FLOAT, Particles25 FLOAT, Particles50 FLOAT, Particles100 FLOAT)";
     int rc = sqlite3_exec(
         object,
         sql.c_str(),
@@ -56,7 +58,6 @@ void SQLiteDb::createTable(Stream *serial)
     {
         Serial.println("SQLITE_OK");
     }
-    close();
 }
 
 int SQLiteDb::save(std::map<std::string, float> data, float temperature, float humidity, String timestamp, Stream *debugger)
@@ -67,30 +68,45 @@ int SQLiteDb::save(std::map<std::string, float> data, float temperature, float h
         return 0;
     }
 
-    String sql = "INSERT INTO " + _tableName + " ('Timestamp', 'Temperature', 'Humidity', 'Pm10', 'Pm25', 'Pm100', 'Particles03', 'Particles05', 'Particles10', 'Particles25', 'Particles50', 'Particles100') VALUES ('" +
-                 timestamp + "', " + (String)temperature + ", " + (String)humidity + ", " + (String)data["pm10_standard"] + ", " + (String)data["pm25_standard"] + ", " + (String)data["pm100_standard"] + ", " + (String)data["particles_03um"] + ", " + (String)data["particles_05um"] + ", " + (String)data["particles_10um"] + ", " + (String)data["particles_25um"] + ", " + (String)data["particles_50um"] + ", " + (String)data["particles_100um"] + ")";
+    String sql = "INSERT INTO " + _tableName
+                 + " ('Timestamp', 'Temperature', 'Humidity', 'Pm10', 'Pm25', 'Pm100', "
+                   "'Particles03', 'Particles05', 'Particles10', 'Particles25', "
+                   "'Particles50', 'Particles100') VALUES (?,?,?,?,?,?,?,?,?,?,?,?);";
+
+    sqlite3_stmt *statement;
+    int rc = sqlite3_prepare_v2(object, sql.c_str(), -1, &statement, 0);
+
+    if (rc != SQLITE_OK) {
+        debugger->println("Failed to prepare statement");
+        debugger->println(sqlite3_errmsg(object));
+        return rc;
+    }
+
+    sqlite3_bind_text(statement, 1, timestamp.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_double(statement, 2, temperature);
+    sqlite3_bind_double(statement, 3, humidity);
+    sqlite3_bind_double(statement, 4, data["pm10_standard"]);
+    sqlite3_bind_double(statement, 5, data["pm25_standard"]);
+    sqlite3_bind_double(statement, 6, data["pm100_standard"]);
+    sqlite3_bind_double(statement, 7, data["particles_03um"]);
+    sqlite3_bind_double(statement, 8, data["particles_05um"]);
+    sqlite3_bind_double(statement, 9, data["particles_10um"]);
+    sqlite3_bind_double(statement, 10, data["particles_25um"]);
+    sqlite3_bind_double(statement, 11, data["particles_50um"]);
+    sqlite3_bind_double(statement, 12, data["particles_100um"]);
 
     debugger->println("Executing: " + sql);
 
-    open();
+    rc = sqlite3_step(statement);
 
-    int rc = sqlite3_exec(object, sql.c_str(), 0, (void *)"Output:", &zErrorMessage);
-
-    if (rc != SQLITE_OK)
-    {
+    if (rc != SQLITE_DONE) {
         debugger->println(F("SQL error: "));
         debugger->println(sqlite3_extended_errcode(object));
-        debugger->print(" ");
-        debugger->println(zErrorMessage);
-        sqlite3_free(zErrorMessage);
-        close();
-        return 1;
+    } else if (rc == SQLITE_OK) {
+        debugger->println("SQLITE_OK: Successfully inserted record into table " + _tableName);
     }
-    else if (rc == SQLITE_OK)
-    {
-        Serial.println("SQLITE_OK: Successfully inserted record into table " + _tableName);
-    }
-    close();
+
+    sqlite3_finalize(statement);
     return rc;
 }
 
@@ -119,7 +135,6 @@ int SQLiteDb::select(Stream *debugger, String datetime, JsonArray *array)
     else
         sql = "select * from " + _tableName + " order by timestamp limit 50;";
     debugger->println("Executing: " + sql);
-    open();
     int rc = sqlite3_exec(object, sql.c_str(), selectCallback, array, &zErrorMessage);
 
     if (rc != SQLITE_OK)
@@ -129,13 +144,11 @@ int SQLiteDb::select(Stream *debugger, String datetime, JsonArray *array)
         debugger->print(" ");
         debugger->println(zErrorMessage);
         sqlite3_free(zErrorMessage);
-        close();
         return 1;
     }
     else
         debugger->println(zErrorMessage);
 
-    close();
     return rc;
 }
 

@@ -435,7 +435,17 @@ void TaskManager::lvglEnableFanTaskAsync(void *user_data)
 {
     TaskManager *self = static_cast<TaskManager *>(user_data);
     if (self && self->m_turnFanOn) {
+        uint32_t fullCyclePeriod = self->m_config.timeBetweenSavingSamples
+                                   - (self->m_config.numberOfSamples - 1)
+                                         * self->m_config.measurePeriod;
+        uint32_t delay = (fullCyclePeriod > self->m_config.turnFanTime)
+                             ? (fullCyclePeriod - self->m_config.turnFanTime)
+                             : 1; // guard underflow/invalid config
+
+        // Re-enable, set period explicitly, and reset timer to avoid immediate trigger
         lv_task_set_prio(self->m_turnFanOn, LV_TASK_PRIO_HIGHEST);
+        lv_task_set_period(self->m_turnFanOn, delay);
+        lv_task_reset(self->m_turnFanOn);
     }
 }
 

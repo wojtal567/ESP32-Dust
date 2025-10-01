@@ -9,12 +9,14 @@ enum class ScreenType { MAIN, SETTINGS, WIFI, INFO, TIME_SETTINGS, SAMPLING_SETT
 class BaseScreenInterface
 {
 public:
-    BaseScreenInterface(ScreenType type) : m_type(type) {}
+    BaseScreenInterface(ScreenType type)
+        : m_type(type)
+    {}
     virtual ~BaseScreenInterface() = default;
-    
+
     virtual void initialize() = 0;
     virtual lv_obj_t *getScreenContainer() const = 0;
-    
+
     ScreenType getType() const { return m_type; }
 
 protected:
@@ -26,25 +28,28 @@ private:
     BaseScreenInterface &operator=(const BaseScreenInterface &) = delete;
 };
 
-template<typename DerivedScreen>
+template <typename DerivedScreen>
 class BaseScreen : public BaseScreenInterface
 {
 public:
-    explicit BaseScreen(ScreenType type) : BaseScreenInterface(type) {
+    explicit BaseScreen(ScreenType type)
+        : BaseScreenInterface(type)
+    {
         m_screenContainer = lv_cont_create(NULL, NULL);
         lv_obj_set_style_local_bg_color(m_screenContainer,
                                         LV_OBJ_PART_MAIN,
                                         LV_STATE_DEFAULT,
                                         LV_COLOR_BLACK);
-        
-        s_activeInstance = static_cast<DerivedScreen*>(this);
+
+        s_activeInstance = static_cast<DerivedScreen *>(this);
     }
 
-    virtual ~BaseScreen() {
-        if (s_activeInstance == static_cast<DerivedScreen*>(this)) {
+    virtual ~BaseScreen()
+    {
+        if (s_activeInstance == static_cast<DerivedScreen *>(this)) {
             s_activeInstance = nullptr;
         }
-        
+
         if (m_screenContainer) {
             lv_obj_del(m_screenContainer);
             m_screenContainer = nullptr;
@@ -53,13 +58,9 @@ public:
 
     virtual void initialize() = 0;
 
-    static DerivedScreen* getActiveInstance() {
-        return s_activeInstance;
-    }
+    static DerivedScreen *getActiveInstance() { return s_activeInstance; }
 
-    lv_obj_t *getScreenContainer() const override {
-        return m_screenContainer;
-    }
+    lv_obj_t *getScreenContainer() const override { return m_screenContainer; }
 
     lv_obj_t *createButton(lv_obj_t *parent,
                            const lv_obj_t *copy,
@@ -67,7 +68,8 @@ public:
                            lv_coord_t height,
                            lv_coord_t x,
                            lv_coord_t y,
-                           lv_event_cb_t eventCallback) {
+                           lv_event_cb_t eventCallback)
+    {
         if (!parent)
             parent = m_screenContainer;
 
@@ -85,7 +87,8 @@ public:
                           lv_coord_t x,
                           lv_coord_t y,
                           const char *text,
-                          lv_color_t color = LV_COLOR_WHITE) {
+                          lv_color_t color = LV_COLOR_WHITE)
+    {
         if (!parent)
             parent = m_screenContainer;
 
@@ -101,7 +104,8 @@ public:
                               lv_coord_t width,
                               lv_coord_t height,
                               lv_coord_t x,
-                              lv_coord_t y) {
+                              lv_coord_t y)
+    {
         if (!parent)
             parent = m_screenContainer;
 
@@ -116,13 +120,13 @@ protected:
     ScreenType m_type;
 
 private:
-    static DerivedScreen* s_activeInstance;
-    
+    static DerivedScreen *s_activeInstance;
+
     // Disable copy constructor and assignment operator
     BaseScreen(const BaseScreen &) = delete;
     BaseScreen &operator=(const BaseScreen &) = delete;
 };
 
 // Static member definition
-template<typename DerivedScreen>
-DerivedScreen* BaseScreen<DerivedScreen>::s_activeInstance = nullptr;
+template <typename DerivedScreen>
+DerivedScreen *BaseScreen<DerivedScreen>::s_activeInstance = nullptr;

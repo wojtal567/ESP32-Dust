@@ -4,10 +4,12 @@
 #include "managers/rtcmanager.h"
 #include "managers/screenmanager.h"
 #include "managers/stylemanager.h"
+
+#include "utils/config.h"
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
 
-WifiScreen::WifiScreen(const Types::ConfigData &config,
+WifiScreen::WifiScreen(Types::ConfigData &config,
                        NetworkManager *networkManager,
                        RTCManager *rtc,
                        ScreenManager *screenManager,
@@ -151,13 +153,11 @@ void WifiScreen::handleConnectButtonEvent(lv_obj_t *btn, lv_event_t event)
 
         bool connected = m_networkManager->connect();
         if (connected) {
-            Serial.println("btn_connect -> connected to Wi-Fi! IP: "
-                           + m_networkManager->getIpAddress());
+            LOG_UI("Connected to Wi-Fi! IP: " + m_networkManager->getIpAddress());
             m_rtcManager->syncWithNTP(StringConstants::NTP_SERVER, Constants::GMT_OFFSET_SEC);
             m_networkManager->setupServer();
         } else {
-            Serial.println(
-                "btn_connect -> can't connect. Probably you have entered wrong credentials.");
+            LOG_UI("Can't connect. Probably you have entered wrong credentials.");
         }
         m_screenManager->switchToScreen(ScreenType::MAIN);
         lv_textarea_set_text(m_ssidTextArea, "");

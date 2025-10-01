@@ -108,8 +108,6 @@ void NetworkManager::setupServer()
     m_server.onNotFound([this]() { this->handleNotFound(); });
 
     m_server.begin();
-    Serial.print("[" + String(millis()) + "] ");
-    Serial.println("HTTP server started on port 80");
 }
 
 void NetworkManager::handleServerClient()
@@ -125,24 +123,14 @@ void NetworkManager::setTaskManager(TaskManager *taskManager)
 void NetworkManager::handleSetAppIp()
 {
     String postBody = m_server.arg("plain");
-    Serial.print("[" + String(millis()) + "] ");
-    Serial.println(postBody);
     DynamicJsonDocument doc(512);
     DeserializationError error = deserializeJson(doc, postBody);
     if (error) {
-        Serial.print("[" + String(millis()) + "] ");
-        Serial.print(F(error.c_str()));
-
         m_server.send(400,
                       F("text/html"),
                       "Error while parsing json body! <br>" + (String)error.c_str());
     } else {
         JsonObject postObj = doc.as<JsonObject>();
-
-        Serial.print("[" + String(millis()) + "] ");
-        Serial.print(F("HTTP Method: "));
-        Serial.print("[" + String(millis()) + "] ");
-        Serial.println(m_server.method());
 
         if (m_server.method() == HTTP_POST) {
             if (postObj.containsKey("ip")) {

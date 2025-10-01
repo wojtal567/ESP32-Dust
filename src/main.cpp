@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <HTTPClient.h>
+#include <sqlite3.h>
 #include <time.h>
 
 #include "managers/MySD.hpp"
@@ -10,6 +11,7 @@
 #include "managers/sensormanager.h"
 #include "managers/stylemanager.h"
 #include "managers/taskmanager.h"
+
 #include "screens/infoscreen.h"
 #include "screens/lockscreen.h"
 #include "screens/mainscreen.h"
@@ -18,7 +20,6 @@
 #include "screens/timesettingsscreen.h"
 #include "screens/wifiscreen.h"
 
-#include <sqlite3.h>
 #include "utils/config.h"
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
@@ -56,7 +57,7 @@ void setup()
     StyleManager::initialize();
 
     SensorManager *sensorManager = new SensorManager();
-    sensorManager->initialize(&Serial, &Serial2);
+    sensorManager->initialize(&Serial2);
 
     RTCManager *rtcManager = new RTCManager();
 
@@ -121,14 +122,12 @@ void setup()
         networkManager->setCredentials(config.ssid.c_str(), config.password.c_str());
         bool connected = networkManager->connect();
         if (connected) {
-            Serial.println(
-                "setup -> connected to Wi-Fi provided by data from configuration file! IP: "
-                + networkManager->getIpAddress());
+            LOG_INFO("Connected to Wi-Fi provided by data from configuration file! IP: "
+                     + networkManager->getIpAddress());
             rtcManager->syncWithNTP(StringConstants::NTP_SERVER, Constants::GMT_OFFSET_SEC);
             networkManager->setupServer();
         } else
-            Serial.println(
-                "setup -> can't connect to Wi-Fi - probably no data or corrupted or wrong!");
+            LOG_ERROR("Can't connect to Wi-Fi - probably no data or corrupted or wrong!");
     }
 
     screenManager->switchToScreen(ScreenType::MAIN);

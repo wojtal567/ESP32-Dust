@@ -1,16 +1,16 @@
 #include "managers/sensormanager.h"
 
 #include <Arduino.h>
-#include "utils/constants.h"
+
+#include "sensors/pms.h"
 #include "utils/config.h"
+#include "utils/constants.h"
 
 SensorManager::SensorManager()
     : m_pmsSensor(nullptr)
     , m_temperature(0)
     , m_sht30(HardwareConfig::SHT30_I2C_ADDRESS)
     , m_humidity(0)
-    , m_dustSensorWorking(false)
-    , m_temperatureSensorWorking(false)
     , m_isFanOn(false)
 {
     // Initialize dust data map with default values
@@ -27,24 +27,18 @@ SensorManager::~SensorManager()
     }
 }
 
-void SensorManager::initialize(HardwareSerial *debugger, HardwareSerial *reader)
+void SensorManager::initialize(HardwareSerial *reader)
 {
     // Initialize PMS sensor with correct parameter types
     if (m_pmsSensor == nullptr) {
         // Create PMS with HardwareSerial pointers
-        m_pmsSensor = new PMS(debugger, reader);
+        m_pmsSensor = new PMS(reader);
     }
 
     // Set up fan control pin
     pinMode(HardwareConfig::FAN_PIN, OUTPUT);
     digitalWrite(HardwareConfig::FAN_PIN, LOW);
     m_isFanOn = false;
-
-    // Try reading from the PMS sensor to see if it's working
-    m_dustSensorWorking = readDustSensor();
-
-    // Check SHT30 sensor
-    m_temperatureSensorWorking = m_sht30.get();
 }
 
 bool SensorManager::readDustSensor()
@@ -56,7 +50,6 @@ bool SensorManager::readDustSensor()
     bool success = m_pmsSensor->readData();
     if (success) {
         m_dustData = m_pmsSensor->returnData();
-        m_dustSensorWorking = true;
     }
     return success;
 }
@@ -67,10 +60,8 @@ bool SensorManager::readTemperatureHumiditySensor()
     if (success == 0) { // SHT30 returns 0 on success
         m_temperature = m_sht30.cTemp;
         m_humidity = m_sht30.humidity;
-        m_temperatureSensorWorking = true;
     } else {
-        Serial.println("Failed to read temperature and humidity from SHT30 sensor.");
-        m_temperatureSensorWorking = false;
+        LOG_SENSOR("Failed to read temperature and humidity from SHT30 sensor.");
     }
     return success;
 }
@@ -85,51 +76,6 @@ float SensorManager::getHumidity() const
     return m_humidity;
 }
 
-float SensorManager::getPM10() const
-{
-    return m_dustData.at("pm10_standard");
-}
-
-float SensorManager::getPM25() const
-{
-    return m_dustData.at("pm25_standard");
-}
-
-float SensorManager::getPM100() const
-{
-    return m_dustData.at("pm100_standard");
-}
-
-float SensorManager::getParticles03um() const
-{
-    return m_dustData.at("particles_03um");
-}
-
-float SensorManager::getParticles05um() const
-{
-    return m_dustData.at("particles_05um");
-}
-
-float SensorManager::getParticles10um() const
-{
-    return m_dustData.at("particles_10um");
-}
-
-float SensorManager::getParticles25um() const
-{
-    return m_dustData.at("particles_25um");
-}
-
-float SensorManager::getParticles50um() const
-{
-    return m_dustData.at("particles_50um");
-}
-
-float SensorManager::getParticles100um() const
-{
-    return m_dustData.at("particles_100um");
-}
-
 const std::map<std::string, float> &SensorManager::getDustData() const
 {
     return m_dustData;
@@ -138,6 +84,7 @@ const std::map<std::string, float> &SensorManager::getDustData() const
 void SensorManager::sleepDustSensor()
 {
     if (!m_isFanOn) {
+
         Serial.println("Dust sensor fan is already OFF.");
         return;
     }
@@ -149,11 +96,11 @@ void SensorManager::sleepDustSensor()
 void SensorManager::wakeDustSensor()
 {
     if (m_isFanOn) {
-        Serial.println("Dust sensor fan is already ON.");
+        LOG_SENSOR("Dust sensor fan is already ON.");
         return;
     }
 
     digitalWrite(HardwareConfig::FAN_PIN, HIGH);
     m_isFanOn = true;
-    Serial.println("Dust sensor fan turned ON.");
+    LOG_SENSOR("Dust sensor fan turned ON.");
 }

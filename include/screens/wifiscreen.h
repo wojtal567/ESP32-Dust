@@ -12,7 +12,7 @@ class ScreenManager;
 class WifiScreen : public BaseScreen<WifiScreen>
 {
 public:
-    WifiScreen(const Types::ConfigData &config,
+    WifiScreen(Types::ConfigData &config,
                NetworkManager *networkManager,
                RTCManager *rtc,
                ScreenManager *screenManager,
@@ -48,7 +48,7 @@ private:
     lv_obj_t *m_connectButtonLabel{nullptr};
     lv_obj_t *m_keyboard{nullptr};
 
-    Types::ConfigData m_config;
+    Types::ConfigData &m_config;
     NetworkManager *m_networkManager;
     RTCManager *m_rtcManager;
     ScreenManager *m_screenManager;

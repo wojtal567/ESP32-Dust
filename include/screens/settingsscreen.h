@@ -10,6 +10,7 @@ public:
     ~SettingsScreen() override;
 
     void initialize() override;
+
 private:
     lv_obj_t *m_backButton{nullptr};
     lv_obj_t *m_backButtonLabel{nullptr};
@@ -35,7 +36,7 @@ private:
     static void infoButtonCallback(lv_obj_t *btn, lv_event_t event);
     static void timeSettingsButtonCallback(lv_obj_t *btn, lv_event_t event);
     static void samplingSettingsButtonCallback(lv_obj_t *btn, lv_event_t event);
-    
+
     void handleBackButtonEvent(lv_obj_t *btn, lv_event_t event);
     void handleWifiSettingsButtonEvent(lv_obj_t *btn, lv_event_t event);
     void handleInfoButtonEvent(lv_obj_t *btn, lv_event_t event);

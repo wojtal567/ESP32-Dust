@@ -1,4 +1,8 @@
 #include "sensors/pms.h"
+
+#include <HardwareSerial.h>
+
+#include "utils/config.h"
 #include "utils/constants.h"
 
 const std::array<std::string, 15> PMS::SENSOR_LABELS = {"framelen",
@@ -17,44 +21,37 @@ const std::array<std::string, 15> PMS::SENSOR_LABELS = {"framelen",
                                                         "unused",
                                                         "checksum"};
 
-PMS::PMS(HardwareSerial *debugger, HardwareSerial *reader)
+PMS::PMS(HardwareSerial *reader)
     : m_reader(reader)
-    , m_debugger(debugger)
 {}
 
 bool PMS::readData()
 {
-    /*
-    if (!_debugger->available())
-    {
-        _reader->println("Debugger unavailable");
-        return false;
-    }*/
     if (m_reader->peek() != Constants::PMS_START_BYTE) {
         // Clear multiple bytes if needed to find sync
         uint8_t attempts = 0;
-        while (m_reader->available() > 0 && m_reader->peek() != Constants::PMS_START_BYTE && attempts < 50) {
+        while (m_reader->available() > 0 && m_reader->peek() != Constants::PMS_START_BYTE
+               && attempts < 50) {
             m_reader->read();
             attempts++;
         }
-        m_debugger->println("PMS5003 -> Reading bytes...");
+        LOG_SENSOR("PMS5003 -> Reading bytes...");
         return false;
     }
 
     if (m_reader->available() < Constants::PMS_BUFFER_SIZE) {
-        m_debugger->println("PMS5003 -> Can't read all bytes from PMS. Exiting. False.");
+        LOG_SENSOR("PMS5003 -> Can't read all bytes from PMS. Exiting. False.");
         return false;
     }
 
-    uint8_t buffer[Constants::PMS_BUFFER_SIZE];    int32_t checkSum{0};
+    uint8_t buffer[Constants::PMS_BUFFER_SIZE];
+    int32_t checkSum{0};
 
     m_reader->readBytes(buffer, Constants::PMS_BUFFER_SIZE);
 
     for (uint8_t i = 0; i < 30; i++) {
         checkSum += buffer[i];
     }
-
-    m_debugger->println();
 
     int32_t buffer_u16[15];
 
@@ -65,13 +62,13 @@ bool PMS::readData()
     }
 
     if (checkSum != m_data["checksum"]) {
-        m_debugger->println("PMS5003 -> Checksum failure. False.");
-        
+        LOG_SENSOR("PMS5003 -> Checksum failure. False.");
+
         // Clear buffer after checksum failure to prevent cascading failures
         while (m_reader->available() > 0) {
             m_reader->read();
         }
-        
+
         return false;
     }
     return true;
@@ -85,7 +82,6 @@ std::map<std::string, float> PMS::returnData()
 void PMS::dumpSamples()
 {
     for (uint16_t i = 0; i < SENSOR_LABELS.size(); i++) {
-        m_debugger->println((String)SENSOR_LABELS[i].c_str() + " "
-                            + (String)m_data[SENSOR_LABELS[i]]);
+        LOG_SENSOR((String)SENSOR_LABELS[i].c_str() + " " + (String)m_data[SENSOR_LABELS[i]]);
     }
 }

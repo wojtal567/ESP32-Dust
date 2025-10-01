@@ -12,7 +12,7 @@ class ScreenManager;
 class TimeSettingsScreen : public BaseScreen<TimeSettingsScreen>
 {
 public:
-    TimeSettingsScreen(const Types::ConfigData &config,
+    TimeSettingsScreen(Types::ConfigData &config,
                        RTCManager *rtc,
                        NetworkManager *networkManager,
                        ScreenManager *screenManager,
@@ -75,7 +75,7 @@ private:
     lv_obj_t *m_saveButton{nullptr};
     lv_obj_t *m_saveButtonLabel{nullptr};
 
-    Types::ConfigData m_config;
+    Types::ConfigData &m_config;
     RTCManager *m_rtcManager;
     NetworkManager *m_networkManager;
     ScreenManager *m_screenManager;

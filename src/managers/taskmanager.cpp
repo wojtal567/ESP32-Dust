@@ -39,12 +39,12 @@ TaskManager::TaskManager(const Types::ConfigData &config,
 
     m_sensorUIQueue = xQueueCreate(5, sizeof(SensorUIUpdateMessage));
     if (m_sensorUIQueue == nullptr) {
-        Serial.println("Failed to create sensor UI queue.");
+        LOG_ERROR("Failed to create sensor UI queue.");
     }
 
     m_statusQueue = xQueueCreate(5, sizeof(StatusUpdateMessage));
     if (m_statusQueue == nullptr) {
-        Serial.println("Failed to create status queue.");
+        LOG_ERROR("Failed to create status queue.");
     }
 
     m_sdMutex = xSemaphoreCreateMutex();
@@ -76,7 +76,7 @@ void TaskManager::initialize()
         = xTaskCreate(sensorDataCollectionTask, "SensorTask", 8192, this, 2, &m_sensorTaskHandle);
 
     if (sensorTaskResult != pdPASS) {
-        Serial.println("Failed to create sensor data collection task.");
+        LOG_ERROR("Failed to create sensor data collection task.");
     }
 
     m_statusProcessor = lv_task_create(statusUIUpdateWrapper, 1000, LV_TASK_PRIO_LOW, this);
@@ -85,7 +85,7 @@ void TaskManager::initialize()
         = xTaskCreate(statusDataCollectionTask, "StatusTask", 8192, this, 1, &m_statusTaskHandle);
 
     if (statusTaskResult != pdPASS) {
-        Serial.println("Failed to create status data collection task.");
+        LOG_ERROR("Failed to create status data collection task.");
     }
 }
 
@@ -100,7 +100,7 @@ void TaskManager::recreateSampleTasksFromConfig()
         = xTaskCreate(sensorDataCollectionTask, "SensorTask", 8192, this, 2, &m_sensorTaskHandle);
 
     if (sensorTaskResult != pdPASS) {
-        Serial.println("Failed to create sensor data collection task.");
+        LOG_ERROR("Failed to create sensor data collection task.");
     }
 
     if (m_turnFanOn) {
@@ -166,47 +166,63 @@ void TaskManager::dateTimeFunc(lv_task_t *task)
 void TaskManager::fetchLastRecordAndSynchronize(lv_task_t *task)
 {
     if (WiFi.status() == WL_CONNECTED && m_appIpAddress != "") {
-        Serial.println("Starting synchronizing process...");
+        LOG_TASK("[FetchTask] Starting synchronizing process...");
         HTTPClient getHttp;
         String url = "http://" + m_appIpAddress + "/fetch/last";
-        Serial.println(url);
+        LOG_TASK("[FetchTask] URL:");
+        {
+            String urlLog = String("[FetchTask] ") + url;
+            LOG_TASK(urlLog.c_str());
+        }
         if (getHttp.begin(url.c_str())) {
-            Serial.println(getHttp.getString());
+            LOG_TASK("[FetchTask] HTTP GET /last response:");
+            {
+                String respLog = String("[FetchTask] ") + getHttp.getString();
+                LOG_TASK(respLog.c_str());
+            }
             uint8_t responseCode = getHttp.GET();
 
             if (responseCode == 200) {
-                Serial.println("GET /last succesful.");
-                Serial.println("HTTP RESPONSE CODE: " + (String)responseCode);
+                LOG_TASK("[FetchTask] GET /last successful.");
+                {
+                    String codeLog = String("[FetchTask] HTTP RESPONSE CODE:")
+                                     + (String)responseCode;
+                    LOG_TASK(codeLog.c_str());
+                }
                 StaticJsonDocument<600> response, doc1;
 
                 DeserializationError err = deserializeJson(response, getHttp.getString());
-                Serial.println("Deserialization error: " + (String)err.c_str());
+                {
+                    String errLog = String("[FetchTask] Deserialization error: ")
+                                    + (String)err.c_str();
+                    LOG_ERROR(errLog.c_str());
+                }
                 JsonArray lastRecord = doc1.to<JsonArray>();
 
-                m_sdCard.getLastRecord(&Serial, &lastRecord);
+                m_sdCard.getLastRecord(&lastRecord);
                 DynamicJsonDocument doc(33000);
                 if ((response[0]["timestamp"].as<String>()
                      != lastRecord[0]["timestamp"].as<String>())
                     || (response[0]["timestamp"].as<String>() == "null")) {
-                    Serial.println("Got last record that looks good. Parsing and sending data to "
-                                   "Server App...");
+                    LOG_TASK("[FetchTask] Got last record that looks good. Parsing and sending "
+                             "data to Server App...");
                     JsonArray records = doc.to<JsonArray>();
-                    m_sdCard.select(&Serial, response[0]["timestamp"].as<String>(), &records);
+                    m_sdCard.select(response[0]["timestamp"].as<String>(), &records);
                     String json = "";
 
                     serializeJson(doc, json);
                     getHttp.begin("http://" + m_appIpAddress + "/submit");
                     getHttp.addHeader("Content-Type", "application/json");
                     getHttp.POST(json);
-                    Serial.println("POST RESPONSE:" + getHttp.getString());
+                    LOG_TASK("[FetchTask] POST RESPONSE:" + getHttp.getString());
                     getHttp.end();
                 }
             } else {
-                Serial.println("ERROR FETCHING DATA. CODE: " + (String)responseCode);
+                LOG_ERROR("[FetchTask] ERROR FETCHING DATA. CODE: " + (String)responseCode);
                 lv_task_set_prio(m_getAppLastRecordAndSynchronize, LV_TASK_PRIO_OFF);
             }
         } else {
-            Serial.println("Wrong url");
+            LOG_ERROR("[FetchTask] Wrong url");
             lv_task_set_prio(m_getAppLastRecordAndSynchronize, LV_TASK_PRIO_OFF);
         }
         getHttp.end();
@@ -236,19 +252,17 @@ bool TaskManager::isLastSampleSaved() const
     if (xSemaphoreTake(m_sdMutex, portMAX_DELAY)) {
         StaticJsonDocument<600> docA;
         JsonArray lastRecordToCheck = docA.to<JsonArray>();
-        m_sdCard.getLastRecord(&Serial, &lastRecordToCheck);
-        Serial.print("Global: ");
-        Serial.print(m_lastSampleTimestamp);
-        Serial.print(" Baza: ");
-        Serial.print(lastRecordToCheck[0]["timestamp"].as<String>());
+        m_sdCard.getLastRecord(&lastRecordToCheck);
+        LOG_TASK("Last sample timestamp: " + m_lastSampleTimestamp
+                 + " Database: " + lastRecordToCheck[0]["timestamp"].as<String>());
 
         xSemaphoreGive(m_sdMutex);
 
         if (m_lastSampleTimestamp == lastRecordToCheck[0]["timestamp"].as<String>()) {
-            Serial.println("Last sample has been saved correctly - return true.");
+            LOG_TASK("Last sample has been saved correctly - return true.");
             return true;
         } else {
-            Serial.println("Something went wrong saving last sample - return false");
+            LOG_ERROR("Something went wrong saving last sample - return false.");
             return false;
         }
     }
@@ -278,25 +292,24 @@ void TaskManager::sensorDataCollectionTask(void *parameters)
     uint32_t measurePeriod = taskManager->m_config.measurePeriod;
 
     while (true) {
-        Serial.printf("Sensor task: Reading sample %d/%d\n",
-                      currentSampleNumber + 1,
-                      taskManager->m_config.numberOfSamples);
+        LOG_TASK("Sensor task: Reading sample " + String(currentSampleNumber + 1) + "/"
+                 + String(taskManager->m_config.numberOfSamples));
 
         taskManager->m_sensorManager->readTemperatureHumiditySensor();
         // Read dust sensor and accumulate data
         if (currentSampleNumber == 0) {
             if (taskManager->m_sensorManager->readDustSensor()) {
-                Serial.println("Successfully read data from dust sensor.");
+                LOG_TASK("Successfully read data from dust sensor.");
                 accumulatedData = taskManager->m_sensorManager->getDustData();
                 accumulatedTemp = taskManager->m_sensorManager->getTemperature();
                 accumulatedHumi = taskManager->m_sensorManager->getHumidity();
                 currentSampleNumber++;
             } else {
-                Serial.println("Failed to read data from dust sensor.");
+                LOG_ERROR("Failed to read data from dust sensor.");
             }
         } else if (currentSampleNumber < taskManager->m_config.numberOfSamples) {
             if (taskManager->m_sensorManager->readDustSensor()) {
-                Serial.println("Successfully read data from dust sensor.");
+                LOG_TASK("Successfully read data from dust sensor.");
                 const std::map<std::string, float> &tmpData = taskManager->m_sensorManager
                                                                   ->getDustData();
                 for (const auto &pair : tmpData) {
@@ -306,15 +319,14 @@ void TaskManager::sensorDataCollectionTask(void *parameters)
                 accumulatedHumi += taskManager->m_sensorManager->getHumidity();
                 currentSampleNumber++;
             } else {
-                Serial.println("Failed to read data from dust sensor.");
+                LOG_ERROR("Failed to read data from dust sensor.");
             }
         }
 
         // Check if we have all samples
         if (currentSampleNumber == taskManager->m_config.numberOfSamples) {
-            Serial.println("TaskManager: All samples collected ("
-                           + String(taskManager->m_config.numberOfSamples)
-                           + "), calculating averages...");
+            LOG_TASK("Sensor task: All samples collected ("
+                     + String(taskManager->m_config.numberOfSamples) + "), calculating averages...");
 
             // calculate averages
             std::map<std::string, float> averagedData;
@@ -334,20 +346,19 @@ void TaskManager::sensorDataCollectionTask(void *parameters)
             if (taskManager->m_rtcManager->isRunning()) {
                 taskManager->m_lastSampleTimestamp = Utils::formatMainTimestamp(
                     taskManager->m_rtcManager->getCurrentDateTime());
-                Serial.println("lastSampleTimestamp before saving to database: "
-                               + taskManager->m_lastSampleTimestamp);
+                LOG_TASK("lastSampleTimestamp before saving to database: "
+                         + taskManager->m_lastSampleTimestamp);
                 if (xSemaphoreTake(taskManager->m_sdMutex, portMAX_DELAY)) {
 
                     taskManager->m_sdCard.save(averagedData,
                                                temp,
                                                humi,
-                                               taskManager->m_lastSampleTimestamp,
-                                               &Serial);
+                                               taskManager->m_lastSampleTimestamp);
                     xSemaphoreGive(taskManager->m_sdMutex);
                 }
                 saveSuccess = taskManager->isLastSampleSaved();
             } else {
-                Serial.println("RTC is not running, not saving");
+                LOG_TASK("RTC is not running, not saving");
             }
 
             auto averagedDataCopy = new std::map<std::string, float>(averagedData);
@@ -359,7 +370,7 @@ void TaskManager::sensorDataCollectionTask(void *parameters)
             msg.isLastSampleSaved = saveSuccess;
 
             if (xQueueSend(taskManager->m_sensorUIQueue, &msg, 0) != pdTRUE) {
-                Serial.println("Sensor task: Failed to send UI update");
+                LOG_ERROR("Sensor task: Failed to send UI update");
             }
 
             // Turn off fan after all samples collected
@@ -417,10 +428,10 @@ void TaskManager::statusDataCollectionTask(void *parameters)
             StatusUpdateMessage msg;
             msg.wifiConnected = taskManager->m_networkManager->isConnected();
 
-            msg.sdCardConnected = taskManager->m_sdCard.start(&Serial);
+            msg.sdCardConnected = taskManager->m_sdCard.start();
 
             if (xQueueSend(taskManager->m_statusQueue, &msg, 0) != pdTRUE) {
-                Serial.println("Status task: Failed to send UI update");
+                LOG_ERROR("Status task: Failed to send UI update");
             }
 
             xSemaphoreGive(taskManager->m_sdMutex);

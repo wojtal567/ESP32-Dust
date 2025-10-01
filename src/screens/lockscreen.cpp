@@ -2,6 +2,7 @@
 
 #include "managers/screenmanager.h"
 #include "managers/stylemanager.h"
+
 #include "utils/stringConstants.h"
 
 LockScreen::LockScreen(ScreenManager *screenManager)

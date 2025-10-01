@@ -4,10 +4,11 @@
 #include "managers/screenmanager.h"
 #include "managers/stylemanager.h"
 #include "managers/taskmanager.h"
+
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
 
-SamplingSettingsScreen::SamplingSettingsScreen(const Types::ConfigData &config,
+SamplingSettingsScreen::SamplingSettingsScreen(Types::ConfigData &config,
                                                TaskManager *taskManager,
                                                NetworkManager *networkManager,
                                                ScreenManager *screenManager,

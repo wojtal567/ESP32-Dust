@@ -1,6 +1,9 @@
 #include "managers/rtcmanager.h"
+
 #include <WiFi.h>
 #include <WiFiUdp.h>
+
+#include "utils/config.h"
 
 RTCManager::RTCManager(long gmtOffsetInSeconds, int daylightOffsetInSeconds, char *ntpServer)
     : m_gmtOffsetInSeconds(gmtOffsetInSeconds)
@@ -13,21 +16,25 @@ RTCManager::RTCManager(long gmtOffsetInSeconds, int daylightOffsetInSeconds, cha
     // Check if RTC is already running and has a reasonable date
     if (m_rtcDevice.GetIsRunning()) {
         RtcDateTime currentTime = m_rtcDevice.GetDateTime();
-        Serial.println("RTC is already running with valid time - not overriding");
-        Serial.printf("Current RTC time: %02u.%02u.%04u %02u:%02u:%02u\n",
-                      currentTime.Day(),
-                      currentTime.Month(),
-                      currentTime.Year(),
-                      currentTime.Hour(),
-                      currentTime.Minute(),
-                      currentTime.Second());
+        LOG_INFO("RTC is already running with valid time - not overriding");
+        char msg[64];
+        snprintf(msg,
+                 sizeof(msg),
+                 "Current RTC time: %02u.%02u.%04u %02u:%02u:%02u",
+                 currentTime.Day(),
+                 currentTime.Month(),
+                 currentTime.Year(),
+                 currentTime.Hour(),
+                 currentTime.Minute(),
+                 currentTime.Second());
+        LOG_INFO(msg);
     }
 }
 
 bool RTCManager::syncWithNTP(const char *ntpServer, long gmtOffset)
 {
     if (!WiFi.isConnected()) {
-        Serial.println("WiFi not connected - cannot sync time with NTP.");
+        LOG_DEBUG("WiFi not connected - cannot sync time with NTP.");
         return false;
     }
 
@@ -58,14 +65,13 @@ bool RTCManager::syncWithNTP(const char *ntpServer, long gmtOffset)
             m_rtcDevice.SetDateTime(date);
             m_rtcDevice.SetIsRunning(true);
         }
-        Serial.println("Successfully updated time on RTC from NTP server.");
-        Serial.printf("Timezone offset applied: %ld seconds (%ld hours)\n",
-                      gmtOffset,
-                      gmtOffset / 3600);
+        LOG_DEBUG("Successfully updated time on RTC from NTP server.");
+        LOG_DEBUG("Timezone offset applied: " + String(gmtOffset) + " seconds ("
+                  + String(gmtOffset / 3600) + " hours)");
     } else if (!success) {
-        Serial.println("Failed to get time from NTP server.");
+        LOG_ERROR("Failed to get time from NTP server.");
     } else {
-        Serial.println("RTC device not available.");
+        LOG_ERROR("RTC device not available.");
     }
 
     timeClient.end();
@@ -99,7 +105,6 @@ String RTCManager::getTime()
     snprintf_P(timestring, 20, PSTR("%02u:%02u:%02u"), dt.Hour(), dt.Minute(), dt.Second());
     return String(timestring);
 }
-
 
 RtcDateTime RTCManager::getCurrentDateTime()
 {

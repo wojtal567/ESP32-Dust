@@ -4,10 +4,12 @@
 #include "managers/rtcmanager.h"
 #include "managers/screenmanager.h"
 #include "managers/stylemanager.h"
+
+#include "utils/config.h"
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
 
-TimeSettingsScreen::TimeSettingsScreen(const Types::ConfigData &config,
+TimeSettingsScreen::TimeSettingsScreen(Types::ConfigData &config,
                                        RTCManager *rtc,
                                        NetworkManager *networkManager,
                                        ScreenManager *screenManager,
@@ -134,8 +136,7 @@ void TimeSettingsScreen::initialize()
     lv_label_set_text(m_syncNtpLabel, "Sync. Clock");
     StyleManager::applyWhiteButton(m_syncNtpButton);
 
-    m_saveButton
-        = createButton(m_screenContainer, NULL, 75, 33, 240, 200, saveButtonCallback);
+    m_saveButton = createButton(m_screenContainer, NULL, 75, 33, 240, 200, saveButtonCallback);
     m_saveButtonLabel = lv_label_create(m_saveButton, NULL);
     lv_label_set_text(m_saveButtonLabel, "Save");
     StyleManager::applyWhiteButton(m_saveButton);
@@ -148,11 +149,7 @@ void TimeSettingsScreen::updateData()
 
     if (m_rtcManager->isRunning()) {
         RtcDateTime now = m_rtcManager->getCurrentDateTime();
-        lv_label_set_text_fmt(m_dateButtonLabel,
-                             "%02d.%02d.%d",
-                             now.Day(),
-                             now.Month(),
-                             now.Year());
+        lv_label_set_text_fmt(m_dateButtonLabel, "%02d.%02d.%d", now.Day(), now.Month(), now.Year());
         lv_spinbox_set_value(m_hourSpinbox, now.Hour());
         lv_spinbox_set_value(m_minuteSpinbox, now.Minute());
     } else {
@@ -262,7 +259,14 @@ void TimeSettingsScreen::handleCalendarEvent(lv_obj_t *calendar, lv_event_t even
     if (event == LV_EVENT_VALUE_CHANGED) {
         lv_calendar_date_t *date = lv_calendar_get_pressed_date(calendar);
         if (date) {
-            Serial.printf("Clicked date: %02d.%02d.%d\n", date->day, date->month, date->year);
+            char logBuf[32];
+            snprintf(logBuf,
+                     sizeof(logBuf),
+                     "Clicked date: %02d.%02d.%d",
+                     date->day,
+                     date->month,
+                     date->year);
+            LOG_UI(logBuf);
             lv_calendar_set_today_date(calendar, date);
             lv_calendar_set_showed_date(calendar, date);
             char buffer[16];
@@ -279,7 +283,6 @@ void TimeSettingsScreen::handleCalendarEvent(lv_obj_t *calendar, lv_event_t even
             } else {
                 label += (String)buffer + '.';
             }
-            Serial.println(label);
             itoa(date->year, buffer, 10);
             label += (String)buffer;
             lv_label_set_text(m_dateButtonLabel, label.c_str());
@@ -296,63 +299,62 @@ void TimeSettingsScreen::handleSyncNtpButton(lv_obj_t *btn, lv_event_t event)
         bool success = m_rtcManager->syncWithNTP(StringConstants::NTP_SERVER,
                                                  Constants::GMT_OFFSET_SEC);
         if (!success) {
-            Serial.println("Time synchronization failed.");
+            LOG_UI("Time synchronization failed.");
         }
     }
 }
 
 void TimeSettingsScreen::handleSaveButton(lv_obj_t *btn, lv_event_t event)
 {
-    if (event == LV_EVENT_CLICKED) { 
-            switch (lv_dropdown_get_selected(m_lockScreenDropdown))
-            {
-            case 0:
-                m_config.lcdLockTime = 60000;
-                break;
-            case 1:
-                m_config.lcdLockTime = 300000;
-                break;
-            case 2:
-                m_config.lcdLockTime = 600000;
-                break;
-            case 3:
-                m_config.lcdLockTime = 3600000;
-                break;
-            case 4:
-                m_config.lcdLockTime = -1;
-                break;
-            default:
-                m_config.lcdLockTime = 60000;
-                break;
-            }
-            m_sdCard.saveConfig(m_config, StringConstants::CONFIG_FILE_PATH);
-            m_sdCard.printConfig(StringConstants::CONFIG_FILE_PATH);
-            if (m_timeChanged == true) {
-                String date = lv_label_get_text(m_dateButtonLabel)
-                              + (String)lv_textarea_get_text(m_hourSpinbox) + ":"
-                              + (String)lv_textarea_get_text(m_minuteSpinbox);
-                RtcDateTime *dt = new RtcDateTime(atoi(date.substring(6, 10).c_str()),
-                                                  atoi(date.substring(3, 6).c_str()),
-                                                  atoi(date.substring(0, 2).c_str()),
-                                                  date.substring(10, 12).toDouble(),
-                                                  date.substring(13, 15).toDouble(),
-                                                  0);
-                m_rtcManager->setDateTime(*dt);
-                m_rtcManager->setIsRunning(true);
-            }
-            if (m_dateChanged == true) {
-                RtcDateTime ori = m_rtcManager->getCurrentDateTime();
-                String date = lv_label_get_text(m_dateButtonLabel);
-                RtcDateTime *dt = new RtcDateTime(atoi(date.substring(6).c_str()),
-                                                  atoi(date.substring(3, 6).c_str()),
-                                                  atoi(date.substring(0, 2).c_str()),
-                                                  ori.Hour(),
-                                                  ori.Minute(),
-                                                  ori.Second());
-                m_rtcManager->setDateTime(*dt);
-                m_rtcManager->setIsRunning(true);
-            }
-            m_screenManager->switchToScreen(ScreenType::MAIN);
+    if (event == LV_EVENT_CLICKED) {
+        switch (lv_dropdown_get_selected(m_lockScreenDropdown)) {
+        case 0:
+            m_config.lcdLockTime = 60000;
+            break;
+        case 1:
+            m_config.lcdLockTime = 300000;
+            break;
+        case 2:
+            m_config.lcdLockTime = 600000;
+            break;
+        case 3:
+            m_config.lcdLockTime = 3600000;
+            break;
+        case 4:
+            m_config.lcdLockTime = -1;
+            break;
+        default:
+            m_config.lcdLockTime = 60000;
+            break;
+        }
+        m_sdCard.saveConfig(m_config, StringConstants::CONFIG_FILE_PATH);
+        m_sdCard.printConfig(StringConstants::CONFIG_FILE_PATH);
+        if (m_timeChanged == true) {
+            String date = lv_label_get_text(m_dateButtonLabel)
+                          + (String)lv_textarea_get_text(m_hourSpinbox) + ":"
+                          + (String)lv_textarea_get_text(m_minuteSpinbox);
+            RtcDateTime *dt = new RtcDateTime(atoi(date.substring(6, 10).c_str()),
+                                              atoi(date.substring(3, 6).c_str()),
+                                              atoi(date.substring(0, 2).c_str()),
+                                              date.substring(10, 12).toDouble(),
+                                              date.substring(13, 15).toDouble(),
+                                              0);
+            m_rtcManager->setDateTime(*dt);
+            m_rtcManager->setIsRunning(true);
+        }
+        if (m_dateChanged == true) {
+            RtcDateTime ori = m_rtcManager->getCurrentDateTime();
+            String date = lv_label_get_text(m_dateButtonLabel);
+            RtcDateTime *dt = new RtcDateTime(atoi(date.substring(6).c_str()),
+                                              atoi(date.substring(3, 6).c_str()),
+                                              atoi(date.substring(0, 2).c_str()),
+                                              ori.Hour(),
+                                              ori.Minute(),
+                                              ori.Second());
+            m_rtcManager->setDateTime(*dt);
+            m_rtcManager->setIsRunning(true);
+        }
+        m_screenManager->switchToScreen(ScreenType::MAIN);
     }
 }
 

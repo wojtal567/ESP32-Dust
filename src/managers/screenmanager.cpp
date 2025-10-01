@@ -67,3 +67,13 @@ BaseScreenInterface *ScreenManager::getScreen(ScreenType type)
         return nullptr;
     }
 }
+
+BaseScreenInterface *ScreenManager::getCurrentScreen()
+{
+    return m_currentScreen;
+}
+
+bool ScreenManager::hasActiveScreen()
+{
+    return m_currentScreen != nullptr;
+}

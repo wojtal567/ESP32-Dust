@@ -1,5 +1,7 @@
 #include "managers/MySD.hpp"
 
+#include "utils/config.h"
+
 MySD::MySD(int port)
     : m_sampleDB("/sd/database.db", "/database.db", "samples")
 {
@@ -16,21 +18,19 @@ void MySD::end()
     SD.end();
 }
 
-bool MySD::start(Stream *debugger)
+bool MySD::start()
 {
     bool result = begin();
 
-    if (result)
-    {
-        Serial.println("MySD::start -> Initializing.");
+    if (result) {
+        LOG_SD("MySD::start -> Initializing.");
         m_sampleDB.init();
         m_sampleDB.open();
-        m_sampleDB.createTable(debugger);
+        m_sampleDB.createTable();
         m_sampleDB.close();
         m_sampleDB.kill();
-    }
-    else
-        Serial.println("MySD::start -> Can't initilize - no access to SD card.");
+    } else
+        LOG_ERROR("MySD::start -> Can't initilize - no access to SD card.");
     end();
     return result;
 }
@@ -38,95 +38,84 @@ bool MySD::start(Stream *debugger)
 void MySD::save(std::map<std::string, float> data,
                 float temperature,
                 float humidity,
-                String timestamp,
-                Stream *debugger)
+                String timestamp)
 {
-    debugger->println("MySD::save");
-    if (begin())
-    {
-        debugger->println("SD Card detected");
+    LOG_SD("MySD::save");
+    if (begin()) {
+        LOG_SD("MySD::save -> SD Card detected");
         if (SD.exists(m_sampleDB.getRelativePath())) {
-            Serial.println("MySD::save -> File exists. Trying to save data.");
-            debugger->println("Database " + m_sampleDB.getLocalPath() + " exists. Saving data...");
+            LOG_SD("MySD::save -> File exists. Trying to save data.");
+            LOG_SD("Database " + m_sampleDB.getLocalPath() + " exists. Saving data...");
             m_sampleDB.init();
             m_sampleDB.open();
-            m_sampleDB.save(data, temperature, humidity, timestamp, debugger);
+            m_sampleDB.save(data, temperature, humidity, timestamp);
             m_sampleDB.close();
             m_sampleDB.kill();
         } else {
-            Serial.println("MySD::save -> No database file. Trying to create one and saving data.");
-            debugger->println("Database " + m_sampleDB.getLocalPath()
-                              + " don't exist. Saving data...");
+            LOG_SD("MySD::save -> No database file. Trying to create one and saving data.");
+            LOG_SD("Database " + m_sampleDB.getLocalPath() + " don't exist. Saving data...");
             m_sampleDB.init();
             m_sampleDB.open();
-            m_sampleDB.createTable(debugger);
-            m_sampleDB.save(data, temperature, humidity, timestamp, debugger);
+            m_sampleDB.createTable();
+            m_sampleDB.save(data, temperature, humidity, timestamp);
             m_sampleDB.close();
             m_sampleDB.kill();
         }
-    }
-    else
-        Serial.println("MySD::save -> Cannot access SD card.");
+    } else
+        LOG_ERROR("MySD::save -> Can't save - no access to SD card.");
     end();
 }
 
-void MySD::select(Stream *debugger, String datetime, JsonArray *array)
+void MySD::select(String datetime, JsonArray *array)
 {
-    debugger->println("MySD::select");
-    if (begin())
-    {
-        debugger->println("SD Card detected");
+    LOG_SD("MySD::select");
+    if (begin()) {
+        LOG_SD("MySD::select -> SD Card detected");
         if (SD.exists(m_sampleDB.getRelativePath())) {
-            Serial.println("MySD::select -> File exists. Trying to select data.");
-            debugger->println("Database " + m_sampleDB.getLocalPath() + " exists.");
+            LOG_SD("MySD::select -> File exists. Trying to select data.");
+            LOG_SD("Database " + m_sampleDB.getLocalPath() + " exists.");
             m_sampleDB.init();
             m_sampleDB.open();
-            m_sampleDB.select(debugger, datetime, array);
+            m_sampleDB.select(datetime, array);
             m_sampleDB.close();
             m_sampleDB.kill();
         } else
-            Serial.println("MySD::select -> File don't exist.");
-    }
-    else
-        Serial.println("MySD::select -> Cannot access SD card.");
+            LOG_SD("MySD::select -> File don't exist.");
+    } else
+        LOG_ERROR("MySD::select -> Can't access SD card.");
     end();
 }
 
-void MySD::getLastRecord(Stream *debugger, JsonArray *array)
+void MySD::getLastRecord(JsonArray *array)
 {
-    debugger->println("MySD::getLastRecord");
-    if (begin())
-    {
-        debugger->println("SD Card detected");
+    LOG_SD("MySD::getLastRecord");
+    if (begin()) {
+        LOG_SD("MySD::getLastRecord -> SD Card detected");
         if (SD.exists(m_sampleDB.getRelativePath())) {
-            Serial.println("MySD::getLastRecord -> File exists. Trying to get last saved sample record.");
-            debugger->println("Database " + m_sampleDB.getLocalPath() + " exists.");
+            LOG_SD("MySD::getLastRecord -> File exists. Trying to get last saved sample record.");
+            LOG_SD("Database " + m_sampleDB.getLocalPath() + " exists.");
             m_sampleDB.init();
             m_sampleDB.open();
-            m_sampleDB.getLastRecord(debugger, array);
+            m_sampleDB.getLastRecord(array);
             m_sampleDB.close();
             m_sampleDB.kill();
         } else
-            Serial.println("MySD::getLastRecord -> File don't exist.");
-    }
-    else
-        Serial.println("MySD::getLastRecord -> Cannot access SD card.");
+            LOG_SD("MySD::getLastRecord -> File don't exist.");
+    } else
+        LOG_ERROR("MySD::getLastRecord -> Can't access SD card.");
     end();
 }
 
 void MySD::saveConfig(const Types::ConfigData &config, const std::string &filePath)
 {
-    if (begin())
-    {
+    if (begin()) {
         SD.remove(filePath.c_str());
         File configurationFile = SD.open(filePath.c_str(), FILE_WRITE);
-        if (!configurationFile)
-        {
-            Serial.println("Failed to create configuration file.");
+        if (!configurationFile) {
+            LOG_ERROR("MySD::saveConfig -> Failed to create configuration file.");
             return;
-        }
-        else
-            Serial.println("Configuration file exists. Trying to save...");
+        } else
+            LOG_SD("Configuration file exists. Trying to save...");
         StaticJsonDocument<512> doc;
         doc["ssid"] = config.ssid.c_str();
         doc["password"] = config.password.c_str();
@@ -135,9 +124,8 @@ void MySD::saveConfig(const Types::ConfigData &config, const std::string &filePa
         doc["measurePeriod"] = config.measurePeriod;
         doc["numberOfSamples"] = config.numberOfSamples;
         doc["turnFanTime"] = config.turnFanTime;
-        if (serializeJson(doc, configurationFile) == 0)
-        {
-            Serial.println("Failed to write to file.");
+        if (serializeJson(doc, configurationFile) == 0) {
+            LOG_ERROR("MySD::saveConfig -> Failed to write to file.");
         }
         configurationFile.close();
     }
@@ -146,26 +134,22 @@ void MySD::saveConfig(const Types::ConfigData &config, const std::string &filePa
 
 void MySD::loadConfig(Types::ConfigData &config, const std::string &filePath)
 {
-    if (begin())
-    {
+    if (begin()) {
         File configurationFile = SD.open(filePath.c_str(), FILE_READ);
-        if (!configurationFile)
-        {
-            Serial.print("Failed to read configuration file. Creating file...");
+        if (!configurationFile) {
+            LOG_ERROR("MySD::loadConfig -> Failed to read configuration file. Creating file...");
             configurationFile.close();
             end();
             saveConfig(config, filePath);
             return;
-        }
-        else
-            Serial.println("Configuration file exists. Reading...");
+        } else
+            LOG_SD("MySD::loadConfig -> Configuration file exists. Reading...");
 
         StaticJsonDocument<512> doc;
         DeserializationError error = deserializeJson(doc, configurationFile);
 
-        if (error)
-        {
-            Serial.println("Failed to read file, using default Configuration");
+        if (error) {
+            LOG_ERROR("MySD::loadConfig -> Failed to read file, using default configuration");
             return;
         }
 
@@ -179,27 +163,23 @@ void MySD::loadConfig(Types::ConfigData &config, const std::string &filePath)
         config.numberOfSamples = doc["numberOfSamples"];
         config.turnFanTime = doc["turnFanTime"];
         configurationFile.close();
-        Serial.println("Reading config and making changes.");
     }
     end();
 }
 
 void MySD::printConfig(const std::string &filePath)
 {
-    if (begin())
-    {
+    if (begin()) {
         File configurationFile = SD.open(filePath.c_str(), FILE_READ);
-        if (!configurationFile)
-        {
-            Serial.print("Failed to read configuration file.");
+        if (!configurationFile) {
+            LOG_ERROR("MySD::printConfig -> Failed to read configuration file.");
             return;
-        }
-        else
-            Serial.println("Configuration file exists. Reading...");
-        Serial.println("Current config.json file:");
+        } else
+            LOG_SD("MySD::printConfig -> Configuration file exists. Reading...");
+        LOG_SD("MySD::printConfig -> Printing configuration file:");
         while (configurationFile.available())
-            Serial.print((char)configurationFile.read());
-        Serial.println();
+            LOG_SD_PRINTF("%c", (char)configurationFile.read());
+        LOG_SD("");
         configurationFile.close();
     }
     end();

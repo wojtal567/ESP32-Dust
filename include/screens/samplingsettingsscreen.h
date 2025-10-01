@@ -12,7 +12,7 @@ class ScreenManager;
 class SamplingSettingsScreen : public BaseScreen<SamplingSettingsScreen>
 {
 public:
-    SamplingSettingsScreen(const Types::ConfigData &config,
+    SamplingSettingsScreen(Types::ConfigData &config,
                            TaskManager *taskManager,
                            NetworkManager *networkManager,
                            ScreenManager *screenManager,
@@ -94,7 +94,7 @@ private:
     lv_obj_t *m_saveButton{nullptr};
     lv_obj_t *m_saveButtonLabel{nullptr};
 
-    Types::ConfigData m_config;
+    Types::ConfigData &m_config;
     TaskManager *m_taskManager;
     NetworkManager *m_networkManager;
     ScreenManager *m_screenManager;

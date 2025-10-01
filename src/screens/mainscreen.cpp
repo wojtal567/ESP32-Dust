@@ -1,19 +1,18 @@
 #include "screens/mainscreen.h"
 
+#include "managers/screenmanager.h"
 #include "managers/stylemanager.h"
+
 #include "utils/constants.h"
 #include "utils/stringConstants.h"
 #include "utils/timeUtils.h"
-#include "managers/screenmanager.h"
 
 MainScreen::MainScreen(ScreenManager *screenManager)
-    : BaseScreen<MainScreen>(ScreenType::MAIN), m_screenManager(screenManager)
-{
-}
+    : BaseScreen<MainScreen>(ScreenType::MAIN)
+    , m_screenManager(screenManager)
+{}
 
-MainScreen::~MainScreen()
-{
-}
+MainScreen::~MainScreen() {}
 
 void MainScreen::initialize()
 {
@@ -24,13 +23,7 @@ void MainScreen::initialize()
     StyleManager::applyTransparentButton(m_setButton);
 
     // lock button
-    m_lockButton = createButton(m_screenContainer,
-                                m_setButton,
-                                14,
-                                18,
-                                95,
-                                7,
-                                lockButtonCallback);
+    m_lockButton = createButton(m_screenContainer, m_setButton, 14, 18, 95, 7, lockButtonCallback);
     m_lockButtonLabel = lv_label_create(m_lockButton, NULL);
     lv_obj_set_style_local_text_font(m_lockButton,
                                      LV_OBJ_PART_MAIN,
@@ -276,14 +269,14 @@ void MainScreen::updateLedStatus(bool isLastSampleSaved)
 
 void MainScreen::settingsButtonCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (auto* instance = getActiveInstance()) {
+    if (auto *instance = getActiveInstance()) {
         instance->handleSettingsButtonEvent(btn, event);
     }
 }
 
 void MainScreen::lockButtonCallback(lv_obj_t *btn, lv_event_t event)
 {
-    if (auto* instance = getActiveInstance()) {
+    if (auto *instance = getActiveInstance()) {
         instance->handleLockButtonEvent(btn, event);
     }
 }

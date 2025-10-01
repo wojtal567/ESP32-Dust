@@ -235,12 +235,12 @@ void StyleManager::applyStandardLine(lv_obj_t *line)
     lv_obj_add_style(line, LV_LINE_PART_MAIN, &m_line);
 }
 
-const lv_font_t* StyleManager::getHugeSymbolsFont()
+const lv_font_t *StyleManager::getHugeSymbolsFont()
 {
     return &hugeSymbolsFont48;
 }
 
-const lv_font_t* StyleManager::getMonte16LockFont()
+const lv_font_t *StyleManager::getMonte16LockFont()
 {
     return &monte16lock;
 }

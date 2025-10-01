@@ -4,7 +4,8 @@
 #include <WEMOS_SHT3X.h>
 #include <map>
 #include <string>
-#include "sensors/pms.h"
+
+class PMS;
 
 class SensorManager
 {
@@ -12,22 +13,13 @@ public:
     SensorManager();
     ~SensorManager();
 
-    void initialize(HardwareSerial *debugger = &Serial, HardwareSerial *reader = &Serial2);
+    void initialize(HardwareSerial *reader = &Serial2);
 
     bool readDustSensor();
     bool readTemperatureHumiditySensor();
 
     float getTemperature() const;
     float getHumidity() const;
-    float getPM10() const;
-    float getPM25() const;
-    float getPM100() const;
-    float getParticles03um() const;
-    float getParticles05um() const;
-    float getParticles10um() const;
-    float getParticles25um() const;
-    float getParticles50um() const;
-    float getParticles100um() const;
 
     const std::map<std::string, float> &getDustData() const;
 
@@ -45,7 +37,5 @@ private:
     float m_humidity;
 
     // State variables
-    bool m_dustSensorWorking;
-    bool m_temperatureSensorWorking;
     bool m_isFanOn;
 };

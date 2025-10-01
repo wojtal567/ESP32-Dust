@@ -17,11 +17,11 @@ public:
 
     bool switchToScreen(ScreenType type);
 
-    BaseScreenInterface *getCurrentScreen() { return m_currentScreen; }
+    BaseScreenInterface *getCurrentScreen();
 
     BaseScreenInterface *getScreen(ScreenType type);
 
-    bool hasActiveScreen() { return m_currentScreen != nullptr; }
+    bool hasActiveScreen();
 
 private:
     BaseScreenInterface *m_currentScreen = nullptr;

@@ -32,8 +32,8 @@ public:
     static void applyStandardLine(lv_obj_t *line);
 
     // Font access methods
-    static const lv_font_t* getHugeSymbolsFont();
-    static const lv_font_t* getMonte16LockFont();
+    static const lv_font_t *getHugeSymbolsFont();
+    static const lv_font_t *getMonte16LockFont();
 
     static void cleanup();
 

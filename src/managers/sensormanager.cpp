@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 #include "utils/constants.h"
-#include "utils/hardwareConfig.h"
+#include "utils/config.h"
 
 SensorManager::SensorManager()
     : m_pmsSensor(nullptr)

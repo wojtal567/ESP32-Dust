@@ -19,8 +19,8 @@
 #include "screens/wifiscreen.h"
 
 #include <sqlite3.h>
+#include "utils/config.h"
 #include "utils/constants.h"
-#include "utils/hardwareConfig.h"
 #include "utils/stringConstants.h"
 
 NetworkManager *networkManager = nullptr;

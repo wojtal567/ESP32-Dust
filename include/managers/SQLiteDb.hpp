@@ -1,36 +1,35 @@
 #pragma once
 
+#include <ArduinoJson.h>
+#include <Stream.h>
 #include <sqlite3.h>
-#include <string>
 #include <stddef.h>
 #include <cstring>
-#include <Stream.h>
 #include <map>
-#include <ArduinoJson.h>
+#include <string>
 
 class SQLiteDb
 {
-    private:
-        sqlite3 *object;
-        char fileName[100] = "\0";
-        String _localPath;
-        String _relativePath;
-        String _tableName;
-        char *zErrorMessage = 0;
-        bool isOpened;
-    public:
-        SQLiteDb(String localPath, String relativePath, String tableName);
-        void init();
-        void kill();
-        int open();
-        void close();
-        void createTable();
-        int save(std::map<std::string, float> data,
-                 float temperature,
-                 float humidity,
-                 String timestamp);
-        int select(String datetime, JsonArray *array);
-        int getLastRecord(JsonArray *array);
-        String getLocalPath();
-        String getRelativePath();
+public:
+    SQLiteDb(String localPath, String relativePath, String tableName);
+    ~SQLiteDb();
+    void init();
+    void kill();
+    int open();
+    void close();
+    void createTable();
+    int save(std::map<std::string, float> data, float temperature, float humidity, String timestamp);
+    int select(String datetime, JsonArray *array);
+    int getLastRecord(JsonArray *array);
+    String getLocalPath();
+    String getRelativePath();
+
+private:
+    sqlite3 *m_object;
+    char m_fileName[100] = "\0";
+    String m_localPath;
+    String m_relativePath;
+    String m_tableName;
+    char *m_errorMessage = 0;
+    SemaphoreHandle_t m_mutex;
 };

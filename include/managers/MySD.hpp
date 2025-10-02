@@ -24,6 +24,6 @@ private:
     bool begin();
     void end();
 
-    int _port;
+    int m_port;
     SQLiteDb m_sampleDB;
 };

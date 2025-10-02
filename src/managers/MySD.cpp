@@ -5,12 +5,12 @@
 MySD::MySD(int port)
     : m_sampleDB("/sd/database.db", "/database.db", "samples")
 {
-    _port = port;
+    m_port = port;
 }
 
 bool MySD::begin()
 {
-    return SD.begin(_port);
+    return SD.begin(m_port);
 }
 
 void MySD::end()

@@ -150,6 +150,7 @@ void TimeSettingsScreen::initialize()
 void TimeSettingsScreen::updateData()
 {
     m_timeChanged = false;
+    m_dateChanged = false;
     lv_dropdown_set_selected(m_lockScreenDropdown, getDropdownIndex());
 
     if (m_rtcManager->isRunning()) {
@@ -361,25 +362,25 @@ void TimeSettingsScreen::handleSaveButton(lv_obj_t *btn, lv_event_t event)
             String date = lv_label_get_text(m_dateButtonLabel)
                           + (String)lv_textarea_get_text(m_hourSpinbox) + ":"
                           + (String)lv_textarea_get_text(m_minuteSpinbox);
-            RtcDateTime *dt = new RtcDateTime(atoi(date.substring(6, 10).c_str()),
-                                              atoi(date.substring(3, 6).c_str()),
-                                              atoi(date.substring(0, 2).c_str()),
-                                              date.substring(10, 12).toDouble(),
-                                              date.substring(13, 15).toDouble(),
-                                              0);
-            m_rtcManager->setDateTime(*dt);
+            RtcDateTime dt(atoi(date.substring(6, 10).c_str()),
+                           atoi(date.substring(3, 6).c_str()),
+                           atoi(date.substring(0, 2).c_str()),
+                           date.substring(10, 12).toDouble(),
+                           date.substring(13, 15).toDouble(),
+                           0);
+            m_rtcManager->setDateTime(dt);
             m_rtcManager->setIsRunning(true);
         }
         if (m_dateChanged == true) {
             RtcDateTime ori = m_rtcManager->getCurrentDateTime();
             String date = lv_label_get_text(m_dateButtonLabel);
-            RtcDateTime *dt = new RtcDateTime(atoi(date.substring(6).c_str()),
-                                              atoi(date.substring(3, 6).c_str()),
-                                              atoi(date.substring(0, 2).c_str()),
-                                              ori.Hour(),
-                                              ori.Minute(),
-                                              ori.Second());
-            m_rtcManager->setDateTime(*dt);
+            RtcDateTime dt(atoi(date.substring(6).c_str()),
+                           atoi(date.substring(3, 6).c_str()),
+                           atoi(date.substring(0, 2).c_str()),
+                           ori.Hour(),
+                           ori.Minute(),
+                           ori.Second());
+            m_rtcManager->setDateTime(dt);
             m_rtcManager->setIsRunning(true);
         }
         m_screenManager->switchToScreen(ScreenType::MAIN);

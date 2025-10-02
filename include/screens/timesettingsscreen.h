@@ -35,6 +35,12 @@ private:
     void handleSyncNtpButton(lv_obj_t *btn, lv_event_t event);
     void handleSaveButton(lv_obj_t *btn, lv_event_t event);
     void handleBackButton(lv_obj_t *btn, lv_event_t event);
+    void handleTimeOffsetButton(lv_obj_t *btn, lv_event_t event);
+    void handleOffsetOk(lv_obj_t *btn, lv_event_t event);
+    void handleOffsetCancel(lv_obj_t *btn, lv_event_t event);
+
+    int offsetSecondsFromIndex(int idx);
+    int indexFromOffsetSeconds(int seconds);
 
     // Static wrappers for LVGL callbacks
     static void backButtonCallback(lv_obj_t *btn, lv_event_t event);
@@ -46,6 +52,9 @@ private:
     static void calendarEventCallback(lv_obj_t *calendar, lv_event_t event);
     static void syncNtpButtonCallback(lv_obj_t *btn, lv_event_t event);
     static void saveButtonCallback(lv_obj_t *btn, lv_event_t event);
+    static void timeOffsetButtonCallback(lv_obj_t *btn, lv_event_t event);
+    static void offsetOkCallback(lv_obj_t *btn, lv_event_t event);
+    static void offsetCancelCallback(lv_obj_t *btn, lv_event_t event);
 
     lv_obj_t *m_backButton{nullptr};
     lv_obj_t *m_backButtonLabel{nullptr};
@@ -69,6 +78,13 @@ private:
     lv_obj_t *m_lockScreenLabel{nullptr};
     lv_obj_t *m_lockScreenDropdown{nullptr};
 
+    lv_obj_t *m_timeOffsetButton{nullptr};
+    lv_obj_t *m_timeOffsetButtonLabel{nullptr};
+    lv_obj_t *m_offsetPopup{nullptr};
+    lv_obj_t *m_timeOffsetDropdown{nullptr};
+    lv_obj_t *m_offsetOkButton{nullptr};
+    lv_obj_t *m_offsetCancelButton{nullptr};
+
     lv_obj_t *m_syncNtpButton{nullptr};
     lv_obj_t *m_syncNtpLabel{nullptr};
 
@@ -80,6 +96,8 @@ private:
     NetworkManager *m_networkManager;
     ScreenManager *m_screenManager;
     MySD &m_sdCard;
+
+    int m_timeOffset{0};
 
     bool m_timeChanged{false}, m_dateChanged{false};
 };

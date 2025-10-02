@@ -3,6 +3,8 @@
 #include <SD.h>
 #include <string>
 #include "SQLiteDb.hpp"
+#include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
 #include "utils/types.h"
 
 class MySD
@@ -26,4 +28,5 @@ private:
 
     int m_port;
     SQLiteDb m_sampleDB;
+    SemaphoreHandle_t m_mutex{nullptr};
 };

@@ -34,7 +34,8 @@ Types::ConfigData config = {.ssid = "",
                             .numberOfSamples = 5,
                             .timeBetweenSavingSamples = 3600000,
                             .turnFanTime = 30000,
-                            .lcdLockTime = 60000};
+                            .lcdLockTime = 60000,
+                            .timeOffset = 0};
 void setup()
 {
 
@@ -130,7 +131,7 @@ void setup()
         if (connected) {
             LOG_INFO("Connected to Wi-Fi provided by data from configuration file! IP: "
                      + networkManager->getIpAddress());
-            rtcManager->syncWithNTP(StringConstants::NTP_SERVER, Constants::GMT_OFFSET_SEC);
+            rtcManager->syncWithNTP(StringConstants::NTP_SERVER, config.timeOffset);
             networkManager->setupServer();
         } else
             LOG_ERROR("Can't connect to Wi-Fi - probably no data or corrupted or wrong!");

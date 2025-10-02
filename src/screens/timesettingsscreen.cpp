@@ -107,6 +107,11 @@ void TimeSettingsScreen::initialize()
                                      LV_STATE_DEFAULT,
                                      LV_SYMBOL_MINUS);
 
+    m_timeOffsetButton
+        = createButton(m_screenContainer, NULL, 85, 34, 145, 200, timeOffsetButtonCallback);
+    m_timeOffsetButtonLabel = lv_label_create(m_timeOffsetButton, NULL);
+    StyleManager::applyBorderlessContainer(m_timeOffsetButton);
+
     m_dateLabel = createLabel(m_screenContainer, NULL, 5, 129, "Date ");
 
     m_dateButton = createButton(m_screenContainer, NULL, 95, 43, 165, 119, dateButtonCallback);
@@ -157,6 +162,17 @@ void TimeSettingsScreen::updateData()
         lv_spinbox_set_value(m_hourSpinbox, 0);
         lv_spinbox_set_value(m_minuteSpinbox, 0);
     }
+
+    m_timeOffset = m_config.timeOffset;
+    char buf[16];
+    if (m_timeOffset >= 0) {
+        int hours = m_timeOffset / 3600;
+        snprintf(buf, sizeof(buf), "UTC+%d", hours);
+    } else {
+        int hours = (-m_timeOffset) / 3600;
+        snprintf(buf, sizeof(buf), "UTC-%d", hours);
+    }
+    lv_label_set_text(m_timeOffsetButtonLabel, buf);
 }
 
 int TimeSettingsScreen::getDropdownIndex() const
@@ -296,8 +312,7 @@ void TimeSettingsScreen::handleCalendarEvent(lv_obj_t *calendar, lv_event_t even
 void TimeSettingsScreen::handleSyncNtpButton(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
-        bool success = m_rtcManager->syncWithNTP(StringConstants::NTP_SERVER,
-                                                 Constants::GMT_OFFSET_SEC);
+        bool success = m_rtcManager->syncWithNTP(StringConstants::NTP_SERVER, m_config.timeOffset);
         if (!success) {
             LOG_UI("Time synchronization failed.");
         }
@@ -327,6 +342,19 @@ void TimeSettingsScreen::handleSaveButton(lv_obj_t *btn, lv_event_t event)
             m_config.lcdLockTime = 60000;
             break;
         }
+
+        if (m_timeOffset != m_config.timeOffset) {
+            m_config.timeOffset = m_timeOffset;
+            // If time offset changed, we should re-sync with NTP server
+            if (m_networkManager->isConnected()) {
+                bool success = m_rtcManager->syncWithNTP(StringConstants::NTP_SERVER,
+                                                         m_config.timeOffset);
+                if (!success) {
+                    LOG_UI("Time synchronization failed.");
+                }
+            }
+        }
+
         m_sdCard.saveConfig(m_config, StringConstants::CONFIG_FILE_PATH);
         m_sdCard.printConfig(StringConstants::CONFIG_FILE_PATH);
         if (m_timeChanged == true) {
@@ -426,5 +454,110 @@ void TimeSettingsScreen::handleBackButton(lv_obj_t *btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
         m_screenManager->switchToScreen(ScreenType::SETTINGS);
+    }
+}
+
+void TimeSettingsScreen::timeOffsetButtonCallback(lv_obj_t *btn, lv_event_t event)
+{
+    if (auto *instance = getActiveInstance()) {
+        instance->handleTimeOffsetButton(btn, event);
+    }
+}
+
+void TimeSettingsScreen::offsetOkCallback(lv_obj_t *btn, lv_event_t event)
+{
+    if (auto *instance = getActiveInstance()) {
+        instance->handleOffsetOk(btn, event);
+    }
+}
+
+void TimeSettingsScreen::offsetCancelCallback(lv_obj_t *btn, lv_event_t event)
+{
+    if (auto *instance = getActiveInstance()) {
+        instance->handleOffsetCancel(btn, event);
+    }
+}
+
+void TimeSettingsScreen::handleTimeOffsetButton(lv_obj_t *btn, lv_event_t event)
+{
+    if (event != LV_EVENT_CLICKED)
+        return;
+
+    m_offsetPopup = createContainer(nullptr, nullptr, 220, 140, 0, 0);
+    lv_obj_align(m_offsetPopup, NULL, LV_ALIGN_CENTER, 0, 0);
+
+    m_timeOffsetDropdown = lv_dropdown_create(m_offsetPopup, NULL);
+    lv_dropdown_set_options(m_timeOffsetDropdown,
+                            "UTC-12\nUTC-11\nUTC-10\nUTC-9\nUTC-8\nUTC-7\nUTC-6\nUTC-5\nUTC-4\nUTC-"
+                            "3\nUTC-2\nUTC-1\nUTC\nUTC+1\nUTC+2\nUTC+3\nUTC+4\nUTC+5\nUTC+6\nUTC+"
+                            "7\nUTC+8\nUTC+9\nUTC+10\nUTC+11\nUTC+12");
+    lv_obj_set_size(m_timeOffsetDropdown, 180, 40);
+    lv_obj_align(m_timeOffsetDropdown, NULL, LV_ALIGN_CENTER, 0, -20);
+
+    int preIdx = indexFromOffsetSeconds(m_timeOffset);
+    if (preIdx >= 0 && preIdx <= 24) {
+        lv_dropdown_set_selected(m_timeOffsetDropdown, preIdx);
+    }
+
+    m_offsetOkButton = createButton(m_offsetPopup, NULL, 80, 30, 20, 90, offsetOkCallback);
+    lv_obj_t *okLbl = lv_label_create(m_offsetOkButton, NULL);
+    lv_label_set_text(okLbl, "OK");
+    StyleManager::applyWhiteButton(m_offsetOkButton);
+
+    m_offsetCancelButton = createButton(m_offsetPopup, NULL, 80, 30, 120, 90, offsetCancelCallback);
+    lv_obj_t *cancelLbl = lv_label_create(m_offsetCancelButton, NULL);
+    lv_label_set_text(cancelLbl, "Cancel");
+    StyleManager::applyWhiteButton(m_offsetCancelButton);
+}
+
+void TimeSettingsScreen::handleOffsetOk(lv_obj_t *btn, lv_event_t event)
+{
+    if (event != LV_EVENT_CLICKED)
+        return;
+
+    if (m_timeOffsetDropdown) {
+        int idx = lv_dropdown_get_selected(m_timeOffsetDropdown);
+        m_timeOffset = offsetSecondsFromIndex(idx);
+    }
+
+    if (m_timeOffsetDropdown && m_timeOffsetButtonLabel) {
+        char buf[16];
+        lv_dropdown_get_selected_str(m_timeOffsetDropdown, buf, sizeof(buf));
+        lv_label_set_text(m_timeOffsetButtonLabel, buf);
+    }
+
+    if (m_offsetPopup) {
+        lv_obj_del(m_offsetPopup);
+        m_offsetPopup = nullptr;
+    }
+}
+
+int TimeSettingsScreen::offsetSecondsFromIndex(int idx)
+{
+    if (idx < 0)
+        idx = 12;
+    if (idx > 24)
+        idx = 24;
+    int hours = idx - 12; // -12..+12
+    return hours * 3600;
+}
+
+int TimeSettingsScreen::indexFromOffsetSeconds(int seconds)
+{
+    int hours = seconds / 3600;
+    if (hours < -12)
+        hours = -12;
+    if (hours > 12)
+        hours = 12;
+    return hours + 12; // 0..24
+}
+
+void TimeSettingsScreen::handleOffsetCancel(lv_obj_t *btn, lv_event_t event)
+{
+    if (event != LV_EVENT_CLICKED)
+        return;
+    if (m_offsetPopup) {
+        lv_obj_del(m_offsetPopup);
+        m_offsetPopup = nullptr;
     }
 }

@@ -27,10 +27,6 @@ constexpr int MAX_RANGE = 999;
 // touch screen calibration
 constexpr uint16_t TOUCH_CALIBRATION[5] = {275, 3620, 264, 3532, 1};
 
-// other constants
-constexpr int GMT_OFFSET_SEC
-    = 7200; // poland, winter - 3600, summer (DST) - 7200 // TODO ADD DROPDOWN
-
 // UI Layout Constants
 constexpr int LABEL_PARTICLE_SIZE_POS_X[7] = {9, 56, 103, 153, 198, 245, 288};
 constexpr int CONT_PARTICLE_NUMBER_POS_X[6] = {18, 65, 112, 159, 206, 253};

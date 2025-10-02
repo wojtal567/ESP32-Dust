@@ -27,5 +27,7 @@ struct ConfigData {
 
     // Display settings
     int lcdLockTime;  // Screen lock timeout in ms
+
+    int timeOffset; // Time offset in seconds from UTC
 };
 }  // namespace Types

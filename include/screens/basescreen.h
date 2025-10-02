@@ -4,7 +4,16 @@
 #include "utils/constants.h"
 
 // Forward declare the enum outside the template
-enum class ScreenType { MAIN, SETTINGS, WIFI, INFO, TIME_SETTINGS, SAMPLING_SETTINGS, LOCK };
+enum class ScreenType {
+    MAIN,
+    SETTINGS,
+    WIFI,
+    INFO,
+    TIME_SETTINGS,
+    SAMPLING_SETTINGS,
+    LOCK,
+    LOADING
+};
 
 class BaseScreenInterface
 {

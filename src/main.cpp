@@ -13,6 +13,7 @@
 #include "managers/taskmanager.h"
 
 #include "screens/infoscreen.h"
+#include "screens/loadingscreen.h"
 #include "screens/lockscreen.h"
 #include "screens/mainscreen.h"
 #include "screens/samplingsettingsscreen.h"
@@ -56,6 +57,11 @@ void setup()
 
     StyleManager::initialize();
 
+    LoadingScreen *loadingScreen = new LoadingScreen();
+    loadingScreen->initialize();
+    // load loading screen
+    lv_disp_load_scr(loadingScreen->getScreenContainer());
+    lv_task_handler();
     SensorManager *sensorManager = new SensorManager();
     sensorManager->initialize(&Serial2);
 

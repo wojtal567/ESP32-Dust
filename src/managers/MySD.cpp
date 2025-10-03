@@ -232,8 +232,10 @@ void MySD::printConfig(const std::string &filePath)
             } else {
                 LOG_SD("MySD::printConfig -> Configuration file exists. Reading...");
                 LOG_SD("MySD::printConfig -> Printing configuration file:");
-                while (configurationFile.available())
-                    LOG_SD_PRINTF("%c", (char)configurationFile.read());
+                while (configurationFile.available()) {
+                    char c = (char)configurationFile.read();
+                    LOG_SD_PRINTF("%c", c);
+                }
                 LOG_SD("");
                 configurationFile.close();
             }

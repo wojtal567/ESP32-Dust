@@ -18,7 +18,7 @@ constexpr int SD_CARD_PIN = 27; // SD_CS pin
 // Logging Configuration
 namespace LogConfig {
 // Set to false to disable all serial logging (for production builds)
-constexpr bool ENABLE_LOGGING = true;
+constexpr bool ENABLE_LOGGING = false;
 
 // Log level control (only applies when ENABLE_LOGGING = true)
 constexpr bool ENABLE_DEBUG_LOGS = true;

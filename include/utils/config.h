@@ -4,16 +4,15 @@ namespace HardwareConfig {
 // PMS5003 Dust Sensor Pins
 constexpr int FAN_PIN = 26; // Fan control pin
 
-// SHT30 Temperature/Humidity Sensor (I2C)
-constexpr int SHT30_SDA_PIN = 21;
-constexpr int SHT30_SCL_PIN = 22;
+// I2C Bus Configuration (shared by SHT30 and RTC)
+constexpr int I2C_SDA_PIN = 21;
+constexpr int I2C_SCL_PIN = 22;
+
+// SHT30 Temperature/Humidity Sensor
 constexpr int SHT30_I2C_ADDRESS = 0x44;
 
 // SD Card Pin
 constexpr int SD_CARD_PIN = 27; // SD_CS pin
-
-// RTC I2C Address
-constexpr int RTC_I2C_ADDRESS = 0x68;
 } // namespace HardwareConfig
 
 // Logging Configuration

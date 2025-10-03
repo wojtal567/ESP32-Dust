@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <HTTPClient.h>
+#include <Wire.h>
 #include <sqlite3.h>
 #include <time.h>
 
@@ -42,6 +43,8 @@ void setup()
     sqlite3_initialize();
     // Serial debug
     Serial.begin(Constants::DEBUG_SERIAL_BAUD);
+    // Initialize I2C bus with configurable pins (used by RTC and SHT30)
+    Wire.begin(HardwareConfig::I2C_SDA_PIN, HardwareConfig::I2C_SCL_PIN);
     Serial2.begin(Constants::PMS_SERIAL_BAUD,
                   SERIAL_8N1,
                   Constants::PMS_RX_PIN,

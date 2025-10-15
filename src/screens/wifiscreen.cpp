@@ -151,14 +151,6 @@ void WifiScreen::handleConnectButtonEvent(lv_obj_t *btn, lv_event_t event)
         m_sdCard.saveConfig(m_config, StringConstants::CONFIG_FILE_PATH);
         m_sdCard.printConfig(StringConstants::CONFIG_FILE_PATH);
 
-        bool connected = m_networkManager->connect();
-        if (connected) {
-            LOG_UI("Connected to Wi-Fi! IP: " + m_networkManager->getIpAddress());
-            m_rtcManager->syncWithNTP(StringConstants::NTP_SERVER, m_config.timeOffset);
-            m_networkManager->setupServer();
-        } else {
-            LOG_UI("Can't connect. Probably you have entered wrong credentials.");
-        }
         m_screenManager->switchToScreen(ScreenType::MAIN);
         lv_textarea_set_text(m_ssidTextArea, "");
         lv_textarea_set_text(m_passwordTextArea, "");

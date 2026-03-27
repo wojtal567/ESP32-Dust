@@ -1,0 +1,154 @@
+#include <Arduino.h>
+#include <HTTPClient.h>
+#include <Wire.h>
+#include <sqlite3.h>
+#include <time.h>
+
+#include "managers/MySD.hpp"
+#include "managers/displaymanager.h"
+#include "managers/networkmanager.h"
+#include "managers/rtcmanager.h"
+#include "managers/screenmanager.h"
+#include "managers/sensormanager.h"
+#include "managers/stylemanager.h"
+#include "managers/taskmanager.h"
+
+#include "screens/infoscreen.h"
+#include "screens/loadingscreen.h"
+#include "screens/lockscreen.h"
+#include "screens/mainscreen.h"
+#include "screens/samplingsettingsscreen.h"
+#include "screens/settingsscreen.h"
+#include "screens/timesettingsscreen.h"
+#include "screens/wifiscreen.h"
+
+#include "utils/config.h"
+#include "utils/constants.h"
+#include "utils/stringConstants.h"
+
+NetworkManager *networkManager = nullptr;
+DisplayManager *displayManager = nullptr;
+// Default configuration
+Types::ConfigData config = {.ssid = "",
+                            .password = "",
+                            .measurePeriod = 30000,
+                            .numberOfSamples = 5,
+                            .timeBetweenSavingSamples = 3600000,
+                            .turnFanTime = 30000,
+                            .lcdLockTime = 60000,
+                            .timeOffset = 0};
+void setup()
+{
+
+    sqlite3_initialize();
+    // Serial debug
+    Serial.begin(Constants::DEBUG_SERIAL_BAUD);
+    // Initialize I2C bus with configurable pins (used by RTC and SHT30)
+    Wire.begin(HardwareConfig::I2C_SDA_PIN, HardwareConfig::I2C_SCL_PIN);
+    Serial2.begin(Constants::PMS_SERIAL_BAUD,
+                  SERIAL_8N1,
+                  Constants::PMS_RX_PIN,
+                  Constants::PMS_TX_PIN);
+
+    static MySD sdCard(HardwareConfig::SD_CARD_PIN);
+
+    networkManager = new NetworkManager(sdCard);
+
+    displayManager = new DisplayManager();
+    displayManager->initialize(Constants::SCREEN_WIDTH,
+                               Constants::SCREEN_HEIGHT,
+                               Constants::TOUCH_CALIBRATION);
+
+    StyleManager::initialize();
+
+    LoadingScreen *loadingScreen = new LoadingScreen();
+    loadingScreen->initialize();
+    // load loading screen
+    lv_disp_load_scr(loadingScreen->getScreenContainer());
+    lv_task_handler();
+    SensorManager *sensorManager = new SensorManager();
+    sensorManager->initialize(&Serial2);
+
+    RTCManager *rtcManager = new RTCManager();
+
+    ScreenManager *screenManager = new ScreenManager();
+
+    MainScreen *mainScreen = new MainScreen(screenManager);
+    mainScreen->initialize();
+
+    SettingsScreen *settingsScreen = new SettingsScreen(screenManager);
+    settingsScreen->initialize();
+
+    WifiScreen *wifiScreen = new WifiScreen(config,
+                                            networkManager,
+                                            rtcManager,
+                                            screenManager,
+                                            sdCard);
+
+    InfoScreen *infoScreen = new InfoScreen(networkManager, config, screenManager);
+    infoScreen->initialize();
+
+    LockScreen *lockScreen = new LockScreen(screenManager);
+    lockScreen->initialize();
+
+    TimeSettingsScreen *timeSettingsScreen = new TimeSettingsScreen(config,
+                                                                    rtcManager,
+                                                                    networkManager,
+                                                                    screenManager,
+                                                                    sdCard);
+    timeSettingsScreen->initialize();
+
+    sdCard.loadConfig(config, StringConstants::CONFIG_FILE_PATH);
+    sdCard.printConfig(StringConstants::CONFIG_FILE_PATH);
+
+    TaskManager *taskManager = new TaskManager(config,
+                                               networkManager,
+                                               sensorManager,
+                                               sdCard,
+                                               rtcManager,
+                                               screenManager,
+                                               mainScreen,
+                                               lockScreen);
+    taskManager->initialize();
+
+    SamplingSettingsScreen *samplingSettingsScreen = new SamplingSettingsScreen(config,
+                                                                                taskManager,
+                                                                                networkManager,
+                                                                                screenManager,
+                                                                                sdCard);
+    samplingSettingsScreen->initialize();
+
+    screenManager->initialize(mainScreen,
+                              settingsScreen,
+                              wifiScreen,
+                              infoScreen,
+                              timeSettingsScreen,
+                              samplingSettingsScreen,
+                              lockScreen);
+
+    networkManager->setTaskManager(taskManager);
+
+    if (config.ssid != "") {
+        networkManager->setCredentials(config.ssid.c_str(), config.password.c_str());
+        bool connected = networkManager->connect();
+        if (connected) {
+            LOG_INFO("Connected to Wi-Fi provided by data from configuration file! IP: "
+                     + networkManager->getIpAddress());
+            rtcManager->syncWithNTP(StringConstants::NTP_SERVER, config.timeOffset);
+            networkManager->setupServer();
+        } else
+            LOG_ERROR("Can't connect to Wi-Fi - probably no data or corrupted or wrong!");
+    }
+
+    screenManager->switchToScreen(ScreenType::MAIN);
+
+    delay(500);
+}
+
+void loop()
+{
+    networkManager->handleServerClient();
+    displayManager->handleTasks();
+
+    delay(5);
+}
